@@ -1,4 +1,4 @@
-import { filterValueLabel } from '@/lib/filter-fields'
+import { filterValueLabel } from '@/lib/filter-fields';
 import { AdvancedFilter } from '@/features/filters/components/advanced-filter';
 import { ContactEditView } from './contact-edit-view';
 import { FilterMenu } from '@/components/ui/filter-menu';
@@ -76,7 +76,15 @@ export function CustomerView({ viewModel: vm }: { viewModel: CustomerViewModel }
                   onChange={(event) => vm.setQuery(event.target.value)}
                 />
               </div>
-              <FilterMenu fields={vm.fields} value={vm.filter} onChange={vm.applyFilter} hiddenFields={vm.hiddenFields} onToggleVisibility={vm.toggleFieldVisibility} fieldOrder={vm.fieldOrder} onMoveField={vm.moveField} />
+              <FilterMenu
+                fields={vm.fields}
+                value={vm.filter}
+                onChange={vm.applyFilter}
+                hiddenFields={vm.hiddenFields}
+                onToggleVisibility={vm.toggleFieldVisibility}
+                fieldOrder={vm.fieldOrder}
+                onMoveField={vm.moveField}
+              />
               <AdvancedFilter fields={vm.fields} value={vm.advancedFilter} onChange={vm.applyAdvancedFilter} />
               <Button
                 variant="ghost"
@@ -90,7 +98,9 @@ export function CustomerView({ viewModel: vm }: { viewModel: CustomerViewModel }
             {vm.filter && (
               <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
                 <span>
-                  {['名稱', ...vm.columns][vm.filter.field]} {filterOperators[vm.filter.operator]}{requiresFilterValue(vm.filter.operator) && `「${filterValueLabel(vm.fields[vm.filter.field], vm.filter.value)}」`}
+                  {['名稱', ...vm.columns][vm.filter.field]} {filterOperators[vm.filter.operator]}
+                  {requiresFilterValue(vm.filter.operator) &&
+                    `「${filterValueLabel(vm.fields[vm.filter.field], vm.filter.value)}」`}
                 </span>
                 <Button variant="ghost" size="sm" onClick={vm.clearFilter}>
                   清除篩選
@@ -104,11 +114,20 @@ export function CustomerView({ viewModel: vm }: { viewModel: CustomerViewModel }
                   <CustomerTableHead selection>
                     <RowCheckbox aria-label="選取全部顯示項目" checked={vm.allSelected} onChange={vm.toggleAll} />
                   </CustomerTableHead>
-                  {vm.fieldOrder.filter(field => !vm.hiddenFields.includes(field)).map(field => (
-                    <CustomerTableHead key={field} scope="col">
-                      {field === 0 ? <span className="flex items-center gap-2"><EntityIcon size={16} />名稱</span> : vm.columns[field - 1]}
-                    </CustomerTableHead>
-                  ))}
+                  {vm.fieldOrder
+                    .filter((field) => !vm.hiddenFields.includes(field))
+                    .map((field) => (
+                      <CustomerTableHead key={field} scope="col">
+                        {field === 0 ? (
+                          <span className="flex items-center gap-2">
+                            <EntityIcon size={16} />
+                            名稱
+                          </span>
+                        ) : (
+                          vm.columns[field - 1]
+                        )}
+                      </CustomerTableHead>
+                    ))}
                 </tr>
               </thead>
               <tbody>
@@ -126,31 +145,37 @@ export function CustomerView({ viewModel: vm }: { viewModel: CustomerViewModel }
                         onChange={() => vm.toggleSelection(row.id)}
                       />
                     </CustomerTableCell>
-                    {vm.fieldOrder.filter(field => !vm.hiddenFields.includes(field)).map(field => field === 0 ? (
-                      <CustomerRowHeading key={field}>
-                        <button
-                          className="group/name flex min-w-[130px] cursor-pointer items-center gap-2 rounded-md border border-transparent bg-[#f4f5f2] px-2 py-1 text-left whitespace-nowrap hover:border-[#d1dbca] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#527459]"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            vm.openDetails(row.id);
-                          }}
-                        >
-                          <span
-                            className={cn(
-                              'grid size-6 place-items-center rounded-md text-[11px]',
-                              avatarColors[index % avatarColors.length]
-                            )}
-                          >
-                            {row.name.slice(0, 1)}
-                          </span>
-                          {row.name}
-                          <ArrowUpRight
-                            size={15}
-                            className="ml-auto text-[#939f8f] opacity-0 group-hover/name:opacity-100 group-focus-visible/name:opacity-100 group-hover/row:opacity-100"
-                          />
-                        </button>
-                      </CustomerRowHeading>
-                    ) : <CustomerTableCell key={field}>{row.cells[field - 1]}</CustomerTableCell>)}
+                    {vm.fieldOrder
+                      .filter((field) => !vm.hiddenFields.includes(field))
+                      .map((field) =>
+                        field === 0 ? (
+                          <CustomerRowHeading key={field}>
+                            <button
+                              className="group/name flex min-w-[130px] cursor-pointer items-center gap-2 rounded-md border border-transparent bg-[#f4f5f2] px-2 py-1 text-left whitespace-nowrap hover:border-[#d1dbca] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#527459]"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                vm.openDetails(row.id);
+                              }}
+                            >
+                              <span
+                                className={cn(
+                                  'grid size-6 place-items-center rounded-md text-[11px]',
+                                  avatarColors[index % avatarColors.length]
+                                )}
+                              >
+                                {row.name.slice(0, 1)}
+                              </span>
+                              {row.name}
+                              <ArrowUpRight
+                                size={15}
+                                className="ml-auto text-[#939f8f] opacity-0 group-hover/name:opacity-100 group-focus-visible/name:opacity-100 group-hover/row:opacity-100"
+                              />
+                            </button>
+                          </CustomerRowHeading>
+                        ) : (
+                          <CustomerTableCell key={field}>{row.cells[field - 1]}</CustomerTableCell>
+                        )
+                      )}
                   </CustomerTableRow>
                 ))}
                 {vm.rows.length === 0 && (

@@ -41,7 +41,9 @@ export function CustomerEditView({ customer }: { customer?: Customer }) {
         <Card>
           <CardHeader>
             <CardTitle>客戶基本資料</CardTitle>
-            <CardDescription>{vm.isNew ? '填寫客戶資訊與負責人。' : '更新客戶資訊與負責人。'}儲存後將返回列表。</CardDescription>
+            <CardDescription>
+              {vm.isNew ? '填寫客戶資訊與負責人。' : '更新客戶資訊與負責人。'}儲存後將返回列表。
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             {(

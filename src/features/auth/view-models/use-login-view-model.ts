@@ -1,46 +1,48 @@
-import { useRef, useState, type FormEvent } from 'react'
-import { authService, type AuthService, type LoginCredentials } from '../models/auth-model'
+import { useRef, useState, type FormEvent } from 'react';
+import { authService, type AuthService, type LoginCredentials } from '../models/auth-model';
 
-export function useLoginViewModel(
-  service: AuthService = authService,
-  onSignedIn?: () => void,
-) {
-  const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' })
-  const [showPassword, setShowPassword] = useState(false)
-  const [notice, setNotice] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const submitting = useRef(false)
+export function useLoginViewModel(service: AuthService = authService, onSignedIn?: () => void) {
+  const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitting = useRef(false);
 
   function updateField(field: keyof LoginCredentials, value: string) {
-    setCredentials(current => ({ ...current, [field]: value }))
-    setNotice('')
+    setCredentials((current) => ({ ...current, [field]: value }));
+    setNotice('');
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (submitting.current) return
-    submitting.current = true
-    setIsSubmitting(true)
-    setNotice('')
+    event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setIsSubmitting(true);
+    setNotice('');
     try {
-      await service.signIn({ ...credentials, email: credentials.email.trim() })
-      setNotice('登入成功。')
-      setCredentials({ email: '', password: '' })
-      onSignedIn?.()
+      await service.signIn({ ...credentials, email: credentials.email.trim() });
+      setNotice('登入成功。');
+      setCredentials({ email: '', password: '' });
+      onSignedIn?.();
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : '暫時無法登入，請稍後再試。')
+      setNotice(error instanceof Error ? error.message : '暫時無法登入，請稍後再試。');
     } finally {
-      submitting.current = false
-      setIsSubmitting(false)
+      submitting.current = false;
+      setIsSubmitting(false);
     }
   }
 
   return {
-    credentials, showPassword, notice, isSubmitting, updateField, submit,
-    togglePassword: () => setShowPassword(current => !current),
+    credentials,
+    showPassword,
+    notice,
+    isSubmitting,
+    updateField,
+    submit,
+    togglePassword: () => setShowPassword((current) => !current),
     requestAccount: () => setNotice('請聯絡貴公司的系統管理員，協助您開通 CRM 帳號。'),
     requestPasswordReset: () => setNotice('請聯絡貴公司的系統管理員協助重設密碼。'),
-  }
+  };
 }
 
-export type LoginViewModel = ReturnType<typeof useLoginViewModel>
+export type LoginViewModel = ReturnType<typeof useLoginViewModel>;

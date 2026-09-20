@@ -70,18 +70,28 @@ function RuleGroupEditor({
             </div>
           ) : (
             <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(0,1fr)_140px_minmax(0,1.5fr)]">
-              <div className="flex min-w-0 items-center gap-2"><FilterFieldIcon field={fields[child.field]} />
-              <FilterSelect
-                className="w-full" aria-label="篩選欄位"
-                value={child.field}
-                onChange={(event) => { const field = Number(event.target.value); updateChild(child.id, { ...child, field, operator: defaultFieldOperator(fields[field]), value: '' }); }}
-              >
-                {fields.map((field, index) => (
-                  <option key={field.label} value={index}>
-                    {field.label}
-                  </option>
-                ))}
-              </FilterSelect>
+              <div className="flex min-w-0 items-center gap-2">
+                <FilterFieldIcon field={fields[child.field]} />
+                <FilterSelect
+                  className="w-full"
+                  aria-label="篩選欄位"
+                  value={child.field}
+                  onChange={(event) => {
+                    const field = Number(event.target.value);
+                    updateChild(child.id, {
+                      ...child,
+                      field,
+                      operator: defaultFieldOperator(fields[field]),
+                      value: '',
+                    });
+                  }}
+                >
+                  {fields.map((field, index) => (
+                    <option key={field.label} value={index}>
+                      {field.label}
+                    </option>
+                  ))}
+                </FilterSelect>
               </div>
               <FilterSelect
                 aria-label="比較方式"
@@ -90,14 +100,18 @@ function RuleGroupEditor({
                   updateChild(child.id, { ...child, operator: event.target.value as FilterOperator })
                 }
               >
-                {getFieldOperators(fields[child.field]).map(key => (
+                {getFieldOperators(fields[child.field]).map((key) => (
                   <option key={key} value={key}>
                     {filterOperators[key]}
                   </option>
                 ))}
               </FilterSelect>
               {requiresFilterValue(child.operator) ? (
-                <FilterValue field={fields[child.field]} value={child.value} onChange={value => updateChild(child.id, { ...child, value })} />
+                <FilterValue
+                  field={fields[child.field]}
+                  value={child.value}
+                  onChange={(value) => updateChild(child.id, { ...child, value })}
+                />
               ) : (
                 <span className="self-center text-xs text-muted-foreground">不需輸入值</span>
               )}

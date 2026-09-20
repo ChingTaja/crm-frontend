@@ -42,7 +42,9 @@ export function ContactEditView({ contact }: { contact?: Contact }) {
         <Card>
           <CardHeader>
             <CardTitle>聯絡人基本資料</CardTitle>
-            <CardDescription>{vm.isNew ? '填寫聯絡方式與所屬客戶。' : '更新聯絡方式與所屬客戶。'}儲存後將返回列表。</CardDescription>
+            <CardDescription>
+              {vm.isNew ? '填寫聯絡方式與所屬客戶。' : '更新聯絡方式與所屬客戶。'}儲存後將返回列表。
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
@@ -53,8 +55,8 @@ export function ContactEditView({ contact }: { contact?: Contact }) {
                 placeholder="請選擇客戶"
                 required
                 value={vm.draft.customerId}
-                options={vm.customers.map(customer => ({ value: customer.id, label: customer.name }))}
-                onValueChange={value => vm.updateField('customerId', value)}
+                options={vm.customers.map((customer) => ({ value: customer.id, label: customer.name }))}
+                onValueChange={(value) => vm.updateField('customerId', value)}
               />
             </div>
             {(

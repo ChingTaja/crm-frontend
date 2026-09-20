@@ -1,12 +1,12 @@
-import { uniqueOptions, type FilterField } from '@/lib/filter-fields'
-import { useFieldOrder } from '@/hooks/use-field-order'
+import { uniqueOptions, type FilterField } from '@/lib/filter-fields';
+import { useFieldOrder } from '@/hooks/use-field-order';
 import type { FieldFilter } from '@/components/ui/filter-menu';
 import { createFilterGroup, matchesAdvancedFilter, type FilterGroup } from '@/features/filters/models/advanced-filter';
 import { useState, useSyncExternalStore } from 'react';
 import { customerRepository, contactRepository, type CustomerEntity } from '../models/customer-model';
 
 export function useCustomerViewModel(entity: CustomerEntity, recordId?: string) {
-  const fieldOrder = useFieldOrder(5)
+  const fieldOrder = useFieldOrder(5);
   const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot);
   const contacts = useSyncExternalStore(contactRepository.subscribe, contactRepository.getSnapshot);
   const editingContact = contacts.find((contact) => contact.id === recordId);
@@ -30,20 +30,22 @@ export function useCustomerViewModel(entity: CustomerEntity, recordId?: string) 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<FieldFilter | null>(null);
   const isCustomers = entity === 'customers';
-  const ownerOptions = uniqueOptions(customers.map(item => item.owner))
-  const fields: FilterField[] = isCustomers ? [
-    { label: '名稱', type: 'text', hideable: false },
-    { label: '產業', type: 'option', options: uniqueOptions(customers.map(item => item.industry)) },
-    { label: '帳戶所有者', type: 'lookup', options: ownerOptions },
-    { label: '建立日期', type: 'date' },
-    { label: '地址', type: 'text' },
-  ] : [
-    { label: '名稱', type: 'text', hideable: false },
-    { label: '所屬客戶', type: 'lookup', options: customers.map(item => ({ value: item.id, label: item.name })) },
-    { label: '職稱', type: 'text' },
-    { label: '電子郵件', type: 'email' },
-    { label: '電話', type: 'phone' },
-  ]
+  const ownerOptions = uniqueOptions(customers.map((item) => item.owner));
+  const fields: FilterField[] = isCustomers
+    ? [
+        { label: '名稱', type: 'text', hideable: false },
+        { label: '產業', type: 'option', options: uniqueOptions(customers.map((item) => item.industry)) },
+        { label: '帳戶所有者', type: 'lookup', options: ownerOptions },
+        { label: '建立日期', type: 'date' },
+        { label: '地址', type: 'text' },
+      ]
+    : [
+        { label: '名稱', type: 'text', hideable: false },
+        { label: '所屬客戶', type: 'lookup', options: customers.map((item) => ({ value: item.id, label: item.name })) },
+        { label: '職稱', type: 'text' },
+        { label: '電子郵件', type: 'email' },
+        { label: '電話', type: 'phone' },
+      ];
   const rows = isCustomers
     ? customers.map((customer) => ({
         id: customer.id,

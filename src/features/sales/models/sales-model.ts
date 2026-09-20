@@ -1,3 +1,4 @@
+import type { QuoteLine, QuoteTotals } from '../../quotes/models/quote-types'
 export const leadStatuses = ['待聯繫', '聯繫中', '已合格', '不合格'] as const
 export const opportunityStages = ['需求確認', '提案報價', '協商中', '已成交', '已失單'] as const
 export type SalesEntity = 'leads' | 'opportunities' | 'orders' | 'products'
@@ -38,6 +39,8 @@ function createRepository<T extends { id: string }>(initial: T[]) {
     getSnapshot: () => records,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
     save(record: T) {
+      const existing = records.find(item => item.id === record.id)
+      if (existing && 'quoteSource' in existing && existing.quoteSource) throw new Error('報價轉入的訂單保留原始價格快照，不可直接覆寫。')
       const saved = { ...record, id: record.id || crypto.randomUUID() }
       records = record.id ? records.map(item => item.id === record.id ? saved : item) : [saved, ...records]
       listeners.forEach(listener => listener())
@@ -73,6 +76,10 @@ export interface Order {
   opportunityId: string
   items: { productId: string; quantity: number; unitPrice: number }[]
   status: typeof orderStatuses[number]
+  quoteSource?: {
+    quoteId: string; number: string; version: number; lines: QuoteLine[]; totals: QuoteTotals
+    paymentTerms: string; deliveryTerms: string; warranty: string; notes: string
+  }
 }
 export const productRepository = createRepository<Product>(Array.from({ length: 15 }, (_, i) => ({ id: `product-${i + 1}`, name: `服務方案 ${i + 1}`, sku: `SKU-${String(i + 1).padStart(3, '0')}`, price: (i + 1) * 1000, status: '啟用' })))
 export const orderRepository = createRepository<Order>(Array.from({ length: 15 }, (_, i) => ({ id: `order-${i + 1}`, name: `訂單 ${String(i + 1).padStart(3, '0')}`, customerId: `c${i + 1}`, opportunityId: `opportunity-${i + 1}`, items: [{ productId: `product-${i + 1}`, quantity: 1, unitPrice: (i + 1) * 1000 }], status: '草稿' })))
