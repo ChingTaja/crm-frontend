@@ -1,4 +1,4 @@
-import { filterOperators, type FilterOperator } from '@/features/filters/models/advanced-filter';
+import { filterOperators, type FilterOperator } from '@/features/filter/models/advanced-filter';
 
 export interface FilterField {
   label: string;

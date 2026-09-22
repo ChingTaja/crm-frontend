@@ -10,7 +10,7 @@ import {
   requiresFilterValue,
   type FilterOperator,
   type FilterRule,
-} from '@/features/filters/models/advanced-filter';
+} from '@/features/filter/models/advanced-filter';
 
 export type FieldFilter = Pick<FilterRule, 'field' | 'operator' | 'value'>;
 interface FilterMenuProps {
