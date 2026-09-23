@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 interface DeleteRecordsButtonProps {
   title: string
   records: { id: string; name: string }[]
-  onDelete: () => void
+  onDelete: () => void | Promise<void>
   disabled?: boolean
   includesVersions?: boolean
 }
@@ -14,19 +14,28 @@ interface DeleteRecordsButtonProps {
 export function DeleteRecordsButton({ title, records, onDelete, disabled, includesVersions }: DeleteRecordsButtonProps) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
-  function confirm() {
+  const [isDeleting, setIsDeleting] = useState(false)
+  const busy = useRef(false)
+  async function confirm() {
+    if (busy.current) return
+    busy.current = true
+    setIsDeleting(true)
+    setError('')
     try {
-      onDelete()
+      await onDelete()
       setOpen(false)
     } catch (error) {
       setError(error instanceof Error ? error.message : '刪除失敗，請稍後重試。')
+    } finally {
+      busy.current = false
+      setIsDeleting(false)
     }
   }
   return <>
     <Button type="button" variant="destructive" disabled={disabled || !records.length} onClick={() => { setError(''); setOpen(true) }}>
       <Trash2 />刪除{records.length > 0 && `（${records.length}）`}
     </Button>
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={next => { if (!busy.current) setOpen(next) }}>
       <DialogContent>
         <DialogTitle className="text-lg font-semibold">刪除{title}</DialogTitle>
         <DialogDescription className="mt-2 text-sm text-muted-foreground">
@@ -37,8 +46,8 @@ export function DeleteRecordsButton({ title, records, onDelete, disabled, includ
         </ul>
         {error && <p role="alert" className="mb-3 text-sm text-destructive">{error}</p>}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>取消</Button>
-          <Button type="button" variant="destructive" disabled={disabled || !records.length} onClick={confirm}>確認刪除</Button>
+          <Button type="button" variant="outline" disabled={isDeleting} onClick={() => setOpen(false)}>取消</Button>
+          <Button type="button" variant="destructive" disabled={disabled || !records.length || isDeleting} onClick={confirm}>{isDeleting ? '刪除中…' : '確認刪除'}</Button>
         </div>
       </DialogContent>
     </Dialog>

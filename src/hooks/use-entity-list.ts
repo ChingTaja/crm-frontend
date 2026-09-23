@@ -6,7 +6,7 @@ import type { FieldFilter } from '@/components/ui/filter-menu'
 import { createFilterGroup, matchesAdvancedFilter, type FilterGroup } from '@/features/filter/models/advanced-filter'
 
 export interface EntityListRow { id: string; name: string; filterValues: string[]; cells: string[] }
-export function useEntityList(entity: string, title: string, fields: FilterField[], records: EntityListRow[], removeMany: (ids: string[]) => void, numericSort = false) {
+export function useEntityList(entity: string, title: string, fields: FilterField[], records: EntityListRow[], removeMany: (ids: string[]) => void | Promise<void>, numericSort = false) {
   const fieldOrder = useFieldOrder(fields.length)
   const [hiddenFields, setHiddenFields] = useState<number[]>([])
   const [advancedFilter, setAdvancedFilter] = useState(createFilterGroup)

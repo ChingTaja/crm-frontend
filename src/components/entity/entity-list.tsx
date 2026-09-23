@@ -11,7 +11,7 @@ import type { EntityListViewModel } from '@/hooks/use-entity-list'
 import { Plus, ArrowDownAZ } from 'lucide-react'
 import { DeleteRecordsButton } from './delete-records-button'
 
-export function EntityList({ vm }: { vm: EntityListViewModel }) {
+export function EntityList({ vm, dataNotice = '示範資料 · 尚未連接後端' }: { vm: EntityListViewModel; dataNotice?: string | null }) {
   const { entity } = vm
   const visibleFields = vm.fieldOrder.filter(field => !vm.hiddenFields.includes(field))
   return <>
@@ -51,7 +51,7 @@ export function EntityList({ vm }: { vm: EntityListViewModel }) {
     <footer className="grid items-center gap-3 py-5 text-xs text-muted-foreground xl:grid-cols-[1fr_auto_1fr]">
       <label>共 {vm.total} 筆 · 顯示 <select aria-label="每頁顯示筆數" className="rounded border px-2 py-1" value={vm.pageSize} onChange={e => vm.setPageSize(Number(e.target.value))}>{vm.pageSizeOptions.map(size => <option key={size}>{size}</option>)}</select> 筆{vm.selectedIds.length > 0 && ` · 已選取 ${vm.selectedIds.length} 筆`}</label>
       <Pagination page={vm.page} pageCount={vm.pageCount} onPageChange={vm.setPage} />
-      <span className="xl:text-right">示範資料 · 尚未連接後端</span>
+      <span className="xl:text-right">{dataNotice}</span>
     </footer>
   </>
 }

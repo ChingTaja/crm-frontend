@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 interface SelectableRecord { id: string; name: string }
 
-export function useRecordSelection(records: SelectableRecord[], pageRecords: { id: string }[], removeMany: (ids: string[]) => void) {
+export function useRecordSelection(records: SelectableRecord[], pageRecords: { id: string }[], removeMany: (ids: string[]) => void | Promise<void>) {
   const [requestedIds, setRequestedIds] = useState<string[]>([])
   const selectedRecords = records.filter(record => requestedIds.includes(record.id))
   const selectedIds = selectedRecords.map(record => record.id)
@@ -16,10 +16,10 @@ export function useRecordSelection(records: SelectableRecord[], pageRecords: { i
     toggleAll: () => setRequestedIds(ids => allSelected
       ? ids.filter(id => !pageRecords.some(record => record.id === id))
       : [...new Set([...ids, ...pageRecords.map(record => record.id)])]),
-    deleteSelected: () => {
+    deleteSelected: async () => {
       if (!selectedIds.length) return
-      removeMany(selectedIds)
-      setRequestedIds([])
+      await removeMany(selectedIds)
+      setRequestedIds(ids => ids.filter(id => !selectedIds.includes(id)))
     },
   }
 }

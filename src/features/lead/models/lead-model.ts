@@ -19,8 +19,12 @@ export interface Lead {
     opportunityId?: string
   }
 }
-export const leadRepository = createRepository<Lead>(Array.from({ length: 15 }, (_, index) => ({
-  id: `lead-${index + 1}`, name: `潛在客戶 ${index + 1}`, company: `示範企業 ${index + 1}`,
-  email: `lead${index + 1}@example.com`, phone: '', source: ['網站詢問', '展覽活動', '客戶推薦'][index % 3],
-  owner: ['林雅婷', '陳柏宇', '王怡安'][index % 3], status: leadStatuses[index % leadStatuses.length],
-})))
+// Cache only records confirmed by the API; never fall back to demo leads.
+export const leadRepository = createRepository<Lead>([])
+
+export function cacheLead(lead: Lead) {
+  const records = leadRepository.getSnapshot()
+  leadRepository.replaceAll(records.some(item => item.id === lead.id)
+    ? records.map(item => item.id === lead.id ? lead : item)
+    : [lead, ...records])
+}
