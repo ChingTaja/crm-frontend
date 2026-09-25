@@ -34,7 +34,7 @@ function DashboardView() {
               icon: ShoppingCart,
               href: '#/orders',
             },
-            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck },
+            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: '#/users' },
           ].map(({ title, description, icon: Icon, href }) => (
             <Card
               key={title}
@@ -60,7 +60,9 @@ function DashboardView() {
               <CardContent>
                 <span className="text-xs text-muted-foreground">
                   {href
-                    ? title === '客戶管理'
+                    ? title === '權限管理'
+                      ? '管理帳號與角色 →'
+                      : title === '客戶管理'
                       ? '查看客戶與聯絡人 →'
                       : title === '商機追蹤'
                         ? '查看 潛在客戶 與 商機 →'

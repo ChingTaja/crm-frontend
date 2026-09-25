@@ -1,3 +1,4 @@
+import { AccessView } from './features/access/views/access-view'
 import { OrderView } from './features/order/views/order-view'
 import { ProductView } from './features/product/views/product-view'
 import { OpportunityView } from './features/opportunity/views/opportunity-view'
@@ -19,7 +20,7 @@ function subscribeToRoute(onChange) {
 
 function getRoute() {
   const path = window.location.hash.slice(2)
-  return ['dashboard', 'customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes'].includes(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/new$/.test(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/[^/]+\/edit$/.test(path) ? path : 'login'
+  return ['users', 'roles', 'dashboard', 'customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes'].includes(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/new$/.test(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/[^/]+\/edit$/.test(path) ? path : 'login'
 }
 
 function LoginPage() {
@@ -39,7 +40,7 @@ function App() {
   const EntityView = entityViews[entity]
 
   useEffect(() => {
-    const titles = { dashboard: '工作空間', customers: '客戶', contacts: '聯絡人', login: '登入', leads: '潛在客戶', opportunities: '商機', orders: '訂單', products: '產品', quotes: '報價單' }
+    const titles = { users: '帳號管理', roles: '角色權限', dashboard: '工作空間', customers: '客戶', contacts: '聯絡人', login: '登入', leads: '潛在客戶', opportunities: '商機', orders: '訂單', products: '產品', quotes: '報價單' }
     document.title = `${titles[route] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`
   }, [route])
 
@@ -48,7 +49,7 @@ function App() {
   return (
     <div className="flex min-h-svh flex-col">
       <WorkspaceHeader onReturnToLogin={() => { window.location.hash = '/login' }} />
-      {EntityView ? <EntityView key={entity} recordId={recordId} /> : <DashboardView />}
+      {['users', 'roles'].includes(entity) ? <AccessView key={entity} section={entity} /> : EntityView ? <EntityView key={entity} recordId={recordId} /> : <DashboardView />}
     </div>
   )
 }

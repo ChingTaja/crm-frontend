@@ -8,7 +8,7 @@ export function useApi<T, Args extends unknown[]>(request: (signal: AbortSignal,
 
   const cancel = useCallback(() => {
     active.current?.abort();
-    active.current = null;ㄔㄛ
+    active.current = null;
     setIsLoading(false);
   }, []);
 

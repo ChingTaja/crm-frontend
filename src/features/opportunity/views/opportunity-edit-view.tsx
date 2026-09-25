@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { useOpportunityEditViewModel } from '../view-models/use-opportunity-edit-view-model'
 import { type Opportunity, opportunityStages } from '../models/opportunity-model'
 import { Lookup } from '@/components/ui/lookup'
+import { Button } from '@/components/ui/button'
 
 export function OpportunityEditView({ record }: { record?: Opportunity }) {
   const form = useOpportunityEditViewModel(record)
@@ -16,7 +17,11 @@ export function OpportunityEditView({ record }: { record?: Opportunity }) {
       <EntityField id="opportunity-owner" label="負責人"><Input id="opportunity-owner" type="text" value={draft.owner} onChange={e => update('owner', e.target.value)} /></EntityField>
       <EntityField id="opportunity-expectedCloseDate" label="預計成交日"><Input id="opportunity-expectedCloseDate" type="date" value={draft.expectedCloseDate} onChange={e => update('expectedCloseDate', e.target.value)} /></EntityField>
       <EntityField id="opportunity-customer" label="所屬客戶 *"><Lookup id="opportunity-customer" label="所屬客戶" required value={draft.customerId} options={form.customers.map(c => ({ value: c.id, label: c.name }))} onValueChange={value => update('customerId', value)} /></EntityField>
-      <EntityField id="opportunity-lead" label="來源 Lead"><Lookup id="opportunity-lead" label="來源 Lead" value={draft.leadId} options={[{ value: '', label: '無' }, ...form.leads.map(l => ({ value: l.id, label: l.name }))]} onValueChange={value => update('leadId', value)} /></EntityField>
+      <EntityField id="opportunity-lead" label="來源 Lead">
+        <Lookup id="opportunity-lead" label="來源 Lead" value={draft.leadId} options={[{ value: '', label: '無' }, ...form.leads.map(l => ({ value: l.id, label: l.name }))]} onValueChange={value => update('leadId', value)} />
+        {form.leadQuery.isLoading && <p role="status" className="text-xs text-muted-foreground">載入 Lead…</p>}
+        {form.leadQuery.error && <div role="alert" className="text-xs text-destructive">{form.leadQuery.error.message}<Button type="button" variant="ghost" size="sm" onClick={form.leadQuery.reload}>重試</Button></div>}
+      </EntityField>
       <EntityField id="opportunity-amount" label="預估金額（TWD）"><Input id="opportunity-amount" type="number" required min="0" step="0.01" value={draft.amount} onChange={e => update('amount', e.target.valueAsNumber)} /></EntityField>
     </CardContent></Card>
   </EntityEditLayout>
