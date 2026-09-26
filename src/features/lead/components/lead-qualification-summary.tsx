@@ -1,3 +1,4 @@
+import { AppLink } from '@/components/ui/app-link';
 import type { Lead } from '../../../api/Api'
 
 export function LeadQualificationSummary({ lead, dirty }: { lead?: Lead; dirty: boolean }) {
@@ -14,19 +15,19 @@ export function LeadQualificationSummary({ lead, dirty }: { lead?: Lead; dirty: 
           )}
           <div className="flex flex-wrap gap-4">
             {lead.qualification.customerId && (
-              <a className="underline" href={`#/customers/${lead.qualification.customerId}/edit`}>
+              <AppLink className="underline" href={`/customers/${lead.qualification.customerId}/edit`}>
                 查看客戶
-              </a>
+              </AppLink>
             )}
             {lead.qualification.contactId && (
-              <a className="underline" href={`#/contacts/${lead.qualification.contactId}/edit`}>
+              <AppLink className="underline" href={`/contacts/${lead.qualification.contactId}/edit`}>
                 查看聯絡人
-              </a>
+              </AppLink>
             )}
             {lead.qualification.opportunityId && (
-              <a className="underline" href={`#/opportunities/${lead.qualification.opportunityId}/edit`}>
+              <AppLink className="underline" href={`/opportunities/${lead.qualification.opportunityId}/edit`}>
                 查看商機
-              </a>
+              </AppLink>
             )}
           </div>
         </div>

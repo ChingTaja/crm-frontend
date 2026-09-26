@@ -8,7 +8,7 @@ import { PasswordResetLayout } from '../components/password-reset-layout';
 import { passwordResetService } from '../models/password-reset';
 
 const sendReset = (signal: AbortSignal, email: string) => passwordResetService.requestReset(
-  email, `${window.location.origin}${window.location.pathname}#/reset-password`, signal,
+  email, `${window.location.origin}/reset-password`, signal,
 );
 
 export function ForgotPasswordView() {

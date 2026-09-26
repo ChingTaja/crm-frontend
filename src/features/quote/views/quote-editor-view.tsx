@@ -1,3 +1,4 @@
+import { navigate } from '@/lib/router';
 import { ArrowLeft, RotateCcw, Save, LockKeyhole } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,8 +20,8 @@ export function QuoteEditorView({ vm, quote, version, onVersion }: { vm: QuoteVi
   const d = editor.draft
   return <>
     <EntityPageHeader>
-      <div className="flex items-center gap-2"><Button variant="ghost" size="icon" aria-label="返回報價單" onClick={() => { window.location.hash = '/quotes' }}><ArrowLeft /></Button><EntityPageTitle>{quote ? quote.number : '新增報價單'}</EntityPageTitle></div>
-      <div className="ml-auto flex gap-2"><Button variant="outline" className="border-red-200 bg-red-50 text-red-700" onClick={() => { window.location.hash = '/quotes' }}>返回列表</Button>{editor.editable && <><Button variant="outline" onClick={editor.reset}><RotateCcw />重置</Button><Button type="submit" form="quote-form"><Save />儲存草稿</Button></>}</div>
+      <div className="flex items-center gap-2"><Button variant="ghost" size="icon" aria-label="返回報價單" onClick={() => { navigate('/quotes') }}><ArrowLeft /></Button><EntityPageTitle>{quote ? quote.number : '新增報價單'}</EntityPageTitle></div>
+      <div className="ml-auto flex gap-2"><Button variant="outline" className="border-red-200 bg-red-50 text-red-700" onClick={() => { navigate('/quotes') }}>返回列表</Button>{editor.editable && <><Button variant="outline" onClick={editor.reset}><RotateCcw />重置</Button><Button type="submit" form="quote-form"><Save />儲存草稿</Button></>}</div>
     </EntityPageHeader>
     <div className="mx-auto max-w-6xl space-y-5 py-6">
       {quote && version && <QuoteVersionManager quote={quote} selectedId={version.id} actor={vm.actor} dirty={editor.dirty} onSelect={onVersion} />}

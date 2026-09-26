@@ -1,3 +1,4 @@
+import { navigate } from '@/lib/router';
 import { useRef, useState } from 'react';
 import { qualifyLead, type QualificationDecision } from '../models/lead-qualification';
 
@@ -17,7 +18,7 @@ export function useLeadQualification(leadId: string, onComplete: () => void) {
       const result = qualifyLead(leadId, request);
       onComplete();
       if (decision === 'approved' && createOpportunity && result.qualification?.opportunityId) {
-        window.location.hash = `/opportunities/${result.qualification.opportunityId}/edit`;
+        navigate(`/opportunities/${result.qualification.opportunityId}/edit`);
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : '審核失敗，請重試。');

@@ -1,3 +1,4 @@
+import { getLocation, navigate, resolveRoute, subscribeToLocation } from './lib/router'
 import { ForgotPasswordView } from './features/auth/views/forgot-password-view'
 import { ResetPasswordView } from './features/auth/views/reset-password-view'
 import { AccessView } from './features/access/views/access-view'
@@ -15,46 +16,36 @@ import { useLoginViewModel } from './features/auth/view-models/use-login-view-mo
 import { CustomerView } from './features/customer/views/customer-view'
 import { DashboardView } from './features/dashboard/views/dashboard-view'
 
-function subscribeToRoute(onChange) {
-  window.addEventListener('hashchange', onChange)
-  return () => window.removeEventListener('hashchange', onChange)
-}
-
-function getRoute() {
-  const path = window.location.hash.slice(2)
-  if (['forgot-password', 'reset-password', 'login'].includes(path.split('?')[0])) return path
-  return ['users', 'roles', 'dashboard', 'customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes'].includes(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/new$/.test(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/[^/]+\/edit$/.test(path) ? path : 'login'
-}
-
 function LoginPage() {
   const viewModel = useLoginViewModel(undefined, () => {
-    window.location.hash = '/dashboard'
+    navigate('/dashboard')
   })
-  return <LoginView viewModel={{ ...viewModel, notice: viewModel.notice || (new URLSearchParams(window.location.hash.split('?')[1]).get('passwordReset') === 'success' ? '密碼修改成功，請使用新密碼登入。' : '') }} />
+  return <LoginView viewModel={{ ...viewModel, notice: viewModel.notice || (new URLSearchParams(window.location.search).get('passwordReset') === 'success' ? '密碼修改成功，請使用新密碼登入。' : '') }} />
 }
 
 const entityViews = { customers: CustomerView, contacts: ContactView, leads: LeadView, opportunities: OpportunityView, orders: OrderView, products: ProductView, quotes: QuoteView }
 
 function App() {
   useQuoteClock()
-  const route = useSyncExternalStore(subscribeToRoute, getRoute)
-  const authRoute = route.split('?')[0]
+  const location = useSyncExternalStore(subscribeToLocation, getLocation)
+  const [pathname, query = ''] = location.split('?')
+  const route = resolveRoute(pathname)
   const entity = route.split('/')[0]
   const recordId = route.split('/')[1]
   const EntityView = entityViews[entity]
 
   useEffect(() => {
     const titles = { 'forgot-password': '忘記密碼', 'reset-password': '設定新密碼', users: '帳號管理', roles: '角色權限', dashboard: '工作空間', customers: '客戶', contacts: '聯絡人', login: '登入', leads: '潛在客戶', opportunities: '商機', orders: '訂單', products: '產品', quotes: '報價單' }
-    document.title = `${titles[route.split('?')[0]] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`
+    document.title = `${titles[route] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`
   }, [route])
 
-  if (authRoute === 'login') return <LoginPage />
-  if (authRoute === 'forgot-password') return <ForgotPasswordView />
-  if (authRoute === 'reset-password') return <ResetPasswordView key={route} hash={`#/${route}`} />
+  if (route === 'login') return <LoginPage />
+  if (route === 'forgot-password') return <ForgotPasswordView />
+  if (route === 'reset-password') return <ResetPasswordView key={location} search={query} />
 
   return (
     <div className="flex min-h-svh flex-col">
-      <WorkspaceHeader onReturnToLogin={() => { window.location.hash = '/login' }} />
+      <WorkspaceHeader onReturnToLogin={() => { navigate('/login') }} />
       {['users', 'roles'].includes(entity) ? <AccessView key={entity} section={entity} /> : EntityView ? <EntityView key={entity} recordId={recordId} /> : <DashboardView />}
     </div>
   )

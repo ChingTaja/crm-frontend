@@ -1,3 +1,5 @@
+import { navigate } from '@/lib/router';
+import { AppLink } from '@/components/ui/app-link';
 import { useRef, useState, type FormEvent } from 'react';
 import { LockKeyhole } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
@@ -10,8 +12,8 @@ import { passwordResetService, resetToken, validateNewPassword } from '../models
 const changePassword = (signal: AbortSignal, token: string, password: string) =>
   passwordResetService.resetPassword(token, password, signal);
 
-export function ResetPasswordView({ hash }: { hash: string }) {
-  const token = resetToken(hash);
+export function ResetPasswordView({ search }: { search: string }) {
+  const token = resetToken(search);
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ export function ResetPasswordView({ hash }: { hash: string }) {
       setPassword('');
       setConfirmation('');
       // Replace the token-bearing history entry after successful reset.
-      window.location.replace(`${window.location.pathname}${window.location.search}#/login?passwordReset=success`);
+      navigate('/login?passwordReset=success', { replace: true });
     } catch (cause) {
       if (!(cause instanceof DOMException && cause.name === 'AbortError'))
         setError(cause instanceof Error ? cause.message : '無法修改密碼，請稍後再試。');
@@ -36,7 +38,7 @@ export function ResetPasswordView({ hash }: { hash: string }) {
   }
   return <PasswordResetLayout title="設定新密碼" description="輸入新密碼，完成後將返回登入頁面。">
     {!token ? <div role="alert" className="space-y-3">
-      <p>重設密碼連結不完整，請重新申請。</p><a className="underline" href="#/forgot-password">重新寄送重設信件</a>
+      <p>重設密碼連結不完整，請重新申請。</p><AppLink className="underline" href="/forgot-password">重新寄送重設信件</AppLink>
     </div> : <form onSubmit={submit} className="space-y-5" aria-busy={request.isLoading}>
       <Label htmlFor="new-password">新密碼</Label>
       <LoginInput id="new-password" icon={LockKeyhole} type="password" autoComplete="new-password" required
@@ -48,7 +50,7 @@ export function ResetPasswordView({ hash }: { hash: string }) {
         {request.isLoading ? '修改中…' : '修改密碼'}
       </Button>
       {error && <div role="alert" className="space-y-2 text-sm text-destructive">
-        <p>{error}</p><a className="underline" href="#/forgot-password">連結已失效？重新申請</a>
+        <p>{error}</p><AppLink className="underline" href="/forgot-password">連結已失效？重新申請</AppLink>
       </div>}
     </form>}
   </PasswordResetLayout>;

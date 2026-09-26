@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoginInput } from '../components/login-input';
 import { Label } from '@/components/ui/label';
@@ -27,19 +27,19 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
           </h2>
           <p className="mb-7 text-[13px] text-[#8b938d] min-[761px]:mb-9">登入您的帳號，開始今天的美好連結。</p>
           <form onSubmit={submit} aria-busy={isSubmitting}>
-            <Label className="mb-2 text-xs" htmlFor="email">
-              電子郵件
+            <Label className="mb-2 text-xs" htmlFor="code">
+              帳號
             </Label>
             <LoginInput
-              icon={Mail}
-              id="email"
-              name="email"
-              value={credentials.email}
-              onChange={(event) => updateField('email', event.target.value)}
+              icon={UserRound}
+              id="code"
+              name="code"
+              value={credentials.code}
+              onChange={(event) => updateField('code', event.target.value)}
               disabled={isSubmitting}
-              type="email"
+              type="text"
               autoComplete="username"
-              placeholder="name@company.com"
+              placeholder="請輸入帳號"
               required
             />
             <div className="mt-6 mb-2 flex items-center justify-between">

@@ -1,3 +1,4 @@
+import { navigate } from '@/lib/router';
 import { useState } from 'react'
 import { quoteRepository } from '../models/quote-repository'
 import { canManageQuote } from '../models/quote-policy'
@@ -45,7 +46,7 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
     send: () => act(() => { quoteRepository.send(quote.id, version.id, actor) }),
     convertToOrder: () => act(() => {
       const id = quoteRepository.convertToOrder(quote.id, version.id, actor)
-      window.location.hash = `/orders/${id}/edit`
+      navigate(`/orders/${id}/edit`)
     }),
   }
 }

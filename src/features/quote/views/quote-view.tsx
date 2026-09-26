@@ -1,3 +1,5 @@
+import { navigate } from '@/lib/router';
+import { AppLink } from '@/components/ui/app-link';
 import { DeleteRecordsButton } from '@/components/entity/delete-records-button'
 import { useState } from 'react'
 import { ArrowDownAZ, Plus } from 'lucide-react'
@@ -22,8 +24,8 @@ export function QuoteView({ recordId }: { recordId?: string }) {
     <SalesSidebar entity="quotes" />
     <main className="min-w-0 px-6">
       <p className="border-b py-3 text-xs text-muted-foreground">前端預覽 · 未寄送郵件 · 資料與紀錄在重新整理後還原</p>
-      {recordId ? recordId === 'new' || (quote && version) ? <QuoteEditorView key={`${recordId}-${version?.id ?? 'new'}-${version?.revision ?? 0}`} vm={vm} quote={quote} version={version} onVersion={setSelectedVersionId} /> : <p className="py-10">找不到報價單。<a className="underline" href="#/quotes">返回列表</a></p> : <>
-        <EntityPageHeader><EntityPageTitle>全部報價單 <span className="text-muted-foreground">· {vm.filteredTotal}</span></EntityPageTitle><div className="ml-auto flex items-center gap-2"><DeleteRecordsButton title="報價單" records={vm.selectedRecords} onDelete={vm.deleteSelected} disabled={!vm.canManage} includesVersions /><Button disabled={!vm.canManage} onClick={() => { vm.clearSelection(); window.location.hash = '/quotes/new' }}><Plus />新增報價單</Button></div></EntityPageHeader>
+      {recordId ? recordId === 'new' || (quote && version) ? <QuoteEditorView key={`${recordId}-${version?.id ?? 'new'}-${version?.revision ?? 0}`} vm={vm} quote={quote} version={version} onVersion={setSelectedVersionId} /> : <p className="py-10">找不到報價單。<AppLink className="underline" href="/quotes">返回列表</AppLink></p> : <>
+        <EntityPageHeader><EntityPageTitle>全部報價單 <span className="text-muted-foreground">· {vm.filteredTotal}</span></EntityPageTitle><div className="ml-auto flex items-center gap-2"><DeleteRecordsButton title="報價單" records={vm.selectedRecords} onDelete={vm.deleteSelected} disabled={!vm.canManage} includesVersions /><Button disabled={!vm.canManage} onClick={() => { vm.clearSelection(); navigate('/quotes/new') }}><Plus />新增報價單</Button></div></EntityPageHeader>
         <div className="flex flex-wrap items-center gap-2 border-b py-3"><Input className="w-52" aria-label="搜尋報價單" placeholder="搜尋報價單…" value={vm.query} onChange={e => vm.setQuery(e.target.value)} /><FilterMenu fields={vm.fields} value={vm.filter} onChange={vm.setFilter} hiddenFields={vm.hiddenFields} onToggleVisibility={vm.toggleVisibility} fieldOrder={vm.fieldOrder} onMoveField={vm.moveField} /><AdvancedFilter fields={vm.fields} value={vm.advancedFilter} onChange={vm.setAdvanced} /><Button variant="ghost" aria-pressed={vm.sort} onClick={vm.toggleSort}><ArrowDownAZ />排序</Button></div>
         <EntityTable>
           <caption className="sr-only">報價單最新版本列表</caption>
@@ -32,9 +34,9 @@ export function QuoteView({ recordId }: { recordId?: string }) {
             {visible.map(index => <EntityTableHead key={index}>{vm.fields[index].label}</EntityTableHead>)}
           </tr></thead>
           <tbody>
-            {vm.rows.map(row => <EntityTableRow key={row.id} data-selected={vm.selectedIds.includes(row.id)} className="cursor-pointer" onClick={() => { window.location.hash = `/quotes/${row.id}/edit` }}>
+            {vm.rows.map(row => <EntityTableRow key={row.id} data-selected={vm.selectedIds.includes(row.id)} className="cursor-pointer" onClick={event => { if (!(event.target as Element).closest('a')) navigate(`/quotes/${row.id}/edit`) }}>
               <EntityTableCell selection onClick={event => event.stopPropagation()}><RowCheckbox aria-label={`選取 ${row.cells[0]}`} checked={vm.selectedIds.includes(row.id)} onChange={() => vm.toggleSelection(row.id)} /></EntityTableCell>
-              {visible.map(index => <EntityTableCell key={index}>{index === 0 ? <a className="font-medium hover:underline" href={`#/quotes/${row.id}/edit`}>{row.cells[index]}</a> : row.cells[index]}</EntityTableCell>)}
+              {visible.map(index => <EntityTableCell key={index}>{index === 0 ? <AppLink className="font-medium hover:underline" href={`/quotes/${row.id}/edit`}>{row.cells[index]}</AppLink> : row.cells[index]}</EntityTableCell>)}
             </EntityTableRow>)}
             {!vm.rows.length && <tr><EntityTableCell className="py-12 text-center text-muted-foreground" colSpan={visible.length + 1}>尚無符合條件的報價單。點擊「新增報價單」開始建立 v1。</EntityTableCell></tr>}
           </tbody>

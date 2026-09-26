@@ -10,7 +10,7 @@ export const permissionActions = [
 export const permissions = permissionEntities.flatMap(entity => permissionActions.map(action => ({
   id: `${entity.id}:${action.id}`, entity: entity.id, action: action.id,
 })))
-export interface Account { id: string; username: string; email: string }
+export interface Account { id: string; code: string; email: string }
 export interface Role { id: string; name: string }
 interface AccessState {
   users: Account[]
@@ -19,7 +19,7 @@ interface AccessState {
   role_permissions: { role_id: string; permission_id: string }[]
 }
 let state: AccessState = {
-  users: [{ id: 'demo-user', username: 'demo', email: 'demo@example.com' }],
+  users: [{ id: 'demo-user', code: 'demo', email: 'demo@example.com' }],
   roles: [{ id: 'sales', name: '業務人員' }],
   user_roles: [{ user_id: 'demo-user', role_id: 'sales' }],
   role_permissions: permissions.filter(p => p.action === 'read').map(p => ({ role_id: 'sales', permission_id: p.id })),
@@ -30,15 +30,16 @@ export const accessStore = {
   getSnapshot: () => state,
   subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
   saveUser(input: Account & { password: string }, roleIds: string[]) {
-    const username = input.username.trim()
+    const code = input.code.trim()
     const email = input.email.trim()
-    if (!username || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('請填寫帳號與有效的 Email。')
+    if (!code) throw new Error('請填寫帳號。')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('請填寫有效的 Email。')
     if (!input.id && !input.password.trim()) throw new Error('新增帳號請填寫密碼。')
     if (input.id && !state.users.some(u => u.id === input.id)) throw new Error('找不到此帳號。')
-    if (state.users.some(u => u.id !== input.id && u.username.toLowerCase() === username.toLowerCase())) throw new Error('此帳號名稱已存在。')
+    if (state.users.some(u => u.id !== input.id && u.code.toLowerCase() === code.toLowerCase())) throw new Error('此帳號名稱已存在。')
     if (roleIds.some(id => !state.roles.some(r => r.id === id))) throw new Error('角色已不存在，請重新選擇。')
     // Preview only: passwords are never retained in the client store.
-    const user = { id: input.id || crypto.randomUUID(), username, email }
+    const user = { id: input.id || crypto.randomUUID(), code, email }
     commit({ ...state, users: input.id ? state.users.map(u => u.id === user.id ? user : u) : [...state.users, user],
       user_roles: [...state.user_roles.filter(link => link.user_id !== user.id), ...[...new Set(roleIds)].map(role_id => ({ user_id: user.id, role_id }))] })
   },

@@ -1,3 +1,4 @@
+import { AppLink } from '@/components/ui/app-link';
 import { filterValueLabel } from '@/lib/filter-fields'
 import { FilterMenu } from '@/components/ui/filter-menu'
 import { AdvancedFilter } from '@/features/filter/components/advanced-filter'
@@ -40,14 +41,14 @@ export function EntityList({ vm, dataNotice = '示範資料 · 尚未連接後�
         {visibleFields.map(field => <EntityTableHead key={field}>{vm.fields[field].label}</EntityTableHead>)}
       </tr></thead>
       <tbody>
-        {vm.rows.map(row => <EntityTableRow key={row.id} data-selected={vm.selectedIds.includes(row.id)} className="cursor-pointer" onClick={() => vm.openDetails(row.id)}>
+        {vm.rows.map(row => <EntityTableRow key={row.id} data-selected={vm.selectedIds.includes(row.id)} className="cursor-pointer" onClick={event => { if (!(event.target as Element).closest('a')) vm.openDetails(row.id) }}>
           <EntityTableCell selection onClick={event => event.stopPropagation()}>
             <RowCheckbox aria-label={`選取 ${row.name}`} checked={vm.selectedIds.includes(row.id)} onChange={() => vm.toggleSelection(row.id)} />
           </EntityTableCell>
           {visibleFields.map(field => {
             const value = row.displayValues ? row.displayValues[field] : field === 0 ? row.name : row.cells[field - 1];
             const isName = vm.fields[field].apiFieldName ? vm.fields[field].apiFieldName === 'name' : field === 0;
-            return <EntityTableCell key={field}>{isName ? <a className="font-medium hover:underline" href={`#/${entity}/${row.id}/edit`}>{value || '—'}</a> : value || '—'}</EntityTableCell>;
+            return <EntityTableCell key={field}>{isName ? <AppLink className="font-medium hover:underline" href={`/${entity}/${row.id}/edit`}>{value || '—'}</AppLink> : value || '—'}</EntityTableCell>;
           })}
         </EntityTableRow>)}
         {!vm.rows.length && <tr><EntityTableCell colSpan={visibleFields.length + 1} className="py-10 text-center text-muted-foreground">沒有符合條件的資料</EntityTableCell></tr>}

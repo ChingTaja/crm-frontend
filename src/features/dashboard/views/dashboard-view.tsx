@@ -1,6 +1,6 @@
+import { AppLink } from '@/components/ui/app-link';
 import { LayoutDashboard, Users, Handshake, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 function DashboardView() {
   return (
@@ -23,15 +23,15 @@ function DashboardView() {
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: '#/customers' },
-            { title: '商機追蹤', description: '掌握商機進度與每一次合作機會。', icon: Handshake, href: '#/leads' },
+            { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: '/customers' },
+            { title: '商機追蹤', description: '掌握商機進度與每一次合作機會。', icon: Handshake, href: '/leads' },
             {
               title: '銷售管理',
               description: '管理報價版本、訂單明細與產品資訊。',
               icon: ShoppingCart,
-              href: '#/orders',
+              href: '/orders',
             },
-            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: '#/users' },
+            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: '/users' },
           ].map(({ title, description, icon: Icon, href }) => (
             <Card
               key={title}
@@ -45,9 +45,9 @@ function DashboardView() {
                 <Icon className="mb-4 text-[#56775e]" aria-hidden="true" />
                 <CardTitle>
                   {href ? (
-                    <a href={href} className="outline-none after:absolute after:inset-0 after:rounded-xl">
+                    <AppLink href={href} className="outline-none after:absolute after:inset-0 after:rounded-xl">
                       {title}
-                    </a>
+                    </AppLink>
                   ) : (
                     title
                   )}

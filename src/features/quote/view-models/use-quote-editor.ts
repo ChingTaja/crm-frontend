@@ -1,3 +1,4 @@
+import { navigate } from '@/lib/router';
 import { useState } from 'react'
 import { quoteRepository } from '../models/quote-repository'
 import { canEditQuote, canManageQuote, quoteToday } from '../models/quote-policy'
@@ -28,7 +29,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
     run(() => {
       if (!editable) throw new Error('此版本不可修改。')
       if (quote && version) quoteRepository.update(quote.id, version.id, version.revision, draft, actor)
-      else { const created = quoteRepository.create(draft, actor); window.location.hash = `/quotes/${created.id}/edit` }
+      else { const created = quoteRepository.create(draft, actor); navigate(`/quotes/${created.id}/edit`) }
     })
   }
   return { draft, error, editable, latest, dirty, update, updateLine, selectProduct, save,

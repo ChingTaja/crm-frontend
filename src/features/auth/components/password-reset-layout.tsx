@@ -1,3 +1,4 @@
+import { AppLink } from '@/components/ui/app-link';
 import type { ReactNode } from 'react';
 import { LockKeyhole } from 'lucide-react';
 import { BrandContent } from './brand-content';
@@ -15,7 +16,7 @@ export function PasswordResetLayout({ title, description, children }: {
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
         </div>
         {children}
-        <a href="#/login" className="inline-block text-sm text-[#3b6550] underline">返回登入頁面</a>
+        <AppLink href="/login" className="inline-block text-sm text-[#3b6550] underline">返回登入頁面</AppLink>
       </div>
     </section>
   </main>;

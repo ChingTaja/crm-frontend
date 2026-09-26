@@ -14,8 +14,8 @@ export const passwordResetService: PasswordResetService = {
   },
 };
 
-export function resetToken(hash: string) {
-  return new URLSearchParams(hash.split('?')[1] ?? '').get('token')?.trim() ?? '';
+export function resetToken(search: string) {
+  return new URLSearchParams(search).get('token')?.trim() ?? '';
 }
 
 export function validateNewPassword(password: string, confirmation: string) {

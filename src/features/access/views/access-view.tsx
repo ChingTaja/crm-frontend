@@ -1,3 +1,4 @@
+import { AppLink } from '@/components/ui/app-link';
 import { useState, useSyncExternalStore, type FormEvent } from 'react'
 import { Plus, ShieldCheck, Users } from 'lucide-react'
 import { EntityWorkspace } from '@/components/layout/entity-workspace'
@@ -19,20 +20,20 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
   return <EntityWorkspace sidebar={<aside className="border-r bg-[#f8f9f8] p-4">
     <p className="mb-3 px-3 text-xs text-muted-foreground">權限管理</p>
     <nav className="flex gap-1 md:grid">{[{ id: 'users', label: '帳號管理', icon: Users }, { id: 'roles', label: '角色權限', icon: ShieldCheck }].map(({ id, label, icon: Icon }) =>
-      <a key={id} href={`#/${id}`} aria-current={section === id ? 'page' : undefined} className="flex items-center gap-2 rounded-lg p-3 text-muted-foreground hover:bg-muted aria-[current=page]:bg-[#e9eee7] aria-[current=page]:text-[#284c36]"><Icon size={18} />{label}</a>)}</nav>
+      <AppLink key={id} href={`/${id}`} aria-current={section === id ? 'page' : undefined} className="flex items-center gap-2 rounded-lg p-3 text-muted-foreground hover:bg-muted aria-[current=page]:bg-[#e9eee7] aria-[current=page]:text-[#284c36]"><Icon size={18} />{label}</AppLink>)}</nav>
   </aside>}>
     <div className="flex flex-wrap items-center justify-between gap-3 py-6">
       <div><p className="mb-2 text-xs text-muted-foreground">權限管理 / {users ? 'Users' : 'Roles'}</p><h1 className="text-2xl font-semibold">{users ? '帳號管理' : '角色權限'}</h1></div>
-      <Button onClick={() => { setNotice(''); setEditing(users ? { id: '', username: '', email: '' } : { id: '', name: '' }) }}><Plus size={16} />新增{users ? '帳號' : '角色'}</Button>
+      <Button onClick={() => { setNotice(''); setEditing(users ? { id: '', code: '', email: '' } : { id: '', name: '' }) }}><Plus size={16} />新增{users ? '帳號' : '角色'}</Button>
     </div>
     <p className="mb-5 rounded-lg bg-[#f5f7f3] p-3 text-sm text-muted-foreground">前端預覽：資料於重新整理後重設，密碼不會儲存；權限尚未套用至實際操作。</p>
     {notice && <p role="status" className="mb-4 text-[#284c36]">{notice}</p>}
     <div className="overflow-x-auto rounded-lg border"><table className="w-full whitespace-nowrap text-sm">
       <thead className="bg-[#f8f9f8]"><tr>{(users ? ['帳號', 'Email', '角色', '操作'] : ['角色名稱', '使用人數', '權限數', '操作']).map(label => <th key={label} className={cell}>{label}</th>)}</tr></thead>
       <tbody>{users ? state.users.map(user => <tr key={user.id}>
-        <td className={cell}>{user.username}</td><td className={cell}>{user.email}</td>
+        <td className={cell}>{user.code}</td><td className={cell}>{user.email}</td>
         <td className={cell}>{state.user_roles.filter(link => link.user_id === user.id).map(link => state.roles.find(role => role.id === link.role_id)?.name).join('、') || '未指派'}</td>
-        <td className={cell}><Button variant="outline" size="sm" onClick={() => setEditing(user)} aria-label={`修改帳號 ${user.username}`}>修改</Button></td>
+        <td className={cell}><Button variant="outline" size="sm" onClick={() => setEditing(user)} aria-label={`修改帳號 ${user.code}`}>修改</Button></td>
       </tr>) : state.roles.map(role => <tr key={role.id}>
         <td className={cell}>{role.name}</td><td className={cell}>{state.user_roles.filter(link => link.role_id === role.id).length}</td>
         <td className={cell}>{state.role_permissions.filter(link => link.role_id === role.id).length} / {permissions.length}</td>
@@ -52,8 +53,8 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
 
 function AccessEditor({ record, onCancel, onSaved }: { record: Account | Role; onCancel: () => void; onSaved: () => void }) {
   const state = useSyncExternalStore(accessStore.subscribe, accessStore.getSnapshot)
-  const isUser = 'username' in record
-  const [name, setName] = useState(isUser ? record.username : record.name)
+  const isUser = 'code' in record
+  const [name, setName] = useState(isUser ? record.code : record.name)
   const [email, setEmail] = useState(isUser ? record.email : '')
   const [password, setPassword] = useState('')
   const [selected, setSelected] = useState<string[]>(isUser ? state.user_roles.filter(link => link.user_id === record.id).map(link => link.role_id) : state.role_permissions.filter(link => link.role_id === record.id).map(link => link.permission_id))
@@ -61,7 +62,7 @@ function AccessEditor({ record, onCancel, onSaved }: { record: Account | Role; o
   function submit(event: FormEvent) {
     event.preventDefault()
     try {
-      if (isUser) accessStore.saveUser({ id: record.id, username: name, email, password }, selected)
+      if (isUser) accessStore.saveUser({ id: record.id, code: name, email, password }, selected)
       else accessStore.saveRole({ id: record.id, name }, selected)
       setPassword(''); onSaved()
     } catch (e) { setError((e as Error).message) }
