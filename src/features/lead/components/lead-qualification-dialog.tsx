@@ -5,10 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { disqualificationReasons } from '../models/lead-qualification';
 import { useLeadQualification } from '../view-models/use-lead-qualification';
-import type { Lead } from '../models/lead-model';
+import type { Lead } from '../../../api/Api';
 
 function QualificationForm({ lead, onClose }: { lead: Lead; onClose: () => void }) {
-  const vm = useLeadQualification(lead.id, onClose);
+  const vm = useLeadQualification(lead.id ?? '', onClose);
   const converted = !!lead.qualification?.customerId;
   return (
     <form

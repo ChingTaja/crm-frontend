@@ -1,3 +1,5 @@
+import { ForgotPasswordView } from './features/auth/views/forgot-password-view'
+import { ResetPasswordView } from './features/auth/views/reset-password-view'
 import { AccessView } from './features/access/views/access-view'
 import { OrderView } from './features/order/views/order-view'
 import { ProductView } from './features/product/views/product-view'
@@ -20,6 +22,7 @@ function subscribeToRoute(onChange) {
 
 function getRoute() {
   const path = window.location.hash.slice(2)
+  if (['forgot-password', 'reset-password', 'login'].includes(path.split('?')[0])) return path
   return ['users', 'roles', 'dashboard', 'customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes'].includes(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/new$/.test(path) || /^(customers|contacts|leads|opportunities|orders|products|quotes)\/[^/]+\/edit$/.test(path) ? path : 'login'
 }
 
@@ -27,7 +30,7 @@ function LoginPage() {
   const viewModel = useLoginViewModel(undefined, () => {
     window.location.hash = '/dashboard'
   })
-  return <LoginView viewModel={viewModel} />
+  return <LoginView viewModel={{ ...viewModel, notice: viewModel.notice || (new URLSearchParams(window.location.hash.split('?')[1]).get('passwordReset') === 'success' ? '密碼修改成功，請使用新密碼登入。' : '') }} />
 }
 
 const entityViews = { customers: CustomerView, contacts: ContactView, leads: LeadView, opportunities: OpportunityView, orders: OrderView, products: ProductView, quotes: QuoteView }
@@ -35,16 +38,19 @@ const entityViews = { customers: CustomerView, contacts: ContactView, leads: Lea
 function App() {
   useQuoteClock()
   const route = useSyncExternalStore(subscribeToRoute, getRoute)
+  const authRoute = route.split('?')[0]
   const entity = route.split('/')[0]
   const recordId = route.split('/')[1]
   const EntityView = entityViews[entity]
 
   useEffect(() => {
-    const titles = { users: '帳號管理', roles: '角色權限', dashboard: '工作空間', customers: '客戶', contacts: '聯絡人', login: '登入', leads: '潛在客戶', opportunities: '商機', orders: '訂單', products: '產品', quotes: '報價單' }
-    document.title = `${titles[route] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`
+    const titles = { 'forgot-password': '忘記密碼', 'reset-password': '設定新密碼', users: '帳號管理', roles: '角色權限', dashboard: '工作空間', customers: '客戶', contacts: '聯絡人', login: '登入', leads: '潛在客戶', opportunities: '商機', orders: '訂單', products: '產品', quotes: '報價單' }
+    document.title = `${titles[route.split('?')[0]] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`
   }, [route])
 
-  if (route === 'login') return <LoginPage />
+  if (authRoute === 'login') return <LoginPage />
+  if (authRoute === 'forgot-password') return <ForgotPasswordView />
+  if (authRoute === 'reset-password') return <ResetPasswordView key={route} hash={`#/${route}`} />
 
   return (
     <div className="flex min-h-svh flex-col">

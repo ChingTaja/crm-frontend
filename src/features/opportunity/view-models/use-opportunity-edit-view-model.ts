@@ -1,11 +1,10 @@
-import { useSyncExternalStore } from 'react';
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useEntityForm } from '@/hooks/use-entity-form';
-import { customerRepository } from '@/features/customer/models/customer-model';
 import { useLeadsQuery } from '@/features/lead/view-models/use-leads-query';
 import { opportunityRepository, type Opportunity } from '../models/opportunity-model';
 
 export function useOpportunityEditViewModel(record?: Opportunity) {
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot);
+  const customers = useCustomersQuery().records;
   const leadQuery = useLeadsQuery();
   const initial: Opportunity = {
     id: '',

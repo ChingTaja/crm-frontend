@@ -5,7 +5,7 @@ import { leadRepository } from '../models/lead-model'
 
 export function useLeadsQuery() {
   const records = useSyncExternalStore(leadRepository.subscribe, leadRepository.getSnapshot)
-  const { execute, cancel, ...state } = useApi(leadApi.list)
+  const { execute, cancel, ...state } = useApi(leadApi.listAll)
   const reload = useCallback(() => {
     // Errors are exposed through useApi; never substitute demo records.
     void execute().then(leadRepository.replaceAll).catch(() => {})

@@ -1,4 +1,4 @@
-import { api } from '../../../lib/api'
-import { createLeadApi } from './lead-api'
+import { createGeneratedApi } from '../../../api/client';
+import { createLeadApi } from './lead-api';
 
-export const leadApi = createLeadApi(api)
+export const leadApi = createLeadApi(createGeneratedApi(import.meta.env.VITE_API_BASE_URL || '/api').api);

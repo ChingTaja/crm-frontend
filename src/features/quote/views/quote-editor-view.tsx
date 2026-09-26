@@ -38,7 +38,7 @@ export function QuoteEditorView({ vm, quote, version, onVersion }: { vm: QuoteVi
         <Card><CardHeader><CardTitle>報價基本資料</CardTitle></CardHeader><CardContent><fieldset disabled={!editor.editable} className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2"><Label htmlFor="quote-name">報價名稱 *</Label><Input id="quote-name" required value={d.name} onChange={e => editor.update('name', e.target.value)} /></div>
           <div className="space-y-2"><Label htmlFor="quote-until">有效期限 *</Label><Input id="quote-until" type="date" required value={d.validUntil} onChange={e => editor.update('validUntil', e.target.value)} /></div>
-          <div className="space-y-2"><Label htmlFor="quote-customer">客戶 *</Label><Lookup id="quote-customer" label="客戶" disabled={!editor.editable} value={d.customerId} options={vm.customers.map(c => ({ value: c.id, label: c.name }))} onValueChange={value => editor.update('customerId', value)} /></div>
+          <div className="space-y-2"><Label htmlFor="quote-customer">客戶 *</Label><Lookup id="quote-customer" label="客戶" disabled={!editor.editable} value={d.customerId} options={vm.customers.map(c => ({ value: c.id ?? '', label: c.name ?? '' }))} onValueChange={value => editor.update('customerId', value)} /></div>
           <div className="space-y-2"><Label htmlFor="quote-opportunity">來源商機</Label><Lookup id="quote-opportunity" label="來源商機" disabled={!editor.editable} value={d.opportunityId} options={[{ value: '', label: '無' }, ...vm.opportunities.filter(o => o.customerId === d.customerId).map(o => ({ value: o.id, label: o.name }))]} onValueChange={value => editor.update('opportunityId', value)} /></div>
         </fieldset></CardContent></Card>
         <QuoteLines editor={editor} products={vm.products} />

@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import type { Customer } from '../models/customer-model';
+import type { CustomerResponse } from '../../../api/Api';
 import { useCustomerEditViewModel } from '../view-models/use-customer-edit-view-model';
 
-export function CustomerEditView({ customer }: { customer?: Customer }) {
+export function CustomerEditView({ customer }: { customer?: CustomerResponse }) {
   const vm = useCustomerEditViewModel(customer);
   return (
     <>
@@ -32,7 +32,7 @@ export function CustomerEditView({ customer }: { customer?: Customer }) {
           <Button type="button" variant="outline" onClick={vm.reset}>
             <RotateCcw /> 重置
           </Button>
-          <Button type="submit" form="customer-edit-form">
+          <Button type="submit" form="customer-edit-form" disabled={vm.isSaving}>
             <Save /> {vm.isNew ? '建立資料' : '儲存變更'}
           </Button>
         </div>
@@ -49,32 +49,28 @@ export function CustomerEditView({ customer }: { customer?: Customer }) {
             {(
               [
                 { field: 'name', label: '客戶名稱', required: true },
-                { field: 'industry', label: '產業' },
+                { field: 'company', label: '公司' },
                 { field: 'owner', label: '帳戶所有者' },
-                { field: 'createdAt', label: '建立日期', type: 'date', readOnly: true },
-                { field: 'address', label: '地址' },
+                { field: 'email', label: '電子郵件', type: 'email' },
+                { field: 'phone', label: '電話', type: 'tel' },
               ] as const
             ).map((item) => (
-              <div key={item.field} className={item.field === 'address' ? 'space-y-2 sm:col-span-2' : 'space-y-2'}>
+              <div key={item.field} className="space-y-2">
                 <Label htmlFor={`edit-${item.field}`}>
                   {item.label}
                   {'required' in item && ' *'}
                 </Label>
                 <Input
                   id={`edit-${item.field}`}
-                  value={vm.draft[item.field]}
+                  value={vm.draft[item.field] ?? ''}
                   type={'type' in item ? item.type : 'text'}
                   required={'required' in item}
-                  readOnly={'readOnly' in item}
                   onChange={(event) => vm.updateField(item.field, event.target.value)}
                 />
               </div>
             ))}
           </CardContent>
         </Card>
-        <p className="mt-4 text-xs text-muted-foreground">
-          目前為前端示範，修改僅保留於本次使用期間，重新整理後會還原。
-        </p>
         <p role="status" className="mt-3 text-sm text-destructive">
           {vm.error}
         </p>

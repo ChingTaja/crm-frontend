@@ -1,12 +1,12 @@
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useSyncExternalStore } from 'react'
 import { useEntityForm } from '@/hooks/use-entity-form'
-import { customerRepository } from '@/features/customer/models/customer-model'
 import { opportunityRepository } from '@/features/opportunity/models/opportunity-model'
 import { productRepository } from '@/features/product/models/product-model'
 import { orderRepository, type Order } from '../models/order-model'
 
 export function useOrderEditViewModel(record?: Order) {
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot)
+  const customers = useCustomersQuery().records
   const products = useSyncExternalStore(productRepository.subscribe, productRepository.getSnapshot)
   const opportunities = useSyncExternalStore(opportunityRepository.subscribe, opportunityRepository.getSnapshot)
   const initial: Order = { id: '', name: '', customerId: '', opportunityId: '', items: [], status: '草稿', ...record }

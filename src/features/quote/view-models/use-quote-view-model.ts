@@ -1,6 +1,6 @@
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useState, useSyncExternalStore } from 'react';
 import { useRecordSelection } from '@/hooks/use-record-selection';
-import { customerRepository } from '../../customer/models/customer-model';
 import { productRepository } from '../../product/models/product-model';
 import { opportunityRepository } from '../../opportunity/models/opportunity-model';
 import { useFieldOrder } from '@/hooks/use-field-order';
@@ -13,7 +13,7 @@ import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
 
 export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const quotes = useSyncExternalStore(quoteRepository.subscribe, quoteRepository.getSnapshot);
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot);
+  const customers = useCustomersQuery().records;
   const products = useSyncExternalStore(productRepository.subscribe, productRepository.getSnapshot);
   const opportunities = useSyncExternalStore(opportunityRepository.subscribe, opportunityRepository.getSnapshot);
   const [query, updateQuery] = useState('');
@@ -26,7 +26,7 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const [sort, setSort] = useState(false);
   const fields: FilterField[] = [
     { label: '報價單', type: 'text', hideable: false },
-    { label: '客戶', type: 'lookup', options: customers.map((c) => ({ value: c.id, label: c.name })) },
+    { label: '客戶', type: 'lookup', options: customers.map((c) => ({ value: c.id ?? '', label: c.name ?? '' })) },
     { label: '最新版本', type: 'number' },
     { label: '狀態', type: 'option', options: uniqueOptions(['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired']) },
     {

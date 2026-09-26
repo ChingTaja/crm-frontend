@@ -1,63 +1,23 @@
-import { useState, useSyncExternalStore, type FormEvent } from 'react';
-import { contactRepository, type Contact } from '../models/contact-model';
-import { customerRepository } from '../../customer/models/customer-model';
+import type { ContactResponse } from '../../../api/Api';
+import { useEntityForm } from '@/hooks/use-entity-form';
+import { useApi } from '@/hooks/use-api';
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
+import { contactApi } from '../models/contact-service';
+import { cacheContact } from '../models/contact-model';
 
-export function useContactEditViewModel(contact?: Contact) {
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot);
-  const isNew = !contact;
-  const [initial] = useState<Contact>(() =>
-    contact
-      ? { ...contact }
-      : {
-          id: '',
-          name: '',
-          customerId: '',
-          title: '',
-          email: '',
-          phone: '',
-          createdAt: new Date().toLocaleDateString('en-CA'),
-        }
-  );
-  const [draft, setDraft] = useState({ ...initial });
-  const [error, setError] = useState('');
-  const back = () => {
-    window.location.hash = '/contacts';
+export function useContactEditViewModel(contact?: ContactResponse) {
+  const customerQuery = useCustomersQuery();
+  const request = useApi(contactApi.save);
+  const initial: ContactResponse = {
+    name: '', company: '', email: '', phone: '', owner: '', customerId: '', ...contact,
   };
-
-  function save(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!draft.name.trim()) {
-      setError('請輸入聯絡人姓名。');
-      return;
+  const form = useEntityForm('contacts', initial, async draft => {
+    if (customerQuery.isLoading) throw new Error('客戶資料載入中，請稍後再試。');
+    if (customerQuery.error) throw new Error('無法載入客戶，請重試。');
+    if (!draft.customerId || !customerQuery.records.some(customer => customer.id === draft.customerId)) {
+      throw new Error('請選擇有效的所屬客戶。');
     }
-    if (!customers.some((customer) => customer.id === draft.customerId)) {
-      setError('請選擇有效的所屬客戶。');
-      return;
-    }
-    contactRepository[isNew ? 'create' : 'update']({
-      ...draft,
-      name: draft.name.trim(),
-      email: draft.email.trim(),
-      phone: draft.phone.trim(),
-      title: draft.title.trim(),
-    });
-    back();
-  }
-
-  return {
-    draft,
-    customers,
-    error,
-    save,
-    back,
-    isNew,
-    reset: () => {
-      setDraft({ ...initial });
-      setError('');
-    },
-    updateField: (field: keyof Contact, value: string) => {
-      setDraft((current) => ({ ...current, [field]: value }));
-      setError('');
-    },
-  };
+    cacheContact(await request.execute({ ...draft, email: draft.email?.trim(), phone: draft.phone?.trim() }));
+  });
+  return { ...form, customerQuery };
 }

@@ -23,27 +23,32 @@ export function EntityList({ vm, dataNotice = '示範資料 · 尚未連接後�
       </div>
     </EntityPageHeader>
     <div className="flex flex-wrap items-center gap-2 border-b py-3">
-      <Input className="w-52" aria-label="搜尋資料" placeholder={`搜尋${vm.title}…`} value={vm.query} onChange={e => vm.setQuery(e.target.value)} />
+      <Input className="w-52" aria-label="搜尋資料" placeholder={`搜尋${vm.serverPaginated ? '本頁' : ''}${vm.title}…`} value={vm.query} onChange={e => vm.setQuery(e.target.value)} />
       <FilterMenu fields={vm.fields} value={vm.filter} onChange={vm.applyFilter} hiddenFields={vm.hiddenFields} onToggleVisibility={vm.toggleFieldVisibility} fieldOrder={vm.fieldOrder} onMoveField={vm.moveField} />
       <AdvancedFilter fields={vm.fields} value={vm.advancedFilter} onChange={vm.applyAdvancedFilter} />
       <Button variant="ghost" aria-pressed={vm.sortAscending} onClick={vm.toggleSort}><ArrowDownAZ />{vm.sortAscending ? '名稱排序' : '排序'}</Button>
     </div>
+    {vm.serverPaginated && <p className="py-2 text-xs text-muted-foreground">搜尋、篩選與排序僅套用於本頁資料。</p>}
     {vm.filter && <div className="flex items-center gap-2 py-3 text-xs text-muted-foreground">
-      <span>{['名稱', ...vm.columns][vm.filter.field]} {filterOperators[vm.filter.operator]}{requiresFilterValue(vm.filter.operator) && `「${filterValueLabel(vm.fields[vm.filter.field], vm.filter.value)}」`}</span>
+      <span>{vm.fields[vm.filter.field].label} {filterOperators[vm.filter.operator]}{requiresFilterValue(vm.filter.operator) && `「${filterValueLabel(vm.fields[vm.filter.field], vm.filter.value)}」`}</span>
       <Button size="sm" variant="ghost" onClick={vm.clearFilter}>清除篩選</Button>
     </div>}
     <EntityTable>
       <caption className="sr-only">{vm.title}列表</caption>
       <thead><tr>
         <EntityTableHead selection><RowCheckbox aria-label="選取全部顯示項目" checked={vm.allSelected} indeterminate={vm.partiallySelected} disabled={!vm.rows.length} onChange={vm.toggleAll} /></EntityTableHead>
-        {visibleFields.map(field => <EntityTableHead key={field}>{field === 0 ? '名稱' : vm.columns[field - 1]}</EntityTableHead>)}
+        {visibleFields.map(field => <EntityTableHead key={field}>{vm.fields[field].label}</EntityTableHead>)}
       </tr></thead>
       <tbody>
         {vm.rows.map(row => <EntityTableRow key={row.id} data-selected={vm.selectedIds.includes(row.id)} className="cursor-pointer" onClick={() => vm.openDetails(row.id)}>
           <EntityTableCell selection onClick={event => event.stopPropagation()}>
             <RowCheckbox aria-label={`選取 ${row.name}`} checked={vm.selectedIds.includes(row.id)} onChange={() => vm.toggleSelection(row.id)} />
           </EntityTableCell>
-          {visibleFields.map(field => <EntityTableCell key={field}>{field === 0 ? <a className="font-medium hover:underline" href={`#/${entity}/${row.id}/edit`}>{row.name}</a> : row.cells[field - 1] || '—'}</EntityTableCell>)}
+          {visibleFields.map(field => {
+            const value = row.displayValues ? row.displayValues[field] : field === 0 ? row.name : row.cells[field - 1];
+            const isName = vm.fields[field].apiFieldName ? vm.fields[field].apiFieldName === 'name' : field === 0;
+            return <EntityTableCell key={field}>{isName ? <a className="font-medium hover:underline" href={`#/${entity}/${row.id}/edit`}>{value || '—'}</a> : value || '—'}</EntityTableCell>;
+          })}
         </EntityTableRow>)}
         {!vm.rows.length && <tr><EntityTableCell colSpan={visibleFields.length + 1} className="py-10 text-center text-muted-foreground">沒有符合條件的資料</EntityTableCell></tr>}
       </tbody>

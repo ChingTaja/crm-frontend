@@ -1,66 +1,68 @@
-import type { ApiRequestOptions } from '../../../lib/api-client'
-import { leadStatuses, type Lead } from './lead-model'
+import { unwrapResponse, deleteRecords } from '../../../lib/api-operations';
+import { collectPages } from '../../../lib/api-pagination';
+import type { Api, Lead, CreateLeadResponse } from '../../../api/Api';
+import { leadStatuses } from './lead-model';
 
-type Request = <T>(path: string, options?: ApiRequestOptions) => Promise<T>
-const statusKeys = ['pending', 'contacting', 'qualified', 'unqualified'] as const
+const statusKeys = ['pending', 'contacting', 'qualified', 'unqualified'] as const;
 
-function toLead(value: unknown): Lead {
-  if (!value || typeof value !== 'object') throw new Error('Lead API 回傳格式不正確。')
-  const record = value as Record<string, unknown>
-  const status = typeof record.status === 'object' && record.status
-    ? leadStatuses[statusKeys.indexOf((record.status as { key: typeof statusKeys[number] }).key)]
-    : record.status
-  if (typeof record.id !== 'string' || !record.id || !leadStatuses.includes(status as Lead['status'])) {
-    throw new Error('Lead API 回傳的 ID 或狀態不正確。')
+function toLead(record: Lead | CreateLeadResponse): Lead {
+  const rawStatus = record.status;
+  const status =
+    typeof rawStatus === 'object' && rawStatus
+      ? leadStatuses[statusKeys.findIndex((key) => key === rawStatus.key)]
+      : rawStatus;
+  if (!record.id || !leadStatuses.some((value) => value === status)) {
+    throw new Error('Lead API 回傳的 ID 或狀態不正確。');
   }
-  const text = (key: string) => typeof record[key] === 'string' ? record[key] as string : ''
   return {
-    id: record.id, name: text('name'), company: text('company'), email: text('email'),
-    phone: text('phone'), source: text('source'), owner: text('owner'), status: status as Lead['status'],
-    ...(record.qualification ? { qualification: record.qualification as Lead['qualification'] } : {}),
-  }
+    ...record,
+    status,
+    name: record.name ?? '',
+    company: record.company ?? '',
+    email: record.email ?? '',
+    phone: record.phone ?? '',
+    source: record.source ?? '',
+    owner: record.owner ?? '',
+  };
 }
 
-function fields(lead: Lead) {
-  return { name: lead.name, company: lead.company, email: lead.email, phone: lead.phone, source: lead.source, owner: lead.owner }
-}
-
-export function createLeadApi(request: Request) {
-  const path = (id: string) => `leads/${encodeURIComponent(id)}`
-  const remove = (signal: AbortSignal, id: string) => request<void>(path(id), { method: 'DELETE', signal })
+export function createLeadApi(client: Api<unknown>['api']) {
+  const remove = async (signal: AbortSignal, id: string) => {
+    await client.deleteLeads(encodeURIComponent(id), { signal });
+  };
+  const list = async (signal: AbortSignal, query: Parameters<Api<unknown>['api']['findAllLeads']>[0] = { page: 0, size: 20 }) => {
+    const data = await unwrapResponse(client.findAllLeads(query, { signal, format: 'json' }));
+    if (!data || !Array.isArray(data.content) || !Number.isInteger(data.totalPages) || !Number.isInteger(data.totalElements)) {
+      throw new Error('Lead 列表回傳格式不正確。');
+    }
+    return { ...data, content: data.content.map(toLead) };
+  };
   return {
-    async list(signal: AbortSignal) {
-      const data = await request<unknown>('leads', { signal })
-      if (!Array.isArray(data)) throw new Error('Lead 列表回傳格式不正確。')
-      return data.map(toLead)
-    },
+    list,
+    listAll: (signal: AbortSignal) => collectPages(signal, list),
     async get(signal: AbortSignal, id: string) {
-      return toLead(await request(path(id), { signal }))
+      return toLead(await unwrapResponse(client.findByIdLead(encodeURIComponent(id), { signal, format: 'json' })));
     },
     async save(signal: AbortSignal, lead: Lead) {
-      const body = lead.id
-        ? { ...fields(lead), id: lead.id, status: lead.status, qualification: lead.qualification }
-        : { ...fields(lead), status: { key: statusKeys[leadStatuses.indexOf(lead.status)], value: lead.status } }
-      return toLead(await request(lead.id ? path(lead.id) : 'leads', {
-        method: lead.id ? 'PUT' : 'POST', signal, body,
-      }))
+      const params = { signal, format: 'json' as const };
+      if (lead.id) {
+        return toLead(await unwrapResponse(client.updateLeads(encodeURIComponent(lead.id), lead, params)));
+      }
+      const { status, ...fields } = lead;
+      delete fields.id;
+      return toLead(
+        await unwrapResponse(
+          client.createLeads(
+            {
+              ...fields,
+              status: { key: statusKeys[leadStatuses.findIndex((value) => value === status)], value: status },
+            },
+            params
+          )
+        )
+      );
     },
     remove,
-    async removeMany(signal: AbortSignal, ids: string[]) {
-      const deleted: string[] = []
-      const failed: { id: string; message: string }[] = []
-      // Sequential deletion bounds load and reports partial success accurately.
-      for (const id of new Set(ids)) {
-        signal.throwIfAborted()
-        try {
-          await remove(signal, id)
-          deleted.push(id)
-        } catch (error) {
-          signal.throwIfAborted()
-          failed.push({ id, message: error instanceof Error ? error.message : '刪除失敗。' })
-        }
-      }
-      return { deleted, failed }
-    },
-  }
+    removeMany: (signal: AbortSignal, ids: string[]) => deleteRecords(signal, ids, remove),
+  };
 }

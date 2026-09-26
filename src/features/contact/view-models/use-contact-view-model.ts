@@ -1,29 +1,36 @@
-import { useSyncExternalStore } from 'react'
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query'
+import { useEntityFields } from '@/hooks/use-entity-fields'
+import { metadataRows } from '@/lib/entity-fields'
 import { useEntityList } from '@/hooks/use-entity-list'
-import type { FilterField } from '@/lib/filter-fields'
 import { contactRepository } from '../models/contact-model'
-import { customerRepository } from '@/features/customer/models/customer-model'
+import { useApi } from '@/hooks/use-api'
+import { contactApi } from '../models/contact-service'
+import { usePaginatedQuery } from '@/hooks/use-paginated-query'
 
 export function useContactViewModel() {
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot)
-  const contacts = useSyncExternalStore(contactRepository.subscribe, contactRepository.getSnapshot)
-  const fields: FilterField[] = [
-        { label: '名稱', type: 'text', hideable: false },
-        { label: '所屬客戶', type: 'lookup', options: customers.map((item) => ({ value: item.id, label: item.name })) },
-        { label: '職稱', type: 'text' },
-        { label: '電子郵件', type: 'email' },
-        { label: '電話', type: 'phone' },
-      ]
-  const rows = contacts.map((contact) => {
-        const customer = customers.find((item) => item.id === contact.customerId);
-        return {
-          id: contact.id,
-          name: contact.name,
-          owner: customer?.owner ?? '',
-          filterValues: [contact.name, contact.customerId, contact.title, contact.email, contact.phone],
-          cells: [customer?.name ?? '—', contact.title, contact.email, contact.phone],
-        };
-      })
-  const list = useEntityList('contacts', '聯絡人', fields, rows, contactRepository.removeMany)
-  return { ...list, records: contacts }
+  const customerQuery = useCustomersQuery()
+  const metadata = useEntityFields('contacts')
+  const query = usePaginatedQuery(contactApi.list)
+  const contacts = query.records
+  const deletion = useApi(contactApi.removeMany)
+  async function removeMany(ids: string[]) {
+    const result = await deletion.execute(ids)
+    contactRepository.removeMany(result.deleted)
+    await query.reload()
+    if (result.failed.length) {
+      throw new Error(`已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗：${result.failed[0].message}`)
+    }
+  }
+  const fields = metadata.fields.map(field => field.apiFieldName === 'customerId'
+    ? { ...field, type: 'lookup' as const, options: customerQuery.records.map(customer => ({ value: customer.id ?? '', label: customer.name ?? '' })) }
+    : field)
+  const rows = metadataRows(contacts, fields)
+  const list = useEntityList('contacts', '聯絡人', fields, rows, removeMany, true, query.pagination)
+  return { ...list, records: contacts, request: {
+    ...query,
+    data: metadata.data && customerQuery.data ? query.data : undefined,
+    error: metadata.error ?? query.error ?? customerQuery.error,
+    isLoading: metadata.isLoading || query.isLoading || customerQuery.isLoading,
+    reload: () => { customerQuery.reload(); void Promise.all([metadata.reload(), query.reload()]).catch(() => {}) },
+  } }
 }

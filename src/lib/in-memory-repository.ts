@@ -1,4 +1,4 @@
-export function createRepository<T extends { id: string }>(
+export function createRepository<T extends { id?: string }>(
   initial: T[],
   validateSave?: (record: T, existing: T | undefined) => void
 ) {
@@ -18,7 +18,7 @@ export function createRepository<T extends { id: string }>(
     },
     removeMany(ids: string[]) {
       const selected = new Set(ids);
-      const next = records.filter((record) => !selected.has(record.id));
+      const next = records.filter((record) => (!record.id || !selected.has(record.id)));
       if (next.length === records.length) return;
       records = next;
       listeners.forEach((listener) => listener());

@@ -1,6 +1,7 @@
 import { filterOperators, type FilterOperator } from '@/features/filter/models/advanced-filter';
 
 export interface FilterField {
+  apiFieldName?: string;
   label: string;
   type: 'text' | 'option' | 'lookup' | 'date' | 'number' | 'email' | 'phone';
   hideable?: boolean;

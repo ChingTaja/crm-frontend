@@ -21,9 +21,6 @@ function DashboardView() {
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">從這裡開始，讓每一段客戶關係更進一步。</p>
         </div>
-        <Alert className="border-[#dce6d5] bg-[#eef3e9]">
-          <AlertDescription>目前為前端預覽模式，尚未驗證帳號或連接後端資料。</AlertDescription>
-        </Alert>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {[
             { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: '#/customers' },
@@ -63,10 +60,10 @@ function DashboardView() {
                     ? title === '權限管理'
                       ? '管理帳號與角色 →'
                       : title === '客戶管理'
-                      ? '查看客戶與聯絡人 →'
-                      : title === '商機追蹤'
-                        ? '查看 潛在客戶 與 商機 →'
-                        : '查看報價單、訂單與產品 →'
+                        ? '查看客戶與聯絡人 →'
+                        : title === '商機追蹤'
+                          ? '查看 潛在客戶 與 商機 →'
+                          : '查看報價單、訂單與產品 →'
                     : '功能準備中'}
                 </span>
               </CardContent>

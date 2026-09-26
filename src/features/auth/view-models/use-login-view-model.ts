@@ -41,7 +41,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
     submit,
     togglePassword: () => setShowPassword((current) => !current),
     requestAccount: () => setNotice('請聯絡貴公司的系統管理員，協助您開通 CRM 帳號。'),
-    requestPasswordReset: () => setNotice('請聯絡貴公司的系統管理員協助重設密碼。'),
+    requestPasswordReset: () => { window.location.hash = '/forgot-password'; },
   };
 }
 

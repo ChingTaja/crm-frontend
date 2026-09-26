@@ -1,15 +1,15 @@
+import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useSyncExternalStore } from 'react'
 import { useEntityList } from '@/hooks/use-entity-list'
 import type { FilterField } from '@/lib/filter-fields'
 import { uniqueOptions } from '@/lib/filter-fields'
 import { orderRepository, orderStatuses } from '../models/order-model'
-import { customerRepository } from '@/features/customer/models/customer-model'
 
 export function useOrderViewModel() {
   const orders = useSyncExternalStore(orderRepository.subscribe, orderRepository.getSnapshot)
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot)
+  const customers = useCustomersQuery().records
   const customerName = (id: string) => customers.find(item => item.id === id)?.name ?? '—'
-  const customerOptions = customers.map(item => ({ value: item.id, label: item.name }))
+  const customerOptions = customers.map(item => ({ value: item.id ?? '', label: item.name ?? '' }))
   const money = (n: number) => `NT$ ${n.toLocaleString('zh-TW')}`
   const fields: FilterField[] = [{ label: '名稱', type: 'text', hideable: false },
       { label: '所屬客戶', type: 'lookup', options: customerOptions }, { label: '品項數', type: 'number' },

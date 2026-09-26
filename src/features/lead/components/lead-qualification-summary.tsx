@@ -1,4 +1,4 @@
-import type { Lead } from '../models/lead-model'
+import type { Lead } from '../../../api/Api'
 
 export function LeadQualificationSummary({ lead, dirty }: { lead?: Lead; dirty: boolean }) {
   return <>

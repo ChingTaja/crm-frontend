@@ -16,7 +16,7 @@ export function OrderEditView({ record }: { record?: Order }) {
     <Card><CardHeader><CardTitle>訂單基本資料</CardTitle></CardHeader><CardContent className="grid gap-6 sm:grid-cols-2">
       <EntityField id="order-name" label="名稱 *"><Input id="order-name" required value={draft.name} onChange={e => update('name', e.target.value)} /></EntityField>
       <EntityField id="order-status" label="狀態"><select id="order-status" className="h-9 w-full rounded-lg border px-3 text-sm" value={draft.status} onChange={e => update('status', e.target.value as Order['status'])}>{orderStatuses.map(value => <option key={value}>{value}</option>)}</select></EntityField>
-      <EntityField id="order-customer" label="所屬客戶 *"><Lookup id="order-customer" label="所屬客戶" required value={draft.customerId} options={form.customers.map(c => ({ value: c.id, label: c.name }))} onValueChange={value => update('customerId', value)} /></EntityField>
+      <EntityField id="order-customer" label="所屬客戶 *"><Lookup id="order-customer" label="所屬客戶" required value={draft.customerId} options={form.customers.map(c => ({ value: c.id ?? '', label: c.name ?? '' }))} onValueChange={value => update('customerId', value)} /></EntityField>
       <EntityField id="order-opportunity" label="來源商機"><Lookup id="order-opportunity" label="來源商機" value={draft.opportunityId} options={[{ value: '', label: '無' }, ...form.opportunities.filter(o => o.customerId === draft.customerId).map(o => ({ value: o.id, label: o.name }))]} onValueChange={value => update('opportunityId', value)} /></EntityField>
     </CardContent></Card>
           <Card>

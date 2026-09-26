@@ -1,26 +1,32 @@
-import { useSyncExternalStore } from 'react'
+import { useEntityFields } from '@/hooks/use-entity-fields'
+import { metadataRows } from '@/lib/entity-fields'
 import { useEntityList } from '@/hooks/use-entity-list'
-import type { FilterField } from '@/lib/filter-fields'
 import { customerRepository } from '../models/customer-model'
-import { uniqueOptions } from '@/lib/filter-fields'
+import { useApi } from '@/hooks/use-api'
+import { customerApi } from '../models/customer-service'
+import { usePaginatedQuery } from '@/hooks/use-paginated-query'
 
 export function useCustomerViewModel() {
-  const customers = useSyncExternalStore(customerRepository.subscribe, customerRepository.getSnapshot)
-  const ownerOptions = uniqueOptions(customers.map(item => item.owner))
-  const fields: FilterField[] = [
-        { label: '名稱', type: 'text', hideable: false },
-        { label: '產業', type: 'option', options: uniqueOptions(customers.map((item) => item.industry)) },
-        { label: '帳戶所有者', type: 'lookup', options: ownerOptions },
-        { label: '建立日期', type: 'date' },
-        { label: '地址', type: 'text' },
-      ]
-  const rows = customers.map((customer) => ({
-        id: customer.id,
-        name: customer.name,
-        owner: customer.owner,
-        filterValues: [customer.name, customer.industry, customer.owner, customer.createdAt, customer.address],
-        cells: [customer.industry, customer.owner, customer.createdAt, customer.address],
-      }))
-  const list = useEntityList('customers', '客戶', fields, rows, customerRepository.removeMany)
-  return { ...list, records: customers }
+  const metadata = useEntityFields('customers')
+  const query = usePaginatedQuery(customerApi.list)
+  const customers = query.records
+  const deletion = useApi(customerApi.removeMany)
+  async function removeMany(ids: string[]) {
+    const result = await deletion.execute(ids)
+    customerRepository.removeMany(result.deleted)
+    await query.reload()
+    if (result.failed.length) {
+      throw new Error(`已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗：${result.failed[0].message}`)
+    }
+  }
+  const fields = metadata.fields
+  const rows = metadataRows(customers, fields)
+  const list = useEntityList('customers', '客戶', fields, rows, removeMany, true, query.pagination)
+  return { ...list, records: customers, request: {
+    ...query,
+    data: metadata.data ? query.data : undefined,
+    error: metadata.error ?? query.error,
+    isLoading: metadata.isLoading || query.isLoading,
+    reload: () => { void Promise.all([metadata.reload(), query.reload()]).catch(() => {}) },
+  } }
 }

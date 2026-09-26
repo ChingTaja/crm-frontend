@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
-export function useEntityForm<T extends { id: string; name: string }>(
+export function useEntityForm<T extends { id?: string; name?: string }>(
   entity: string,
   initialRecord: T,
   saveRecord: (draft: T) => void | Promise<unknown>
@@ -27,7 +27,7 @@ export function useEntityForm<T extends { id: string; name: string }>(
     setIsSaving(true);
     setError('');
     try {
-      if (!draft.name.trim()) throw new Error('請輸入名稱。');
+      if (!draft.name?.trim()) throw new Error('請輸入名稱。');
       await saveRecord({ ...draft, name: draft.name.trim() });
       if (mounted.current) window.location.hash = `/${entity}`;
     } catch (error) {

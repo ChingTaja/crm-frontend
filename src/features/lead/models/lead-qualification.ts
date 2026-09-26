@@ -24,37 +24,36 @@ export function qualifyLead(leadId: string, decision: QualificationDecision) {
       qualification: { decision: 'rejected', reason: decision.reason, note: decision.note.trim(), reviewedAt },
     });
   }
-  if (!lead.name.trim()) throw new Error('請先填寫並儲存 Lead 名稱。');
+  if (!lead.name?.trim()) throw new Error('請先填寫並儲存 Lead 名稱。');
   const previous = lead.qualification;
-  const date = reviewedAt.slice(0, 10);
   const customerId =
     previous?.customerId ??
     customerRepository.create({
-      name: lead.company.trim() || lead.name.trim(),
-      industry: '',
-      owner: lead.owner,
-      address: '',
-      createdAt: date,
+      name: (lead.company ?? '').trim() || lead.name.trim(),
+      owner: lead.owner ?? '',
+      company: lead.company,
+      email: lead.email,
+      phone: lead.phone,
     }).id;
   const contactId =
     previous?.contactId ??
     contactRepository.create({
       customerId,
       name: lead.name.trim(),
-      title: '',
-      email: lead.email,
-      phone: lead.phone,
-      createdAt: date,
+      company: lead.company,
+      owner: lead.owner,
+      email: lead.email ?? '',
+      phone: lead.phone ?? '',
     }).id;
   const opportunityId =
     previous?.opportunityId ??
     (decision.createOpportunity
       ? opportunityRepository.save({
           id: '',
-          name: `${lead.company.trim() || lead.name.trim()}－新商機`,
+          name: `${(lead.company ?? '').trim() || lead.name.trim()}－新商機`,
           customerId,
-          leadId: lead.id,
-          owner: lead.owner,
+          leadId,
+          owner: lead.owner ?? '',
           amount: 0,
           expectedCloseDate: '',
           stage: '需求確認',
