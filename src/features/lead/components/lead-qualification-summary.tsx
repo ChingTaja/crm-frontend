@@ -1,8 +1,9 @@
 import { AppLink } from '@/components/ui/app-link';
-import type { Lead } from '../../../api/Api'
+import type { Lead } from '../../../api/Api';
 
 export function LeadQualificationSummary({ lead, dirty }: { lead?: Lead; dirty: boolean }) {
-  return <>
+  return (
+    <>
       {lead && dirty && <p className="pt-3 text-xs text-muted-foreground">請先儲存修改，再進行資格審核。</p>}
       {lead?.qualification && (
         <div role="status" className="mt-4 space-y-2 rounded-lg border bg-muted/30 p-4 text-sm">
@@ -32,5 +33,6 @@ export function LeadQualificationSummary({ lead, dirty }: { lead?: Lead; dirty: 
           </div>
         </div>
       )}
-  </>
+    </>
+  );
 }

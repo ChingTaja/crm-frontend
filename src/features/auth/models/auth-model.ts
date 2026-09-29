@@ -1,16 +1,12 @@
-export interface LoginCredentials {
-  code: string;
-  password: string;
-}
+import type { LoginRequest } from '../../../api/Api';
+import { authApi } from './auth-service';
+
+export type LoginCredentials = Pick<LoginRequest, 'password'> & { code: LoginRequest['username'] };
 
 export interface AuthService {
-  signIn(credentials: LoginCredentials): Promise<void>;
+  signIn(credentials: LoginCredentials, signal: AbortSignal): Promise<unknown>;
 }
 
-// Temporary mock: resolves without verifying credentials or creating a session.
-// Replace this adapter with the real authentication API when it is available.
 export const authService: AuthService = {
-  async signIn() {
-    return Promise.resolve();
-  },
+  signIn: ({ code, password }, signal) => authApi.login(signal, { username: code, password }),
 };

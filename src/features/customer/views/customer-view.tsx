@@ -11,7 +11,8 @@ import { cacheCustomer } from '../models/customer-model';
 
 function CustomerListView() {
   const vm = useCustomerViewModel();
-  if (vm.request.error) return <EntityRequestError title="客戶" entity="customers" error={vm.request.error} retry={vm.request.reload} />;
+  if (vm.request.error)
+    return <EntityRequestError title="客戶" entity="customers" error={vm.request.error} retry={vm.request.reload} />;
   if (!vm.request.data || vm.request.isLoading)
     return (
       <p role="status" className="py-10 text-muted-foreground">
@@ -31,7 +32,9 @@ function CustomerDetailView({ id }: { id: string }) {
   }, [id, execute, cancel]);
   if (error)
     return (
-      <EntityRequestError title="客戶" entity="customers"
+      <EntityRequestError
+        title="客戶"
+        entity="customers"
         error={error}
         retry={() => {
           void execute(id)

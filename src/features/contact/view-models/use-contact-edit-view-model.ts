@@ -9,12 +9,18 @@ export function useContactEditViewModel(contact?: ContactResponse) {
   const customerQuery = useCustomersQuery();
   const request = useApi(contactApi.save);
   const initial: ContactResponse = {
-    name: '', company: '', email: '', phone: '', owner: '', customerId: '', ...contact,
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    owner: '',
+    customerId: '',
+    ...contact,
   };
-  const form = useEntityForm('contacts', initial, async draft => {
+  const form = useEntityForm('contacts', initial, async (draft) => {
     if (customerQuery.isLoading) throw new Error('客戶資料載入中，請稍後再試。');
     if (customerQuery.error) throw new Error('無法載入客戶，請重試。');
-    if (!draft.customerId || !customerQuery.records.some(customer => customer.id === draft.customerId)) {
+    if (!draft.customerId || !customerQuery.records.some((customer) => customer.id === draft.customerId)) {
       throw new Error('請選擇有效的所屬客戶。');
     }
     cacheContact(await request.execute({ ...draft, email: draft.email?.trim(), phone: draft.phone?.trim() }));

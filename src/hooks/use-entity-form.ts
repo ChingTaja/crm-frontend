@@ -1,3 +1,4 @@
+import { navigate } from '@/lib/router';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 export function useEntityForm<T extends { id?: string; name?: string }>(
@@ -18,7 +19,7 @@ export function useEntityForm<T extends { id?: string; name?: string }>(
     };
   }, []);
   const back = () => {
-    if (!busy.current) window.location.hash = `/${entity}`;
+    if (!busy.current) navigate(`/${entity}`);
   };
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,7 +30,7 @@ export function useEntityForm<T extends { id?: string; name?: string }>(
     try {
       if (!draft.name?.trim()) throw new Error('請輸入名稱。');
       await saveRecord({ ...draft, name: draft.name.trim() });
-      if (mounted.current) window.location.hash = `/${entity}`;
+      if (mounted.current) navigate(`/${entity}`);
     } catch (error) {
       if (mounted.current) setError(error instanceof Error ? error.message : '儲存失敗。');
     } finally {

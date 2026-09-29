@@ -39,6 +39,7 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
               disabled={isSubmitting}
               type="text"
               autoComplete="username"
+              maxLength={100}
               placeholder="請輸入帳號"
               required
             />
@@ -64,6 +65,7 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
               disabled={isSubmitting}
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
+              maxLength={72}
               placeholder="請輸入您的密碼"
               required
             >

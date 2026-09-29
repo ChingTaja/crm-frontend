@@ -10,9 +10,17 @@ export function createCustomerApi(client: Api<unknown>['api']) {
   const remove = async (signal: AbortSignal, id: string) => {
     await client.deleteCustomers(encodeURIComponent(id), { signal });
   };
-  const list = async (signal: AbortSignal, query: Parameters<Api<unknown>['api']['findAllCustomers']>[0] = { page: 0, size: 20 }) => {
+  const list = async (
+    signal: AbortSignal,
+    query: Parameters<Api<unknown>['api']['findAllCustomers']>[0] = { page: 0, size: 20 }
+  ) => {
     const data = await unwrapResponse(client.findAllCustomers(query, { signal, format: 'json' }));
-    if (!data || !Array.isArray(data.content) || !Number.isInteger(data.totalPages) || !Number.isInteger(data.totalElements)) {
+    if (
+      !data ||
+      !Array.isArray(data.content) ||
+      !Number.isInteger(data.totalPages) ||
+      !Number.isInteger(data.totalElements)
+    ) {
       throw new Error('Customer 列表回傳格式不正確。');
     }
     return { ...data, content: data.content.map(customer) };
@@ -21,14 +29,18 @@ export function createCustomerApi(client: Api<unknown>['api']) {
     list,
     listAll: (signal: AbortSignal) => collectPages(signal, list),
     async get(signal: AbortSignal, id: string) {
-      return customer(await unwrapResponse(client.findByIdCustomer(encodeURIComponent(id), { signal, format: 'json' })));
+      return customer(
+        await unwrapResponse(client.findByIdCustomer(encodeURIComponent(id), { signal, format: 'json' }))
+      );
     },
     async save(signal: AbortSignal, record: CustomerResponse) {
       const { id, ...fields } = record;
       const params = { signal, format: 'json' as const };
-      return customer(await unwrapResponse(id
-        ? client.updateCustomers(encodeURIComponent(id), fields, params)
-        : client.createCustomers(fields, params)));
+      return customer(
+        await unwrapResponse(
+          id ? client.updateCustomers(encodeURIComponent(id), fields, params) : client.createCustomers(fields, params)
+        )
+      );
     },
     remove,
     removeMany: (signal: AbortSignal, ids: string[]) => deleteRecords(signal, ids, remove),

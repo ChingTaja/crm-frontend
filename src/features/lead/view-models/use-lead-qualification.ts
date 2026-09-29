@@ -1,29 +1,42 @@
-import { navigate } from '@/lib/router';
-import { useRef, useState } from 'react';
-import { qualifyLead, type QualificationDecision } from '../models/lead-qualification';
+import { qualificationRequest } from '../models/lead-qualification-request';
+import { useRef, useState, type FormEvent } from 'react';
+import type { Lead, QualifyLeadRequest } from '../../../api/Api';
+import { useApi } from '@/hooks/use-api';
+import { leadApi } from '../models/lead-service';
+import { cacheLead, isLeadReviewed } from '../models/lead-model';
 
-export function useLeadQualification(leadId: string, onComplete: () => void) {
-  const [decision, setDecision] = useState<'approved' | 'rejected'>('approved');
+export function useLeadQualification(lead: Lead, onComplete: () => void, onBusy: (busy: boolean) => void) {
+  const [decision, setDecision] = useState<QualifyLeadRequest['decision']>('approved');
   const [createOpportunity, setCreateOpportunity] = useState(false);
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
-  const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const request = useApi(leadApi.qualify);
   const busy = useRef(false);
-  function submit() {
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (busy.current) return;
+    if (isLeadReviewed(lead.status)) {
+      setValidationError('此 Lead 已完成資格審核。');
+      return;
+    }
+    if (!lead.id) {
+      setValidationError('請先儲存 Lead，再進行審核。');
+      return;
+    }
     busy.current = true;
+    onBusy(true);
+    setValidationError('');
+    const payload = qualificationRequest(decision, createOpportunity, reason, note);
     try {
-      const request: QualificationDecision =
-        decision === 'approved' ? { decision, createOpportunity } : { decision, reason, note };
-      const result = qualifyLead(leadId, request);
+      const saved = await request.execute(lead.id, payload);
+      cacheLead(saved);
       onComplete();
-      if (decision === 'approved' && createOpportunity && result.qualification?.opportunityId) {
-        navigate(`/opportunities/${result.qualification.opportunityId}/edit`);
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : '審核失敗，請重試。');
+    } catch {
+      /* useApi exposes the server error and retains the form values. */
     } finally {
       busy.current = false;
+      onBusy(false);
     }
   }
   return {
@@ -35,7 +48,8 @@ export function useLeadQualification(leadId: string, onComplete: () => void) {
     setReason,
     note,
     setNote,
-    error,
     submit,
+    isSubmitting: request.isLoading,
+    error: validationError || request.error?.message,
   };
 }

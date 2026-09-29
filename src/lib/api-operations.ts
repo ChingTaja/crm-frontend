@@ -9,7 +9,7 @@ export async function unwrapResponse<T>(pending: Promise<HttpResponse<T>>) {
 export async function deleteRecords(
   signal: AbortSignal,
   ids: string[],
-  remove: (signal: AbortSignal, id: string) => Promise<void>,
+  remove: (signal: AbortSignal, id: string) => Promise<void>
 ) {
   const deleted: string[] = [];
   const failed: { id: string; message: string }[] = [];

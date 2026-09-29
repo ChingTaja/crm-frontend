@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { useLeadViewModel } from '../view-models/use-lead-view-model';
 import { LeadEditView } from './lead-edit-view';
 import { EntityWorkspace } from '@/components/layout/entity-workspace';
@@ -7,11 +7,12 @@ import { EntityList } from '@/components/entity/entity-list';
 import { EntityRequestError } from '@/components/entity/entity-request-error';
 import { useApi } from '@/hooks/use-api';
 import { leadApi } from '../models/lead-service';
-import { cacheLead } from '../models/lead-model';
+import { cacheLead, leadRepository } from '../models/lead-model';
 
 function LeadListView() {
   const vm = useLeadViewModel();
-  if (vm.request.error) return <EntityRequestError title="潛在客戶" entity="leads" error={vm.request.error} retry={vm.request.reload} />;
+  if (vm.request.error)
+    return <EntityRequestError title="潛在客戶" entity="leads" error={vm.request.error} retry={vm.request.reload} />;
   if (!vm.request.data || vm.request.isLoading)
     return (
       <p role="status" className="py-10 text-muted-foreground">
@@ -23,6 +24,7 @@ function LeadListView() {
 
 function LeadDetailView({ id }: { id: string }) {
   const { data, error, execute, cancel } = useApi(leadApi.get);
+  const records = useSyncExternalStore(leadRepository.subscribe, leadRepository.getSnapshot);
   useEffect(() => {
     void execute(id)
       .then(cacheLead)
@@ -31,7 +33,9 @@ function LeadDetailView({ id }: { id: string }) {
   }, [id, execute, cancel]);
   if (error)
     return (
-      <EntityRequestError title="潛在客戶" entity="leads"
+      <EntityRequestError
+        title="潛在客戶"
+        entity="leads"
         error={error}
         retry={() => {
           void execute(id)
@@ -46,7 +50,8 @@ function LeadDetailView({ id }: { id: string }) {
         載入潛在客戶資料…
       </p>
     );
-  return <LeadEditView record={data} />;
+  const record = records.find((item) => item.id === id) ?? data;
+  return <LeadEditView key={JSON.stringify(record)} record={record} />;
 }
 
 export function LeadView({ recordId }: { recordId?: string }) {

@@ -1,6 +1,10 @@
 import type { Lead } from '../../../api/Api';
 import { createRepository } from '../../../lib/in-memory-repository';
-export const leadStatuses = ['待聯繫', '聯繫中', '已合格', '不合格'] as const;
+export const leadStatuses = ['待聯繫', '已合格', '不合格'] as const;
+export function isLeadReviewed(status: Lead['status']) {
+  return status === 'qualified' || status === 'unqualified' || status === '已合格' || status === '不合格';
+}
+
 // Cache only records confirmed by the API; never fall back to demo leads.
 export const leadRepository = createRepository<Lead>([]);
 

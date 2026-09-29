@@ -1,8 +1,20 @@
+import { useRef } from 'react';
+import { useApi } from '@/hooks/use-api';
+import { authApi } from '@/features/auth/models/auth-service';
 import { AppLink } from '@/components/ui/app-link';
 import { Layers, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => void }) {
+  const request = useApi(authApi.logout);
+  const busy = useRef(false);
+  async function logout() {
+    if (busy.current) return;
+    busy.current = true;
+    try { await request.execute(); onReturnToLogin(); }
+    catch { /* The server error remains visible; do not pretend logout succeeded. */ }
+    finally { busy.current = false; }
+  }
   return (
     <header className="border-b bg-white px-4 py-4 sm:px-10">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
@@ -16,10 +28,11 @@ export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => vo
           </span>
           Connect <span className="text-xs font-normal tracking-widest text-muted-foreground">CRM</span>
         </AppLink>
-        <Button variant="outline" onClick={onReturnToLogin}>
-          <LogOut /> 返回登入頁
+        <Button variant="outline" disabled={request.isLoading} onClick={logout}>
+          <LogOut /> {request.isLoading ? '登出中…' : '登出'}
         </Button>
       </div>
+      {request.error && <p role="alert" className="mx-auto mt-3 max-w-6xl text-sm text-destructive">登出失敗：{request.error.message}</p>}
     </header>
   );
 }

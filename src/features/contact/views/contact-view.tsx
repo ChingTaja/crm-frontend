@@ -11,7 +11,8 @@ import { cacheContact } from '../models/contact-model';
 
 function ContactListView() {
   const vm = useContactViewModel();
-  if (vm.request.error) return <EntityRequestError title="聯絡人" entity="contacts" error={vm.request.error} retry={vm.request.reload} />;
+  if (vm.request.error)
+    return <EntityRequestError title="聯絡人" entity="contacts" error={vm.request.error} retry={vm.request.reload} />;
   if (!vm.request.data || vm.request.isLoading)
     return (
       <p role="status" className="py-10 text-muted-foreground">
@@ -31,7 +32,9 @@ function ContactDetailView({ id }: { id: string }) {
   }, [id, execute, cancel]);
   if (error)
     return (
-      <EntityRequestError title="聯絡人" entity="contacts"
+      <EntityRequestError
+        title="聯絡人"
+        entity="contacts"
         error={error}
         retry={() => {
           void execute(id)

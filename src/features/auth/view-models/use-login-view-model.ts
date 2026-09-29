@@ -1,5 +1,5 @@
 import { navigate } from '@/lib/router';
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { authService, type AuthService, type LoginCredentials } from '../models/auth-model';
 
 export function useLoginViewModel(service: AuthService = authService, onSignedIn?: () => void) {
@@ -8,6 +8,8 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
   const [notice, setNotice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitting = useRef(false);
+  const active = useRef<AbortController | null>(null);
+  useEffect(() => () => active.current?.abort(), []);
 
   function updateField(field: keyof LoginCredentials, value: string) {
     setCredentials((current) => ({ ...current, [field]: value }));
@@ -18,15 +20,19 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
     event.preventDefault();
     if (submitting.current) return;
     submitting.current = true;
+    const controller = new AbortController();
+    active.current = controller;
     setIsSubmitting(true);
     setNotice('');
     try {
       if (!credentials.code.trim()) throw new Error('請輸入帳號。');
-      await service.signIn({ ...credentials, code: credentials.code.trim() });
+      await service.signIn({ ...credentials, code: credentials.code.trim() }, controller.signal);
+      if (controller.signal.aborted) return;
       setNotice('登入成功。');
       setCredentials({ code: '', password: '' });
       onSignedIn?.();
     } catch (error) {
+      if (controller.signal.aborted) return;
       setNotice(error instanceof Error ? error.message : '暫時無法登入，請稍後再試。');
     } finally {
       submitting.current = false;
@@ -43,7 +49,9 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
     submit,
     togglePassword: () => setShowPassword((current) => !current),
     requestAccount: () => setNotice('請聯絡貴公司的系統管理員，協助您開通 CRM 帳號。'),
-    requestPasswordReset: () => { navigate('/forgot-password'); },
+    requestPasswordReset: () => {
+      navigate('/forgot-password');
+    },
   };
 }
 

@@ -1,8 +1,8 @@
+import { useOpportunitiesQuery } from '@/features/opportunity/view-models/use-opportunities-query';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useState, useSyncExternalStore } from 'react';
 import { useRecordSelection } from '@/hooks/use-record-selection';
 import { productRepository } from '../../product/models/product-model';
-import { opportunityRepository } from '../../opportunity/models/opportunity-model';
 import { useFieldOrder } from '@/hooks/use-field-order';
 import type { FieldFilter } from '@/components/ui/filter-menu';
 import { uniqueOptions, type FilterField } from '@/lib/filter-fields';
@@ -15,7 +15,7 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const quotes = useSyncExternalStore(quoteRepository.subscribe, quoteRepository.getSnapshot);
   const customers = useCustomersQuery().records;
   const products = useSyncExternalStore(productRepository.subscribe, productRepository.getSnapshot);
-  const opportunities = useSyncExternalStore(opportunityRepository.subscribe, opportunityRepository.getSnapshot);
+  const opportunities = useOpportunitiesQuery().records;
   const [query, updateQuery] = useState('');
   const [filter, setFilter] = useState<FieldFilter | null>(null);
   const [advancedFilter, setAdvanced] = useState(createFilterGroup);
@@ -72,7 +72,11 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const pageRows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const selection = useRecordSelection(rows.map(row => ({ id: row.id, name: row.cells[0] })), pageRows, ids => quoteRepository.removeMany(ids, actor));
+  const selection = useRecordSelection(
+    rows.map((row) => ({ id: row.id, name: row.cells[0] })),
+    pageRows,
+    (ids) => quoteRepository.removeMany(ids, actor)
+  );
   return {
     ...selection,
     quotes,
