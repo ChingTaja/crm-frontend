@@ -1,9 +1,14 @@
+import type { FilterField } from '../../../lib/filter-fields';
 export const filterOperators = {
   contains: '包含',
   notContains: '不包含',
   equals: '等於',
   notEquals: '不等於',
   startsWith: '開頭是',
+  greaterThan: '大於／晚於',
+  greaterThanOrEqual: '大於等於／不早於',
+  lessThan: '小於／早於',
+  lessThanOrEqual: '小於等於／不晚於',
   empty: '為空',
   notEmpty: '不為空',
 } as const;
@@ -48,23 +53,32 @@ export function isFilterComplete(node: FilterNode): boolean {
 }
 
 /** An empty root is an unfiltered list; UI prevents applying empty nested groups. */
-export function matchesAdvancedFilter(values: string[], node: FilterNode): boolean {
+export function matchesAdvancedFilter(values: string[], node: FilterNode, fields?: FilterField[]): boolean {
   if (node.kind === 'group') {
     if (!node.children.length) return true;
-    const check = (child: FilterNode) => matchesAdvancedFilter(values, child);
+    const check = (child: FilterNode) => matchesAdvancedFilter(values, child, fields);
     return node.match === 'all' ? node.children.every(check) : node.children.some(check);
   }
   const actual = (values[node.field] ?? '').trim().toLocaleLowerCase();
   const expected = node.value.trim().toLocaleLowerCase();
+  const type = fields?.[node.field]?.type;
+  const numeric = type === 'number';
+  const left = numeric ? Number(actual) : actual;
+  const right = numeric ? Number(expected) : expected;
+  const comparable = actual !== '' && actual !== '—' && expected !== '' && (!numeric || (Number.isFinite(left) && Number.isFinite(right)));
   switch (node.operator) {
+    case 'greaterThan': return comparable && left > right;
+    case 'greaterThanOrEqual': return comparable && left >= right;
+    case 'lessThan': return comparable && left < right;
+    case 'lessThanOrEqual': return comparable && left <= right;
     case 'contains':
       return actual.includes(expected);
     case 'notContains':
       return !actual.includes(expected);
     case 'equals':
-      return actual === expected;
+      return numeric ? comparable && left === right : actual === expected;
     case 'notEquals':
-      return actual !== expected;
+      return numeric ? !comparable || left !== right : actual !== expected;
     case 'startsWith':
       return actual.startsWith(expected);
     case 'empty':

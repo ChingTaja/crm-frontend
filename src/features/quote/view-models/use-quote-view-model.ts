@@ -65,8 +65,8 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const filtered = rows.filter(
     (row) =>
       row.cells.join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
-      (!filter || matchesAdvancedFilter(row.values, { ...filter, id: 'single', kind: 'rule' })) &&
-      matchesAdvancedFilter(row.values, advancedFilter)
+      (!filter || matchesAdvancedFilter(row.values, { ...filter, id: 'single', kind: 'rule' }, fields)) &&
+      matchesAdvancedFilter(row.values, advancedFilter, fields)
   );
   if (sort) filtered.sort((a, b) => a.cells[0].localeCompare(b.cells[0], 'zh-Hant'));
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));

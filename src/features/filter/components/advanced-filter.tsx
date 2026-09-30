@@ -1,3 +1,4 @@
+import { validateFilter } from '../models/filter-query';
 import { useState, type ComponentProps } from 'react';
 import { Filter, Plus, CopyPlus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,6 @@ import {
   createFilterRule,
   countFilterRules,
   filterOperators,
-  isFilterComplete,
   requiresFilterValue,
   type FilterGroup,
   type FilterNode,
@@ -133,7 +133,7 @@ function RuleGroupEditor({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => onChange({ ...group, children: [...group.children, createFilterRule()] })}
+          onClick={() => onChange({ ...group, children: [...group.children, { ...createFilterRule(), operator: fields[0] ? defaultFieldOperator(fields[0]) : 'contains' }] })}
         >
           <Plus />
           新增篩選規則
@@ -146,7 +146,7 @@ function RuleGroupEditor({
             onClick={() =>
               onChange({
                 ...group,
-                children: [...group.children, { ...createFilterGroup(), children: [createFilterRule()] }],
+                children: [...group.children, { ...createFilterGroup(), children: [{ ...createFilterRule(), operator: fields[0] ? defaultFieldOperator(fields[0]) : 'contains' }] }],
               })
             }
           >
@@ -172,7 +172,7 @@ export function AdvancedFilter({ fields, value, onChange }: AdvancedFilterProps)
   const count = countFilterRules(value);
   function changeOpen(next: boolean) {
     if (next) {
-      setDraft(count ? structuredClone(value) : { ...createFilterGroup(), children: [createFilterRule()] });
+      setDraft(count ? structuredClone(value) : { ...createFilterGroup(), children: [{ ...createFilterRule(), operator: fields[0] ? defaultFieldOperator(fields[0]) : 'contains' }] });
       setError('');
     }
     setOpen(next);
@@ -192,7 +192,7 @@ export function AdvancedFilter({ fields, value, onChange }: AdvancedFilterProps)
           <Filter />
           {count ? `${count} 條進階規則` : '進階篩選'}
         </PopoverTrigger>
-        <PopoverContent className="w-[850px]">
+        <PopoverContent className="w-[min(850px,calc(100vw-2rem))]">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <PopoverTitle className="text-sm font-semibold">進階篩選</PopoverTitle>
             <PopoverClose render={<Button variant="ghost" size="icon-sm" aria-label="關閉進階篩選" />}>
@@ -228,8 +228,9 @@ export function AdvancedFilter({ fields, value, onChange }: AdvancedFilterProps)
               </Button>
               <Button
                 onClick={() => {
-                  if (draft.children.length > 0 && !isFilterComplete(draft)) {
-                    setError('請填寫所有規則的值，並移除空白群組。');
+                  const failure = validateFilter(draft, fields);
+                  if (failure) {
+                    setError(failure);
                     return;
                   }
                   onChange(draft);

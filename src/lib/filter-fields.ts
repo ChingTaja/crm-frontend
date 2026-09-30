@@ -1,4 +1,4 @@
-import { filterOperators, type FilterOperator } from '@/features/filter/models/advanced-filter';
+import { type FilterOperator } from '../features/filter/models/advanced-filter';
 
 export interface FilterField {
   apiFieldName?: string;
@@ -9,10 +9,21 @@ export interface FilterField {
 }
 
 export function getFieldOperators(field: FilterField): FilterOperator[] {
-  if (field.type === 'option' || field.type === 'lookup' || field.type === 'date' || field.type === 'number') {
+  if (field.type === 'date' || field.type === 'number')
+    return [
+      'equals',
+      'notEquals',
+      'greaterThan',
+      'greaterThanOrEqual',
+      'lessThan',
+      'lessThanOrEqual',
+      'empty',
+      'notEmpty',
+    ];
+  if (field.type === 'option' || field.type === 'lookup') {
     return ['equals', 'notEquals', 'empty', 'notEmpty'];
   }
-  return Object.keys(filterOperators) as FilterOperator[];
+  return ['contains', 'notContains', 'equals', 'notEquals', 'startsWith', 'empty', 'notEmpty'];
 }
 export function defaultFieldOperator(field: FilterField): FilterOperator {
   return getFieldOperators(field)[0];

@@ -1,3 +1,4 @@
+import { createSearchRequest } from '@/features/filter/models/filter-query';
 import { navigate } from '@/lib/router';
 import { useState } from 'react';
 import { useRecordSelection } from './use-record-selection';
@@ -47,8 +48,8 @@ export function useEntityList(
   const pageSizeOptions = [5, 10, 15, 20];
   const filtered = records.filter(
     (row) =>
-      matchesAdvancedFilter(row.filterValues, advancedFilter) &&
-      (!filter || matchesAdvancedFilter(row.filterValues, { ...filter, kind: 'rule', id: 'simple' })) &&
+      matchesAdvancedFilter(row.filterValues, advancedFilter, fields) &&
+      (!filter || matchesAdvancedFilter(row.filterValues, { ...filter, kind: 'rule', id: 'simple' }, fields)) &&
       [row.name, ...row.cells].join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
   );
   if (sortAscending) filtered.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant', { numeric: numericSort }));
@@ -66,6 +67,8 @@ export function useEntityList(
     total: pagination?.total ?? records.length,
     filteredTotal: pagination?.total ?? filtered.length,
     serverPaginated: !!pagination,
+    buildSearchRequest: () => createSearchRequest(fields, advancedFilter, filter, page - 1, pageSize, query,
+      sortAscending ? [{ field: fields.find(field => field.apiFieldName === 'name' || field.apiFieldName === 'username')?.apiFieldName ?? 'name', direction: 'asc' }] : []),
     advancedFilter,
     applyAdvancedFilter: (value: FilterGroup) => {
       selection.clearSelection();
