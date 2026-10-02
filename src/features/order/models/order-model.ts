@@ -1,6 +1,6 @@
 import { createRepository } from '../../../lib/in-memory-repository';
 import type { QuoteLine, QuoteTotals } from '../../quote/models/quote-types';
-export const orderStatuses = ['草稿', '已確認', '已完成', '已取消'] as const;
+export const orderStatuses = ['已確認', '處理中', '已完成', '已取消'] as const;
 export interface Order {
   id: string;
   name: string;
@@ -20,6 +20,12 @@ export interface Order {
     notes: string;
   };
 }
+export const orderTransitions: Record<Order['status'], readonly Order['status'][]> = {
+  已確認: ['處理中', '已取消'],
+  處理中: ['已完成', '已取消'],
+  已完成: [],
+  已取消: [],
+};
 export const orderRepository = createRepository<Order>(
   Array.from({ length: 15 }, (_, i) => ({
     id: `order-${i + 1}`,
@@ -27,9 +33,18 @@ export const orderRepository = createRepository<Order>(
     customerId: `c${i + 1}`,
     opportunityId: `opportunity-${i + 1}`,
     items: [{ productId: `product-${i + 1}`, quantity: 1, unitPrice: (i + 1) * 1000 }],
-    status: '草稿',
+    status: '已確認',
   })),
-  (_record, existing) => {
-    if (existing?.quoteSource) throw new Error('報價轉入的訂單保留原始價格快照，不可直接覆寫。');
+  (record, existing) => {
+    if (!existing) {
+      if (!record.quoteSource || record.status !== '已確認') throw new Error('訂單必須由報價單轉入，初始狀態為已確認。');
+      return;
+    }
+    const { status: previousStatus, ...previous } = existing;
+    const { status, ...next } = record;
+    if (JSON.stringify(previous) !== JSON.stringify(next)) throw new Error('訂單快照不可修改，僅可更新狀態。');
+    if (status !== previousStatus && !orderTransitions[previousStatus].includes(status)) {
+      throw new Error('不允許此訂單狀態變更，請重新確認目前狀態。');
+    }
   }
 );

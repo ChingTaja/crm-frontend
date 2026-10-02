@@ -1,25 +1,40 @@
-import { useSyncExternalStore } from 'react';
+import { useEntityFields } from '@/hooks/use-entity-fields';
+import { metadataRows } from '@/lib/entity-fields';
 import { useEntityList } from '@/hooks/use-entity-list';
-import type { FilterField } from '@/lib/filter-fields';
-import { uniqueOptions } from '@/lib/filter-fields';
-import { productRepository, productStatuses } from '../models/product-model';
+import { productRepository } from '../models/product-model';
+import { useApi } from '@/hooks/use-api';
+import { productApi } from '../models/product-service';
+import { usePaginatedQuery } from '@/hooks/use-paginated-query';
 
 export function useProductViewModel() {
-  const products = useSyncExternalStore(productRepository.subscribe, productRepository.getSnapshot);
-  const money = (n: number) => `NT$ ${n.toLocaleString('zh-TW')}`;
-  const fields: FilterField[] = [
-    { label: '名稱', type: 'text', hideable: false },
-    { label: '產品編號', type: 'text' },
-    { label: '單價', type: 'number' },
-    { label: '狀態', type: 'option', options: uniqueOptions([...productStatuses]) },
-  ];
-  const rows = products.map((item) => ({
-    id: item.id,
-    name: item.name,
-    status: item.status,
-    filterValues: [item.name, item.sku, String(item.price), item.status],
-    cells: [item.sku, money(item.price), item.status],
-  }));
-  const list = useEntityList('products', '產品', fields, rows, productRepository.removeMany, true);
-  return { ...list, records: products };
+  const metadata = useEntityFields('products');
+  const query = usePaginatedQuery(productApi.list);
+  const products = query.records;
+  const deletion = useApi(productApi.removeMany);
+  async function removeMany(ids: string[]) {
+    const result = await deletion.execute(ids);
+    productRepository.removeMany(result.deleted);
+    await query.reload();
+    if (result.failed.length) {
+      throw new Error(
+        `已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗：${result.failed[0].message}`
+      );
+    }
+  }
+  const fields = metadata.fields;
+  const rows = metadataRows(products, fields);
+  const list = useEntityList('products', '產品', fields, rows, removeMany, true, query.pagination);
+  return {
+    ...list,
+    records: products,
+    request: {
+      ...query,
+      data: metadata.data ? query.data : undefined,
+      error: metadata.error ?? query.error,
+      isLoading: metadata.isLoading || query.isLoading,
+      reload: () => {
+        void Promise.all([metadata.reload(), query.reload()]).catch(() => {});
+      },
+    },
+  };
 }

@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { EntityPageHeader, EntityPageTitle } from '@/components/layout/entity-page-header';
 import type { Order } from '@/features/order/models/order-model';
-import { QuoteTotals } from '../../quote/components/quote-lines';
+import { useOrderEditViewModel } from '../view-models/use-order-edit-view-model';
 import { money, quoteLineTotals } from '../../quote/models/quote-policy';
 
 export function QuoteOrderView({ order }: { order: Order }) {
-  const source = order.quoteSource!;
+  const source = order.quoteSource;
+  const vm = useOrderEditViewModel(order);
   return (
     <>
       <EntityPageHeader>
@@ -23,12 +24,25 @@ export function QuoteOrderView({ order }: { order: Order }) {
         </Button>
       </EntityPageHeader>
       <div className="mx-auto max-w-5xl space-y-5 py-6">
+        <div className="rounded-lg border p-4 space-y-3">
+          <p>訂單狀態：<strong>{order.status}</strong></p>
+          <p className="text-sm text-muted-foreground">已確認 → 處理中 → 已完成；完成前可取消，已完成或已取消的訂單不可再變更。</p>
+          <div className="flex gap-2">
+            {vm.nextStatuses.map(status => (
+              <Button key={status} variant={status === '已取消' ? 'destructive' : 'default'} onClick={() => vm.changeStatus(status)}>
+                {status === '處理中' ? '開始處理' : status === '已完成' ? '完成訂單' : '取消訂單'}
+              </Button>
+            ))}
+          </div>
+          {vm.error && <p role="alert" className="text-sm text-destructive">{vm.error}</p>}
+        </div>
+        {source ? <>
         <p className="rounded-lg bg-muted p-3 text-sm">
           來源：
           <AppLink className="underline" href={`/quotes/${source.quoteId}/edit`}>
             {source.number} v{source.version}
           </AppLink>
-          。此訂單保留已接受報價的明細、折扣、稅金及條款快照，目前為唯讀。
+          。此訂單保留已接受報價的明細、折扣、稅金及條款快照，不可修改。
         </p>
         <Card>
           <CardHeader>
@@ -63,7 +77,12 @@ export function QuoteOrderView({ order }: { order: Order }) {
                 </tbody>
               </table>
             </div>
-            <QuoteTotals lines={source.lines} />
+            <dl className="ml-auto grid max-w-sm grid-cols-2 gap-3 text-sm">
+              <dt>未稅原價</dt><dd className="text-right">{money(source.totals.subtotalCents)}</dd>
+              <dt>折扣</dt><dd className="text-right">− {money(source.totals.discountCents)}</dd>
+              <dt>稅金</dt><dd className="text-right">{money(source.totals.taxCents)}</dd>
+              <dt className="font-semibold">含稅總金額</dt><dd className="text-right font-semibold">{money(source.totals.totalCents)}</dd>
+            </dl>
           </CardContent>
         </Card>
         <Card>
@@ -84,6 +103,13 @@ export function QuoteOrderView({ order }: { order: Order }) {
             ))}
           </CardContent>
         </Card>
+        </> : <Card>
+          <CardHeader><CardTitle>訂單明細（唯讀）</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">此筆舊訂單沒有報價來源，以下顯示原訂單保存的明細。</p>
+            {order.items.map((line, index) => <p key={index}>產品 {line.productId} · 數量 {line.quantity} · 單價 {money(line.unitPrice * 100)}</p>)}
+          </CardContent>
+        </Card>}
       </div>
     </>
   );

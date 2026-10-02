@@ -301,7 +301,7 @@ export function createQuoteRepository(
           quantity: line.quantity,
           unitPrice: line.unitPrice,
         })),
-        status: '草稿',
+        status: '已確認',
         quoteSource: {
           quoteId: quote.id,
           number: quote.number,

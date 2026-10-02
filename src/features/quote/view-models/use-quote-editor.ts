@@ -2,7 +2,7 @@ import { navigate } from '@/lib/router';
 import { useState } from 'react';
 import { quoteRepository } from '../models/quote-repository';
 import { canEditQuote, canManageQuote, quoteToday } from '../models/quote-policy';
-import type { Product } from '../../product/models/product-model';
+import type { ProductResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
 
 export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?: QuoteVersion) {
@@ -47,7 +47,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
     }));
     setError('');
   }
-  function selectProduct(id: string, product: Product) {
+  function selectProduct(id: string, product: Required<ProductResponse>) {
     setDraft((current) => ({
       ...current,
       lines: current.lines.map((line) =>

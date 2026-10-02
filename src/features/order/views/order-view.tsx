@@ -12,9 +12,14 @@ export function OrderView({ recordId }: { recordId?: string }) {
   return (
     <EntityWorkspace sidebar={<SalesSidebar entity="orders" />}>
       {recordId ? (
-        record?.quoteSource ? (
+        recordId === 'new' ? (
+          <p className="py-10">
+            訂單由已接受的報價單轉換建立。
+            <AppLink className="ml-2 underline" href="/quotes">前往報價單</AppLink>
+          </p>
+        ) : record?.quoteSource ? (
           <QuoteOrderView order={record} />
-        ) : recordId === 'new' || record ? (
+        ) : record ? (
           <OrderEditView key={recordId} record={record} />
         ) : (
           <p className="py-10">
@@ -25,7 +30,13 @@ export function OrderView({ recordId }: { recordId?: string }) {
           </p>
         )
       ) : (
-        <EntityList vm={vm} />
+        <>
+          <p className="py-3 text-sm text-muted-foreground">
+            訂單由已接受的報價單轉換建立。
+            <AppLink className="ml-2 underline" href="/quotes">前往報價單</AppLink>
+          </p>
+          <EntityList vm={vm} allowCreate={false} />
+        </>
       )}
     </EntityWorkspace>
   );

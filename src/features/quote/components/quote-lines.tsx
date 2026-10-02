@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lookup } from '@/components/ui/lookup';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Product } from '../../product/models/product-model';
+import type { ProductResponse } from '../../../api/Api';
 import type { QuoteEditor } from '../view-models/use-quote-editor';
 import { money, quoteLineTotals, quoteTotals } from '../models/quote-policy';
 import type { QuoteLine } from '../models/quote-types';
@@ -23,7 +23,7 @@ export function QuoteTotals({ lines }: { lines: QuoteLine[] }) {
     </dl>
   );
 }
-export function QuoteLines({ editor, products }: { editor: QuoteEditor; products: Product[] }) {
+export function QuoteLines({ editor, products }: { editor: QuoteEditor; products: Required<ProductResponse>[] }) {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">

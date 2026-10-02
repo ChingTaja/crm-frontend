@@ -1,8 +1,8 @@
+import { useProductsQuery } from '@/features/product/view-models/use-products-query';
 import { useOpportunitiesQuery } from '@/features/opportunity/view-models/use-opportunities-query';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useState, useSyncExternalStore } from 'react';
 import { useRecordSelection } from '@/hooks/use-record-selection';
-import { productRepository } from '../../product/models/product-model';
 import { useFieldOrder } from '@/hooks/use-field-order';
 import type { FieldFilter } from '@/components/ui/filter-menu';
 import { uniqueOptions, type FilterField } from '@/lib/filter-fields';
@@ -14,7 +14,8 @@ import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
 export function useQuoteViewModel(actor: QuoteActor | null = null) {
   const quotes = useSyncExternalStore(quoteRepository.subscribe, quoteRepository.getSnapshot);
   const customers = useCustomersQuery().records;
-  const products = useSyncExternalStore(productRepository.subscribe, productRepository.getSnapshot);
+  const productQuery = useProductsQuery();
+  const products = productQuery.records;
   const opportunities = useOpportunitiesQuery().records;
   const [query, updateQuery] = useState('');
   const [filter, setFilter] = useState<FieldFilter | null>(null);
@@ -82,6 +83,7 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
     quotes,
     customers,
     products,
+    productQuery,
     opportunities,
     actor,
     canManage: canManageQuote(actor),

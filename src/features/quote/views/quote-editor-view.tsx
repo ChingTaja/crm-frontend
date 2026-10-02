@@ -101,13 +101,17 @@ export function QuoteEditorView({
             原因／備註：{version.decisionReason || '未填寫'}
           </p>
         )}
-        <p className="rounded-lg bg-muted/40 p-3 text-xs leading-relaxed">
-          任何明細折扣超過 {quotePolicy.discountThresholdPercent}%，或含稅總額超過{' '}
-          {money(quotePolicy.totalThreshold * 100)}，須主管批准後才能送出。有效期限以台北時間當日 23:59:59 為止。
+        <aside aria-label="主管審批注意事項" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+          <p className="font-semibold">主管審批注意事項</p>
+          <p className="mt-1 leading-relaxed">
+            任一明細折扣<strong>超過 {quotePolicy.discountThresholdPercent}%</strong>，或含稅總金額
+            <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>，需要主管審批，批准後才能送出報價單。
+          </p>
           {(requiresQuoteApproval(d) || version?.requiresReapproval) && (
-            <strong className="ml-1 text-amber-700">此版本需要審批。</strong>
+            <p className="mt-2 font-semibold">此版本需要主管審批。</p>
           )}
-        </p>
+        </aside>
+        <p className="text-xs text-muted-foreground">有效期限以台北時間當日 23:59:59 為止。</p>
         <form
           id="quote-form"
           className="space-y-5"
@@ -171,6 +175,13 @@ export function QuoteEditorView({
               </fieldset>
             </CardContent>
           </Card>
+          {vm.productQuery.isLoading && <p role="status">正在載入產品…</p>}
+          {vm.productQuery.error && (
+            <div role="alert" className="text-sm text-destructive">
+              無法載入產品：{vm.productQuery.error.message}
+              <Button type="button" variant="outline" onClick={vm.productQuery.reload}>重試</Button>
+            </div>
+          )}
           <QuoteLines editor={editor} products={vm.products} />
           <Card>
             <CardHeader>
