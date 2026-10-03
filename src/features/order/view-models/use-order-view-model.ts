@@ -1,49 +1,23 @@
+import { useCallback, useState } from 'react';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
-import { useSyncExternalStore } from 'react';
-import { useEntityList } from '@/hooks/use-entity-list';
-import type { FilterField } from '@/lib/filter-fields';
-import { uniqueOptions } from '@/lib/filter-fields';
-import { orderRepository, orderStatuses } from '../models/order-model';
+import { useEntityFields } from '@/hooks/use-entity-fields';
+import { usePaginatedQuery } from '@/hooks/use-paginated-query';
+import { metadataRows } from '@/lib/entity-fields';
+import type { OrderQuery } from '../models/order-api';
+import { orderApi } from '../models/order-service';
 
 export function useOrderViewModel() {
-  const orders = useSyncExternalStore(orderRepository.subscribe, orderRepository.getSnapshot);
-  const customers = useCustomersQuery().records;
-  const customerName = (id: string) => customers.find((item) => item.id === id)?.name ?? '—';
-  const customerOptions = customers.map((item) => ({ value: item.id ?? '', label: item.name ?? '' }));
-  const money = (n: number) => `NT$ ${n.toLocaleString('zh-TW')}`;
-  const fields: FilterField[] = [
-    { label: '名稱', type: 'text', hideable: false },
-    { label: '所屬客戶', type: 'lookup', options: customerOptions },
-    { label: '品項數', type: 'number' },
-    { label: '總金額', type: 'number' },
-    { label: '狀態', type: 'option', options: uniqueOptions([...orderStatuses]) },
-  ];
-  const rows = orders.map((item) => ({
-    id: item.id,
-    name: item.name,
-    status: item.status,
-    filterValues: [
-      item.name,
-      item.customerId,
-      String(item.items.length),
-      String(
-        item.quoteSource
-          ? item.quoteSource.totals.totalCents / 100
-          : item.items.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0)
-      ),
-      item.status,
-    ],
-    cells: [
-      customerName(item.customerId),
-      String(item.items.length),
-      money(
-        item.quoteSource
-          ? item.quoteSource.totals.totalCents / 100
-          : item.items.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0)
-      ),
-      item.status,
-    ],
-  }));
-  const list = useEntityList('orders', '訂單', fields, rows, orderRepository.removeMany, true);
-  return { ...list, records: orders };
+  const [filters, setFilters] = useState<OrderQuery>({ sort: 'createdAt', direction: 'desc' });
+  const customers = useCustomersQuery();
+  const metadata = useEntityFields('orders');
+  const request = useCallback(
+    (signal: AbortSignal, page: { page: number; size: number }) => orderApi.list(signal, { ...filters, ...page }),
+    [filters]
+  );
+  const query = usePaginatedQuery(request);
+  function search(next: OrderQuery) {
+    query.pagination.setPage(1);
+    setFilters({ ...next, keyword: next.keyword?.trim() || undefined });
+  }
+  return { query, metadata, customers, filters, search, rows: metadataRows(query.records, metadata.fields) };
 }

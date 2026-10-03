@@ -39,6 +39,176 @@ export interface UserResponse {
   role?: RoleResponse;
 }
 
+export interface QuoteLineRequest {
+  id?: string;
+  /** @minLength 1 */
+  productId: string;
+  /** @exclusiveMin 0 */
+  quantity: number;
+  /** @min 0 */
+  unitPrice: number;
+  /**
+   * @min 0
+   * @max 100
+   */
+  discountPercent: number;
+  /**
+   * @min 0
+   * @max 100
+   */
+  taxPercent: number;
+}
+
+export interface UpdateQuoteRequest {
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  name: string;
+  /** @minLength 1 */
+  customerId: string;
+  opportunityId?: string;
+  /** @format date */
+  validUntil: string;
+  /**
+   * @maxItems 200
+   * @minItems 0
+   */
+  lines: QuoteLineRequest[];
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  paymentTerms?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  deliveryTerms?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  warranty?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  notes?: string;
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+}
+
+export interface QuoteAuditResponse {
+  id?: string;
+  /** @format date-time */
+  at?: string;
+  actorId?: string;
+  actorName?: string;
+  action?: string;
+  /** @format int32 */
+  version?: number;
+  detail?: string;
+}
+
+export interface QuoteLineResponse {
+  id?: string;
+  productId?: string;
+  productName?: string;
+  sku?: string;
+  catalogPrice?: number;
+  quantity?: number;
+  unitPrice?: number;
+  discountPercent?: number;
+  taxPercent?: number;
+}
+
+export interface QuoteResponse {
+  id?: string;
+  number?: string;
+  versions?: QuoteVersionResponse[];
+  audit?: QuoteAuditResponse[];
+  orderId?: string;
+}
+
+export interface QuoteTotals {
+  /** @format int64 */
+  subtotalCents?: number;
+  /** @format int64 */
+  discountCents?: number;
+  /** @format int64 */
+  taxCents?: number;
+  /** @format int64 */
+  totalCents?: number;
+}
+
+export interface QuoteVersionResponse {
+  id?: string;
+  /** @format int32 */
+  version?: number;
+  /** @format int64 */
+  revision?: number;
+  name?: string;
+  customerId?: string;
+  opportunityId?: string;
+  /** @format date */
+  validUntil?: string;
+  lines?: QuoteLineResponse[];
+  totals?: QuoteTotals;
+  currency?: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  warranty?: string;
+  notes?: string;
+  status?: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Expired';
+  approval?: 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
+  requiresReapproval?: boolean;
+  /** @format date-time */
+  createdAt?: string;
+  createdBy?: string;
+  /** @format date-time */
+  sentAt?: string;
+  approvalBy?: string;
+  /** @format date-time */
+  approvalAt?: string;
+  approvalReason?: string;
+  /** @format date-time */
+  decisionAt?: string;
+  decisionBy?: string;
+  decisionReason?: string;
+}
+
+export interface UpdateProductRequest {
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  sku: string;
+  /** @min 0 */
+  price: number;
+  /**
+   * @minLength 1
+   * @pattern 啟用|停用
+   */
+  status: string;
+}
+
+export interface ProductResponse {
+  id?: string;
+  name?: string;
+  sku?: string;
+  price?: number;
+  status?: string;
+}
+
 export interface UpdateOpportunityRequest {
   /**
    * @minLength 0
@@ -147,6 +317,35 @@ export interface ContactResponse {
   customerId?: string;
 }
 
+export interface EntitySearchRequest {
+  /** @format int32 */
+  page?: number;
+  /** @format int32 */
+  size?: number;
+  keyword?: string;
+  filter?: any;
+  sort?: SortRule[];
+}
+
+export interface SortRule {
+  field?: string;
+  direction?: string;
+}
+
+export interface PageResponseObject {
+  content?: any[];
+  /** @format int32 */
+  page?: number;
+  /** @format int32 */
+  size?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+}
+
 export interface RegisterRequest {
   /**
    * @minLength 0
@@ -165,6 +364,113 @@ export interface RegisterRequest {
    */
   password: string;
   roleId?: string;
+}
+
+export interface CreateQuoteRequest {
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  name: string;
+  /** @minLength 1 */
+  customerId: string;
+  opportunityId?: string;
+  /** @format date */
+  validUntil: string;
+  /**
+   * @maxItems 200
+   * @minItems 0
+   */
+  lines: QuoteLineRequest[];
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  paymentTerms?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  deliveryTerms?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  warranty?: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  notes?: string;
+}
+
+export interface QuoteActionRequest {
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+}
+
+export interface ReviewQuoteRequest {
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+  /**
+   * @minLength 1
+   * @pattern approved|rejected
+   */
+  decision: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  reason?: string;
+}
+
+export interface DecideQuoteRequest {
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+  /**
+   * @minLength 1
+   * @pattern accepted|rejected
+   */
+  decision: string;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  reason?: string;
+}
+
+export interface ConvertQuoteToOrderResponse {
+  orderId?: string;
+  quote?: QuoteResponse;
+}
+
+export interface CreateProductRequest {
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  sku: string;
+  /** @min 0 */
+  price: number;
+  /**
+   * @minLength 1
+   * @pattern 啟用|停用
+   */
+  status: string;
 }
 
 export interface CreateOpportunityRequest {
@@ -314,8 +620,176 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
+export interface UpdateOrderStatusRequest {
+  status: 'Confirmed' | 'Processing' | 'Completed' | 'Cancelled';
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+  /**
+   * @minLength 0
+   * @maxLength 10000
+   */
+  reason?: string;
+}
+
+export interface OrderAudit {
+  id?: string;
+  /** @format date-time */
+  at?: string;
+  actorId?: string;
+  actorName?: string;
+  action?: string;
+  fromStatus?: string;
+  toStatus?: string;
+  reason?: string;
+}
+
+export interface OrderLineResponse {
+  id?: string;
+  productId?: string;
+  productName?: string;
+  sku?: string;
+  catalogPrice?: number;
+  quantity?: number;
+  unitPrice?: number;
+  discountPercent?: number;
+  taxPercent?: number;
+  /** @format int64 */
+  subtotalCents?: number;
+  /** @format int64 */
+  discountCents?: number;
+  /** @format int64 */
+  taxCents?: number;
+  /** @format int64 */
+  totalCents?: number;
+}
+
+export interface OrderResponse {
+  id?: string;
+  number?: string;
+  name?: string;
+  status?: string;
+  /** @format int64 */
+  revision?: number;
+  customerId?: string;
+  customerName?: string;
+  opportunityId?: string;
+  quoteSource?: QuoteSource;
+  currency?: string;
+  lines?: OrderLineResponse[];
+  totals?: QuoteTotals;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  warranty?: string;
+  notes?: string;
+  /** @format date-time */
+  createdAt?: string;
+  createdBy?: string;
+  /** @format date-time */
+  updatedAt?: string;
+  /** @format date-time */
+  processingAt?: string;
+  /** @format date-time */
+  completedAt?: string;
+  /** @format date-time */
+  cancelledAt?: string;
+  cancellationReason?: string;
+  audit?: OrderAudit[];
+  allowedTransitions?: ('Confirmed' | 'Processing' | 'Completed' | 'Cancelled')[];
+}
+
+export interface QuoteSource {
+  quoteId?: string;
+  quoteNumber?: string;
+  quoteVersionId?: string;
+  /** @format int32 */
+  quoteVersion?: number;
+}
+
 export interface PageResponseUserResponse {
   content?: UserResponse[];
+  /** @format int32 */
+  page?: number;
+  /** @format int32 */
+  size?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+}
+
+export interface PageResponseQuoteSummaryResponse {
+  content?: QuoteSummaryResponse[];
+  /** @format int32 */
+  page?: number;
+  /** @format int32 */
+  size?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+}
+
+export interface QuoteSummaryResponse {
+  id?: string;
+  number?: string;
+  name?: string;
+  customerId?: string;
+  customerName?: string;
+  opportunityId?: string;
+  /** @format int32 */
+  version?: number;
+  status?: 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Expired';
+  approval?: 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
+  /** @format date */
+  validUntil?: string;
+  /** @format int64 */
+  totalCents?: number;
+  currency?: string;
+  orderId?: string;
+}
+
+export interface PageResponseProductResponse {
+  content?: ProductResponse[];
+  /** @format int32 */
+  page?: number;
+  /** @format int32 */
+  size?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+}
+
+export interface OrderSummaryResponse {
+  id?: string;
+  number?: string;
+  name?: string;
+  customerId?: string;
+  customerName?: string;
+  quoteNumber?: string;
+  /** @format int32 */
+  quoteVersion?: number;
+  /** @format int32 */
+  lineCount?: number;
+  /** @format int64 */
+  totalCents?: number;
+  currency?: string;
+  status?: string;
+  /** @format date-time */
+  createdAt?: string;
+}
+
+export interface PageResponseOrderSummaryResponse {
+  content?: OrderSummaryResponse[];
   /** @format int32 */
   page?: number;
   /** @format int32 */
@@ -668,6 +1142,66 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags quote-controller
+     * @name UpdateQuotes
+     * @request PUT:/api/quotes/{id}/versions/{versionId}
+     */
+    updateQuotes: (id: string, versionId: string, data: UpdateQuoteRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}`,
+        method: 'PUT',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags product-controller
+     * @name FindByIdProduct
+     * @request GET:/api/products/{id}
+     */
+    findByIdProduct: (id: string, params: RequestParams = {}) =>
+      this.request<ProductResponse, any>({
+        path: `/api/products/${id}`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags product-controller
+     * @name UpdateProducts
+     * @request PUT:/api/products/{id}
+     */
+    updateProducts: (id: string, data: UpdateProductRequest, params: RequestParams = {}) =>
+      this.request<ProductResponse, any>({
+        path: `/api/products/${id}`,
+        method: 'PUT',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags product-controller
+     * @name DeleteProducts
+     * @request DELETE:/api/products/{id}
+     */
+    deleteProducts: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/products/${id}`,
+        method: 'DELETE',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags opportunity-controller
      * @name FindByIdOpportunity
      * @request GET:/api/opportunities/{id}
@@ -844,6 +1378,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags entity-search-controller
+     * @name SearchEntities
+     * @request POST:/api/{entity}/search
+     */
+    searchEntities: (entity: string, data: EntitySearchRequest, params: RequestParams = {}) =>
+      this.request<PageResponseObject, any>({
+        path: `/api/${entity}/search`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags user-controller
      * @name FindAllUsers
      * @request GET:/api/users
@@ -880,6 +1430,192 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     createUsers: (data: RegisterRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name FindAllQuotes
+     * @request GET:/api/quotes
+     */
+    findAllQuotes: (
+      query?: {
+        /**
+         * @format int32
+         * @default 0
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 20
+         */
+        size?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseQuoteSummaryResponse, any>({
+        path: `/api/quotes`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name CreateQuotes
+     * @request POST:/api/quotes
+     */
+    createQuotes: (data: CreateQuoteRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name Send
+     * @request POST:/api/quotes/{id}/versions/{versionId}/send
+     */
+    send: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/send`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name Review
+     * @request POST:/api/quotes/{id}/versions/{versionId}/review
+     */
+    review: (id: string, versionId: string, data: ReviewQuoteRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/review`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name RequestApproval
+     * @request POST:/api/quotes/{id}/versions/{versionId}/request-approval
+     */
+    requestApproval: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/request-approval`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name NewVersion
+     * @request POST:/api/quotes/{id}/versions/{versionId}/new-version
+     */
+    newVersion: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/new-version`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name Decision
+     * @request POST:/api/quotes/{id}/versions/{versionId}/decision
+     */
+    decision: (id: string, versionId: string, data: DecideQuoteRequest, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/decision`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name ConvertToOrder
+     * @request POST:/api/quotes/{id}/versions/{versionId}/convert-to-order
+     */
+    convertToOrder: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
+      this.request<ConvertQuoteToOrderResponse, any>({
+        path: `/api/quotes/${id}/versions/${versionId}/convert-to-order`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags product-controller
+     * @name FindAllProducts
+     * @request GET:/api/products
+     */
+    findAllProducts: (
+      query?: {
+        /**
+         * @format int32
+         * @default 0
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 20
+         */
+        size?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseProductResponse, any>({
+        path: `/api/products`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags product-controller
+     * @name CreateProducts
+     * @request POST:/api/products
+     */
+    createProducts: (data: CreateProductRequest, params: RequestParams = {}) =>
+      this.request<ProductResponse, any>({
+        path: `/api/products`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -1157,6 +1893,104 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: 'POST',
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
+     * @name UpdateOrderStatus
+     * @request PATCH:/api/orders/{id}/status
+     */
+    updateOrderStatus: (id: string, data: UpdateOrderStatusRequest, params: RequestParams = {}) =>
+      this.request<OrderResponse, any>({
+        path: `/api/orders/${id}/status`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name FindByIdQuote
+     * @request GET:/api/quotes/{id}
+     */
+    findByIdQuote: (id: string, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quotes/${id}`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags quote-controller
+     * @name DeleteQuotes
+     * @request DELETE:/api/quotes/{id}
+     */
+    deleteQuotes: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/quotes/${id}`,
+        method: 'DELETE',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
+     * @name FindAllOrders
+     * @request GET:/api/orders
+     */
+    findAllOrders: (
+      query?: {
+        /**
+         * @format int32
+         * @default 0
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 20
+         */
+        size?: number;
+        keyword?: string;
+        status?: 'Confirmed' | 'Processing' | 'Completed' | 'Cancelled';
+        customerId?: string;
+        /** @format date */
+        createdFrom?: string;
+        /** @format date */
+        createdTo?: string;
+        /** @default "createdAt" */
+        sort?: string;
+        /** @default "desc" */
+        direction?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseOrderSummaryResponse, any>({
+        path: `/api/orders`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
+     * @name FindByIdOrder
+     * @request GET:/api/orders/{id}
+     */
+    findByIdOrder: (id: string, params: RequestParams = {}) =>
+      this.request<OrderResponse, any>({
+        path: `/api/orders/${id}`,
+        method: 'GET',
         ...params,
       }),
 

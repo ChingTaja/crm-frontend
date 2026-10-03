@@ -29,7 +29,7 @@ export function QuoteActions({
             模擬送出報價
           </Button>
         )}
-        {vm.canConvert && <Button onClick={vm.convertToOrder}>{quote.orderId ? '查看訂單' : '轉換訂單'}</Button>}
+        {vm.canConvert && <Button disabled={vm.isConverting || dirty} onClick={vm.convertToOrder}>{quote.orderId ? '查看訂單' : '轉換訂單'}</Button>}
         {vm.canReview && (
           <>
             <Button onClick={() => vm.open('approve')}>批准</Button>

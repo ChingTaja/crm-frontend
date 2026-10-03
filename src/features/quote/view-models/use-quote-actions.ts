@@ -1,11 +1,14 @@
 import { navigate } from '@/lib/router';
 import { useState } from 'react';
+import { useApi } from '@/hooks/use-api';
+import { orderApi } from '@/features/order/models/order-service';
 import { quoteRepository } from '../models/quote-repository';
 import { canManageQuote } from '../models/quote-policy';
 import type { Quote, QuoteActor, QuoteVersion } from '../models/quote-types';
 
 type Decision = 'approve' | 'deny' | 'accept' | 'reject';
 export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: QuoteActor | null) {
+  const conversion = useApi(orderApi.convert);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
@@ -38,7 +41,8 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
   return {
     decision,
     reason,
-    error,
+    error: error || conversion.error?.message,
+    isConverting: conversion.isLoading,
     setReason,
     confirm,
     decisionLabel: decision ? labels[decision] : '',
@@ -62,10 +66,18 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
       act(() => {
         quoteRepository.send(quote.id, version.id, actor);
       }),
-    convertToOrder: () =>
-      act(() => {
-        const id = quoteRepository.convertToOrder(quote.id, version.id, actor);
-        navigate(`/orders/${id}/edit`);
-      }),
+    convertToOrder: async () => {
+      if (conversion.isLoading) return;
+      if (quote.orderId) {
+        navigate(`/orders/${quote.orderId}/edit`);
+        return;
+      }
+      try {
+        const result = await conversion.execute(quote.id, version.id, { expectedRevision: version.revision });
+        navigate(`/orders/${result.orderId}/edit`);
+      } catch {
+        /* useApi exposes ProblemDetail messages. */
+      }
+    },
   };
 }
