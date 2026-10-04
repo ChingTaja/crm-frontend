@@ -1,3 +1,4 @@
+import { AccessProvider, AccessPage } from './features/access/views/access-provider';
 import { UserView } from './features/access/views/user-view';
 import { getLocation, navigate, resolveRoute, subscribeToLocation } from './lib/router';
 import { ForgotPasswordView } from './features/auth/views/forgot-password-view';
@@ -80,22 +81,26 @@ function App() {
   if (route === 'reset-password') return <ResetPasswordView key={location} search={query} />;
 
   return (
-    <div className="flex min-h-svh flex-col">
-      <WorkspaceHeader
-        onReturnToLogin={() => {
-          navigate('/login', { replace: true });
-        }}
-      />
-      {entity === 'users' ? (
-        <UserView />
-      ) : entity === 'roles' ? (
-        <AccessView key={entity} section={entity} />
-      ) : EntityView ? (
-        <EntityView key={entity} recordId={recordId} />
-      ) : (
-        <DashboardView />
-      )}
-    </div>
+    <AccessProvider route={location}>
+      <div className="flex min-h-svh flex-col">
+        <WorkspaceHeader
+          onReturnToLogin={() => {
+            navigate('/login', { replace: true });
+          }}
+        />
+        <AccessPage entity={entity} isNew={recordId === 'new'}>
+          {entity === 'users' ? (
+            <UserView />
+          ) : entity === 'roles' ? (
+            <AccessView key={entity} section={entity} />
+          ) : EntityView ? (
+            <EntityView key={entity} recordId={recordId} />
+          ) : (
+            <DashboardView />
+          )}
+        </AccessPage>
+      </div>
+    </AccessProvider>
   );
 }
 

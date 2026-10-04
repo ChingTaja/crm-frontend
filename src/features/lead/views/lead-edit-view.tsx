@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { EntityEditLayout } from '@/components/entity/entity-edit-layout';
 import { EntityField } from '@/components/entity/entity-field';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { LeadQualificationDialog } from '../components/lead-qualification-dialog
 import { LeadQualificationSummary } from '../components/lead-qualification-summary';
 
 export function LeadEditView({ record }: { record?: Lead }) {
+  const { can } = useAccess();
   const form = useLeadEditViewModel(record);
   const { draft, update } = form;
   return (
@@ -17,7 +19,7 @@ export function LeadEditView({ record }: { record?: Lead }) {
       formId="lead-form"
       form={form}
       dataNotice={null}
-      headingAction={record && <LeadQualificationDialog lead={record} disabled={form.isDirty || form.isSaving} />}
+      headingAction={record && can('leads.qualify') && <LeadQualificationDialog lead={record} disabled={form.isDirty || form.isSaving} />}
       notice={
         <>
           <LeadQualificationSummary lead={record} dirty={form.isDirty} />

@@ -61,11 +61,11 @@ export function QuoteView({ recordId }: { recordId?: string }) {
                   title="報價單"
                   records={vm.selectedRecords}
                   onDelete={vm.deleteSelected}
-                  disabled={!vm.canManage}
+                  disabled={!vm.canDelete}
                   includesVersions
                 />
                 <Button
-                  disabled={!vm.canManage}
+                  disabled={!vm.canCreate}
                   onClick={() => {
                     vm.clearSelection();
                     navigate('/quotes/new');

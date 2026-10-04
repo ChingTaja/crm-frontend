@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
 import { useState } from 'react';
 import { quoteRepository } from '../models/quote-repository';
@@ -6,6 +7,7 @@ import type { ProductResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
 
 export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?: QuoteVersion) {
+  const { can } = useAccess();
   const [initial] = useState<QuoteContent>(() =>
     version
       ? structuredClone({
@@ -34,7 +36,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState('');
   const latest = !quote || quote.versions[quote.versions.length - 1]?.id === version?.id;
-  const editable = canManageQuote(actor) && latest && (!version || canEditQuote(version));
+  const editable = can(quote ? 'quotes.update' : 'quotes.create') && canManageQuote(actor) && latest && (!version || canEditQuote(version));
   const dirty = JSON.stringify(initial) !== JSON.stringify(draft);
   function update<K extends keyof QuoteContent>(field: K, value: QuoteContent[K]) {
     setDraft((current) => ({ ...current, [field]: value, ...(field === 'customerId' ? { opportunityId: '' } : {}) }));

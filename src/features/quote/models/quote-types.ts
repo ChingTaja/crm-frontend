@@ -1,6 +1,6 @@
 export type QuoteStatus = 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Expired';
 export type ApprovalStatus = 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
-export type QuoteActor = { id: string; name: string; role: 'sales' | 'manager' | 'customer' | 'system' };
+export type QuoteActor = { id: string; name: string; role: 'sales' | 'manager' | 'customer' | 'system'; permissionCodes?: string[] };
 export interface QuoteLine {
   id: string;
   productId: string;

@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { useState } from 'react';
 import { quoteRepository } from '../models/quote-repository';
 import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
@@ -25,11 +26,12 @@ export function useQuoteVersions(
   dirty: boolean,
   onSelect: (id: string) => void
 ) {
+  const { can } = useAccess();
   const [error, setError] = useState('');
   const latest = quote.versions[quote.versions.length - 1];
   const blockedReason = dirty
     ? '請先儲存或重置修改，再切換或建立版本。'
-    : !canManageQuote(actor)
+    : (!can('quotes.update') || !canManageQuote(actor))
       ? '目前身分無法建立新版本。'
       : quote.orderId || latest.status === 'Accepted'
         ? '報價已接受或已轉成訂單，無法建立新版本。'

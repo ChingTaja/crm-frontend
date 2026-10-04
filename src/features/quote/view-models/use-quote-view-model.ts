@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { useProductsQuery } from '@/features/product/view-models/use-products-query';
 import { useOpportunitiesQuery } from '@/features/opportunity/view-models/use-opportunities-query';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
@@ -11,7 +12,9 @@ import { quoteRepository } from '../models/quote-repository';
 import type { QuoteActor } from '../models/quote-types';
 import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
 
-export function useQuoteViewModel(actor: QuoteActor | null = null) {
+export function useQuoteViewModel() {
+  const { me, can } = useAccess();
+  const actor: QuoteActor | null = me ? { id: me.id, name: me.username, role: 'system', permissionCodes: me.permissionCodes } : null;
   const quotes = useSyncExternalStore(quoteRepository.subscribe, quoteRepository.getSnapshot);
   const customers = useCustomersQuery().records;
   const productQuery = useProductsQuery();
@@ -86,6 +89,8 @@ export function useQuoteViewModel(actor: QuoteActor | null = null) {
     productQuery,
     opportunities,
     actor,
+    canCreate: can('quotes.create'),
+    canDelete: can('quotes.delete'),
     canManage: canManageQuote(actor),
     fields,
     ...order,

@@ -40,7 +40,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
           <table className="w-full min-w-[780px] text-left text-sm">
             <thead>
               <tr>
-                {['商品／價格快照', '數量', '單價', '折扣 %', '稅率 %', '含稅小計', ''].map((label) => (
+                {['商品', '數量', '單價', '折扣 %', '稅率 %', '含稅小計', ''].map((label) => (
                   <th key={label} className="border-b px-2 py-3 font-medium text-muted-foreground">
                     {label}
                   </th>
@@ -71,7 +71,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                       <p>{line.productName}</p>
                     )}
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {line.sku || '尚未選擇'} · 目錄快照 {money(line.catalogPrice * 100)}
+                      {line.sku || '尚未選擇'} · 原定價 {money(line.catalogPrice * 100)}
                     </p>
                   </td>
                   {(['quantity', 'unitPrice', 'discountPercent', 'taxPercent'] as const).map((field) => (
@@ -111,13 +111,9 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
             </tbody>
           </table>
         </div>
-        {!editor.draft.lines.length && (
-          <p className="text-sm text-muted-foreground">新增商品後，系統會保存商品名稱、編號與當時價格。</p>
-        )}
+        {!editor.draft.lines.length && <p className="text-sm text-muted-foreground">尚無明細。</p>}
         <QuoteTotals lines={editor.draft.lines} />
-        <p className="text-xs text-muted-foreground">
-          折扣按各明細原價計算，稅金按折後金額計算，每筆金額四捨五入至小數點後兩位。
-        </p>
+        <p className="text-xs text-muted-foreground">稅金按折後金額計算，金額四捨五入至小數點後兩位。</p>
       </CardContent>
     </Card>
   );

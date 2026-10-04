@@ -40,6 +40,16 @@ export function createAuthFetch(baseUrl: string, fetcher: typeof fetch = fetch):
         navigate('/login?sessionExpired=1', { replace: true });
       }
     }
+    if (protectedRequest && response.status === 403 && path !== '/api/auth/me' && typeof window !== 'undefined') {
+      let detail = '沒有此操作的權限。';
+      try {
+        const problem = await response.clone().json();
+        if (typeof problem.detail === 'string') detail = problem.detail;
+      } catch {
+        /* Keep the fallback for non-JSON responses. */
+      }
+      window.dispatchEvent(new CustomEvent('crm:permissions-changed', { detail }));
+    }
     return response;
   };
 }

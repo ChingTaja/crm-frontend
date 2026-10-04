@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
 import { useState } from 'react';
 import { useApi } from '@/hooks/use-api';
@@ -8,6 +9,7 @@ import type { Quote, QuoteActor, QuoteVersion } from '../models/quote-types';
 
 type Decision = 'approve' | 'deny' | 'accept' | 'reject';
 export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: QuoteActor | null) {
+  const { can } = useAccess();
   const conversion = useApi(orderApi.convert);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [reason, setReason] = useState('');
@@ -53,11 +55,11 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
       setError('');
     },
     close: () => setDecision(null),
-    canRequest: canManage && draft && ['Required', 'Rejected'].includes(version.approval),
-    canSend: canManage && draft && ['Approved', 'NotRequired'].includes(version.approval),
-    canConvert: canManage && version.status === 'Accepted',
-    canReview: latest && actor?.role === 'manager' && draft && version.approval === 'Pending',
-    canDecide: latest && actor?.role === 'customer' && version.status === 'Sent',
+    canRequest: can('quotes.update') && canManage && draft && ['Required', 'Rejected'].includes(version.approval),
+    canSend: can('quotes.update') && canManage && draft && ['Approved', 'NotRequired'].includes(version.approval),
+    canConvert: can('quotes.update') && canManage && version.status === 'Accepted',
+    canReview: latest && can('quotes.update') && version.createdBy !== actor?.id && draft && version.approval === 'Pending',
+    canDecide: latest && can('quotes.update') && version.status === 'Sent',
     requestApproval: () =>
       act(() => {
         quoteRepository.requestApproval(quote.id, version.id, actor);

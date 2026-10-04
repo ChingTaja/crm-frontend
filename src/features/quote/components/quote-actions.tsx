@@ -29,7 +29,11 @@ export function QuoteActions({
             模擬送出報價
           </Button>
         )}
-        {vm.canConvert && <Button disabled={vm.isConverting || dirty} onClick={vm.convertToOrder}>{quote.orderId ? '查看訂單' : '轉換訂單'}</Button>}
+        {vm.canConvert && (
+          <Button disabled={vm.isConverting || dirty} onClick={vm.convertToOrder}>
+            {quote.orderId ? '查看訂單' : '轉換訂單'}
+          </Button>
+        )}
         {vm.canReview && (
           <>
             <Button onClick={() => vm.open('approve')}>批准</Button>
@@ -47,7 +51,7 @@ export function QuoteActions({
           </>
         )}
       </div>
-      {dirty && <p className="text-xs text-muted-foreground">請先儲存或重置修改，再執行審批或送出。</p>}
+      {dirty && <p className="text-xs text-muted-foreground">請先儲存或重置修改。</p>}
       <p role="alert" className="text-sm text-destructive">
         {vm.error}
       </p>
@@ -60,8 +64,7 @@ export function QuoteActions({
         <DialogContent>
           <DialogTitle className="text-lg font-semibold">{vm.decisionLabel}</DialogTitle>
           <DialogDescription className="mt-2 text-sm text-muted-foreground">
-            {quote.number} v{version.version}。
-            {vm.needsReason ? '請填寫拒絕原因。' : '確認後將更新狀態並記錄操作人及時間。'}
+            {quote.number} v{version.version}。{vm.needsReason ? '請填寫拒絕原因。' : '請確認此操作。'}
           </DialogDescription>
           <form
             className="mt-4 space-y-4"

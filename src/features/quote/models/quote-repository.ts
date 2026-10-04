@@ -43,6 +43,7 @@ export function createQuoteRepository(
     detail,
   });
   function role(actor: QuoteActor | null, required: QuoteActor['role']) {
+    if (actor?.permissionCodes && required !== 'sales' && actor.permissionCodes.includes('quotes.update')) return;
     if (required === 'sales' && canManageQuote(actor)) return;
     if (!actor?.id || actor.role !== required)
       throw new Error(`此操作需要${required === 'manager' ? '主管' : required === 'customer' ? '客戶' : '業務'}身分。`);

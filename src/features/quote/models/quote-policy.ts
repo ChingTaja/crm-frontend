@@ -8,7 +8,7 @@ export const quotePolicy = {
 } as const;
 // Local editing works without an identity until authentication is connected.
 // An absent identity never grants approval or customer-decision permissions.
-export const canManageQuote = (actor: QuoteActor | null) => actor === null || (!!actor.id && actor.role === 'sales');
+export const canManageQuote = (actor: QuoteActor | null) => actor?.permissionCodes ? actor.permissionCodes.some(code => code.startsWith('quotes.') && code !== 'quotes.read') : actor === null || (!!actor.id && actor.role === 'sales');
 export function quoteToday(now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: quotePolicy.timeZone,

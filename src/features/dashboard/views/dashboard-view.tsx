@@ -1,8 +1,10 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { AppLink } from '@/components/ui/app-link';
 import { LayoutDashboard, Users, Handshake, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 function DashboardView() {
+  const { can } = useAccess();
   return (
     <div className="flex-1 bg-[#f5f7f3] text-[#263d37]">
       <main className="mx-auto max-w-6xl space-y-8 px-5 py-10 sm:px-10 sm:py-14">
@@ -23,16 +25,16 @@ function DashboardView() {
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: '/customers' },
-            { title: '商機追蹤', description: '掌握商機進度與每一次合作機會。', icon: Handshake, href: '/leads' },
+            { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: can('customers.read') ? '/customers' : '/contacts' },
+            { title: '商機追蹤', description: '掌握商機進度與每一次合作機會。', icon: Handshake, href: can('leads.read') ? '/leads' : '/opportunities' },
             {
               title: '銷售管理',
               description: '管理報價版本、訂單明細與產品資訊。',
               icon: ShoppingCart,
-              href: '/orders',
+              href: can('orders.read') ? '/orders' : can('quotes.read') ? '/quotes' : '/products',
             },
-            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: '/users' },
-          ].map(({ title, description, icon: Icon, href }) => (
+            { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: can('users.read') ? '/users' : '/roles' },
+          ].filter(item => can(`${item.href.slice(1)}.read`)).map(({ title, description, icon: Icon, href }) => (
             <Card
               key={title}
               className={

@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { EntityPageHeader, EntityPageTitle } from '@/components/layout/entity-page-header';
 import { ArrowLeft, Building2, RotateCcw, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import type { CustomerResponse } from '../../../api/Api';
 import { useCustomerEditViewModel } from '../view-models/use-customer-edit-view-model';
 
 export function CustomerEditView({ customer }: { customer?: CustomerResponse }) {
+  const { can } = useAccess();
   const vm = useCustomerEditViewModel(customer);
   return (
     <>
@@ -32,12 +34,12 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
           <Button type="button" variant="outline" onClick={vm.reset}>
             <RotateCcw /> 重置
           </Button>
-          <Button type="submit" form="customer-edit-form" disabled={vm.isSaving}>
+          <Button type="submit" form="customer-edit-form" disabled={vm.isSaving || !can(vm.isNew ? 'customers.create' : 'customers.update')}>
             <Save /> {vm.isNew ? '建立資料' : '儲存變更'}
           </Button>
         </div>
       </EntityPageHeader>
-      <form id="customer-edit-form" onSubmit={vm.save} className="mx-auto w-full max-w-5xl py-8">
+      <form id="customer-edit-form" onSubmit={event => { if (can(vm.isNew ? 'customers.create' : 'customers.update')) vm.save(event); else event.preventDefault(); }} className="mx-auto w-full max-w-5xl py-8">
         <Card>
           <CardHeader>
             <CardTitle>客戶基本資料</CardTitle>

@@ -40,12 +40,12 @@ export function OrderEditView({ id }: { id: string }) {
             </AppLink>
           </p>
           <p className="text-sm text-muted-foreground">
-            明細與條款為報價轉單時的快照，不可修改。完成訂單代表人工確認履約完成，不表示已付款。
+            報價明細與條款不可修改。完成訂單不代表已付款。
           </p>
           <div className="flex flex-wrap items-center gap-3">
             {order.allowedTransitions?.includes('Cancelled') && (
               <label className="text-sm">
-                取消原因（取消時必填）
+                取消原因 *
                 <input
                   className="ml-2 rounded border p-2"
                   maxLength={10000}

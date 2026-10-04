@@ -22,14 +22,13 @@ export interface UpdateUserRequest {
    * @maxLength 254
    */
   email: string;
-  /** @minLength 1 */
-  roleId: string;
+  roleId?: string;
 }
 
 export interface RoleResponse {
-  id?: string;
-  code?: string;
-  name?: string;
+  id: string;
+  code: string;
+  name: string;
 }
 
 export interface UserResponse {
@@ -37,6 +36,44 @@ export interface UserResponse {
   username?: string;
   email?: string;
   role?: RoleResponse;
+}
+
+export interface UpdateRoleRequest {
+  /**
+   * @minLength 0
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * @minLength 0
+   * @maxLength 2000
+   */
+  description?: string;
+  /**
+   * @maxItems 100
+   * @minItems 0
+   */
+  permissionCodes: string[];
+  /**
+   * @format int64
+   * @exclusiveMin 0
+   */
+  expectedRevision: number;
+}
+
+export interface RoleDetailResponse {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  system: boolean;
+  /** @format int64 */
+  userCount: number;
+  /** @format int32 */
+  permissionCount: number;
+  /** @format int64 */
+  revision: number;
+  permissionCodes: string[];
 }
 
 export interface QuoteLineRequest {
@@ -333,17 +370,17 @@ export interface SortRule {
 }
 
 export interface PageResponseObject {
-  content?: any[];
+  content: any[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface RegisterRequest {
@@ -364,6 +401,29 @@ export interface RegisterRequest {
    */
   password: string;
   roleId?: string;
+}
+
+export interface CreateRoleRequest {
+  /**
+   * @minLength 1
+   * @pattern [A-Za-z][A-Za-z0-9_]{1,49}
+   */
+  code: string;
+  /**
+   * @minLength 0
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * @minLength 0
+   * @maxLength 2000
+   */
+  description?: string;
+  /**
+   * @maxItems 100
+   * @minItems 0
+   */
+  permissionCodes: string[];
 }
 
 export interface CreateQuoteRequest {
@@ -709,31 +769,65 @@ export interface QuoteSource {
 }
 
 export interface PageResponseUserResponse {
-  content?: UserResponse[];
+  content: UserResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface PageResponseRoleSummaryResponse {
+  content: RoleSummaryResponse[];
+  /** @format int32 */
+  page: number;
+  /** @format int32 */
+  size: number;
+  /** @format int64 */
+  totalElements: number;
+  /** @format int32 */
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface RoleSummaryResponse {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  system: boolean;
+  /** @format int64 */
+  userCount: number;
+  /** @format int32 */
+  permissionCount: number;
+  /** @format int64 */
+  revision: number;
+}
+
+export interface RoleOptionResponse {
+  id: string;
+  code: string;
+  name: string;
 }
 
 export interface PageResponseQuoteSummaryResponse {
-  content?: QuoteSummaryResponse[];
+  content: QuoteSummaryResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface QuoteSummaryResponse {
@@ -756,17 +850,25 @@ export interface QuoteSummaryResponse {
 }
 
 export interface PageResponseProductResponse {
-  content?: ProductResponse[];
+  content: ProductResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface PermissionResponse {
+  code: string;
+  name: string;
+  entity: string;
+  groupName: string;
+  description?: string;
 }
 
 export interface OrderSummaryResponse {
@@ -789,45 +891,45 @@ export interface OrderSummaryResponse {
 }
 
 export interface PageResponseOrderSummaryResponse {
-  content?: OrderSummaryResponse[];
+  content: OrderSummaryResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface PageResponseOpportunityResponse {
-  content?: OpportunityResponse[];
+  content: OpportunityResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface PageResponseLead {
-  content?: Lead[];
+  content: Lead[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface FieldMetadata {
@@ -842,31 +944,39 @@ export interface FieldMetadata {
 }
 
 export interface PageResponseCustomerResponse {
-  content?: CustomerResponse[];
+  content: CustomerResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface PageResponseContactResponse {
-  content?: ContactResponse[];
+  content: ContactResponse[];
   /** @format int32 */
-  page?: number;
+  page: number;
   /** @format int32 */
-  size?: number;
+  size: number;
   /** @format int64 */
-  totalElements?: number;
+  totalElements: number;
   /** @format int32 */
-  totalPages?: number;
-  first?: boolean;
-  last?: boolean;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface CurrentUserResponse {
+  id: string;
+  username: string;
+  email: string;
+  role: RoleResponse;
+  permissionCodes: string[];
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -1101,11 +1211,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name FindByIdUser
      * @request GET:/api/users/{id}
+     * @secure
      */
     findByIdUser: (id: string, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1115,12 +1227,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name UpdateUsers
      * @request PUT:/api/users/{id}
+     * @secure
      */
     updateUsers: (id: string, data: UpdateUserRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1131,11 +1245,63 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name DeleteUsers
      * @request DELETE:/api/users/{id}
+     * @secure
      */
     deleteUsers: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/users/${id}`,
         method: 'DELETE',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name FindByIdRole
+     * @request GET:/api/roles/{id}
+     * @secure
+     */
+    findByIdRole: (id: string, params: RequestParams = {}) =>
+      this.request<RoleDetailResponse, any>({
+        path: `/api/roles/${id}`,
+        method: 'GET',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name UpdateRoles
+     * @request PUT:/api/roles/{id}
+     * @secure
+     */
+    updateRoles: (id: string, data: UpdateRoleRequest, params: RequestParams = {}) =>
+      this.request<RoleDetailResponse, any>({
+        path: `/api/roles/${id}`,
+        method: 'PUT',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name DeleteRoles
+     * @request DELETE:/api/roles/{id}
+     * @secure
+     */
+    deleteRoles: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/roles/${id}`,
+        method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1145,12 +1311,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name UpdateQuotes
      * @request PUT:/api/quotes/{id}/versions/{versionId}
+     * @secure
      */
     updateQuotes: (id: string, versionId: string, data: UpdateQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1161,11 +1329,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags product-controller
      * @name FindByIdProduct
      * @request GET:/api/products/{id}
+     * @secure
      */
     findByIdProduct: (id: string, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1175,12 +1345,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags product-controller
      * @name UpdateProducts
      * @request PUT:/api/products/{id}
+     * @secure
      */
     updateProducts: (id: string, data: UpdateProductRequest, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1191,11 +1363,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags product-controller
      * @name DeleteProducts
      * @request DELETE:/api/products/{id}
+     * @secure
      */
     deleteProducts: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/products/${id}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1205,11 +1379,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags opportunity-controller
      * @name FindByIdOpportunity
      * @request GET:/api/opportunities/{id}
+     * @secure
      */
     findByIdOpportunity: (id: string, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1219,12 +1395,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags opportunity-controller
      * @name UpdateOpportunities
      * @request PUT:/api/opportunities/{id}
+     * @secure
      */
     updateOpportunities: (id: string, data: UpdateOpportunityRequest, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1235,11 +1413,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags opportunity-controller
      * @name DeleteOpportunities
      * @request DELETE:/api/opportunities/{id}
+     * @secure
      */
     deleteOpportunities: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/opportunities/${id}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1249,11 +1429,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-controller
      * @name FindByIdLead
      * @request GET:/api/leads/{id}
+     * @secure
      */
     findByIdLead: (id: string, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1263,12 +1445,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-controller
      * @name UpdateLeads
      * @request PUT:/api/leads/{id}
+     * @secure
      */
     updateLeads: (id: string, data: Lead, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1279,11 +1463,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-controller
      * @name DeleteLeads
      * @request DELETE:/api/leads/{id}
+     * @secure
      */
     deleteLeads: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/leads/${id}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1293,11 +1479,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags customer-controller
      * @name FindByIdCustomer
      * @request GET:/api/customers/{id}
+     * @secure
      */
     findByIdCustomer: (id: string, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1307,12 +1495,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags customer-controller
      * @name UpdateCustomers
      * @request PUT:/api/customers/{id}
+     * @secure
      */
     updateCustomers: (id: string, data: UpdateCustomerRequest, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1323,11 +1513,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags customer-controller
      * @name DeleteCustomers
      * @request DELETE:/api/customers/{id}
+     * @secure
      */
     deleteCustomers: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/customers/${id}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1337,11 +1529,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags contact-controller
      * @name FindByIdContact
      * @request GET:/api/contacts/{id}
+     * @secure
      */
     findByIdContact: (id: string, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1351,12 +1545,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags contact-controller
      * @name UpdateContacts
      * @request PUT:/api/contacts/{id}
+     * @secure
      */
     updateContacts: (id: string, data: UpdateContactRequest, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts/${id}`,
         method: 'PUT',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1367,11 +1563,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags contact-controller
      * @name DeleteContacts
      * @request DELETE:/api/contacts/{id}
+     * @secure
      */
     deleteContacts: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/contacts/${id}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -1381,12 +1579,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags entity-search-controller
      * @name SearchEntities
      * @request POST:/api/{entity}/search
+     * @secure
      */
     searchEntities: (entity: string, data: EntitySearchRequest, params: RequestParams = {}) =>
       this.request<PageResponseObject, any>({
         path: `/api/${entity}/search`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1397,6 +1597,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name FindAllUsers
      * @request GET:/api/users
+     * @secure
      */
     findAllUsers: (
       query?: {
@@ -1417,6 +1618,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/users`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1426,12 +1628,64 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags user-controller
      * @name CreateUsers
      * @request POST:/api/users
+     * @secure
      */
     createUsers: (data: RegisterRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users`,
         method: 'POST',
         body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name FindAllRoles
+     * @request GET:/api/roles
+     * @secure
+     */
+    findAllRoles: (
+      query?: {
+        /**
+         * @format int32
+         * @default 0
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 20
+         */
+        size?: number;
+        keyword?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseRoleSummaryResponse, any>({
+        path: `/api/roles`,
+        method: 'GET',
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name CreateRoles
+     * @request POST:/api/roles
+     * @secure
+     */
+    createRoles: (data: CreateRoleRequest, params: RequestParams = {}) =>
+      this.request<RoleDetailResponse, any>({
+        path: `/api/roles`,
+        method: 'POST',
+        body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1442,6 +1696,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name FindAllQuotes
      * @request GET:/api/quotes
+     * @secure
      */
     findAllQuotes: (
       query?: {
@@ -1462,6 +1717,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/quotes`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1471,12 +1727,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name CreateQuotes
      * @request POST:/api/quotes
+     * @secure
      */
     createQuotes: (data: CreateQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1487,12 +1745,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name Send
      * @request POST:/api/quotes/{id}/versions/{versionId}/send
+     * @secure
      */
     send: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/send`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1503,12 +1763,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name Review
      * @request POST:/api/quotes/{id}/versions/{versionId}/review
+     * @secure
      */
     review: (id: string, versionId: string, data: ReviewQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/review`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1519,12 +1781,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name RequestApproval
      * @request POST:/api/quotes/{id}/versions/{versionId}/request-approval
+     * @secure
      */
     requestApproval: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/request-approval`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1535,12 +1799,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name NewVersion
      * @request POST:/api/quotes/{id}/versions/{versionId}/new-version
+     * @secure
      */
     newVersion: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/new-version`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1551,12 +1817,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name Decision
      * @request POST:/api/quotes/{id}/versions/{versionId}/decision
+     * @secure
      */
     decision: (id: string, versionId: string, data: DecideQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/decision`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1567,12 +1835,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name ConvertToOrder
      * @request POST:/api/quotes/{id}/versions/{versionId}/convert-to-order
+     * @secure
      */
     convertToOrder: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<ConvertQuoteToOrderResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/convert-to-order`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1583,6 +1853,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags product-controller
      * @name FindAllProducts
      * @request GET:/api/products
+     * @secure
      */
     findAllProducts: (
       query?: {
@@ -1603,6 +1874,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/products`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1612,12 +1884,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags product-controller
      * @name CreateProducts
      * @request POST:/api/products
+     * @secure
      */
     createProducts: (data: CreateProductRequest, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1628,6 +1902,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags opportunity-controller
      * @name FindAllOpportunities
      * @request GET:/api/opportunities
+     * @secure
      */
     findAllOpportunities: (
       query?: {
@@ -1648,6 +1923,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/opportunities`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1657,12 +1933,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags opportunity-controller
      * @name CreateOpportunities
      * @request POST:/api/opportunities
+     * @secure
      */
     createOpportunities: (data: CreateOpportunityRequest, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1673,6 +1951,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-controller
      * @name FindAllLeads
      * @request GET:/api/leads
+     * @secure
      */
     findAllLeads: (
       query?: {
@@ -1693,6 +1972,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/leads`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1702,12 +1982,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-controller
      * @name CreateLeads
      * @request POST:/api/leads
+     * @secure
      */
     createLeads: (data: CreateLeadRequest, params: RequestParams = {}) =>
       this.request<CreateLeadResponse, any>({
         path: `/api/leads`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1718,12 +2000,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags lead-qualification-controller
      * @name QualifyLead
      * @request POST:/api/leads/{id}/qualification
+     * @secure
      */
     qualifyLead: (id: string, data: QualifyLeadRequest, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}/qualification`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1734,6 +2018,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags customer-controller
      * @name FindAllCustomers
      * @request GET:/api/customers
+     * @secure
      */
     findAllCustomers: (
       query?: {
@@ -1754,6 +2039,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/customers`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1763,12 +2049,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags customer-controller
      * @name CreateCustomers
      * @request POST:/api/customers
+     * @secure
      */
     createCustomers: (data: CreateCustomerRequest, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1779,6 +2067,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags contact-controller
      * @name FindAllContacts
      * @request GET:/api/contacts
+     * @secure
      */
     findAllContacts: (
       query?: {
@@ -1799,6 +2088,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/contacts`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1808,12 +2098,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags contact-controller
      * @name CreateContacts
      * @request POST:/api/contacts
+     * @secure
      */
     createContacts: (data: CreateContactRequest, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -1856,11 +2148,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags auth-controller
      * @name Logout
      * @request POST:/api/auth/logout
+     * @secure
      */
     logout: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/auth/logout`,
         method: 'POST',
+        secure: true,
         ...params,
       }),
 
@@ -1902,13 +2196,37 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags order-controller
      * @name UpdateOrderStatus
      * @request PATCH:/api/orders/{id}/status
+     * @secure
      */
     updateOrderStatus: (id: string, data: UpdateOrderStatusRequest, params: RequestParams = {}) =>
       this.request<OrderResponse, any>({
         path: `/api/orders/${id}/status`,
         method: 'PATCH',
         body: data,
+        secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags role-controller
+     * @name RoleOptions
+     * @request GET:/api/roles/options
+     * @secure
+     */
+    roleOptions: (
+      query?: {
+        keyword?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<RoleOptionResponse[], any>({
+        path: `/api/roles/options`,
+        method: 'GET',
+        query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1918,11 +2236,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name FindByIdQuote
      * @request GET:/api/quotes/{id}
+     * @secure
      */
     findByIdQuote: (id: string, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1932,11 +2252,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags quote-controller
      * @name DeleteQuotes
      * @request DELETE:/api/quotes/{id}
+     * @secure
      */
     deleteQuotes: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/quotes/${id}`,
         method: 'DELETE',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags permission-controller
+     * @name FindAllPermissions
+     * @request GET:/api/permissions
+     * @secure
+     */
+    findAllPermissions: (params: RequestParams = {}) =>
+      this.request<PermissionResponse[], any>({
+        path: `/api/permissions`,
+        method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -1946,6 +2284,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags order-controller
      * @name FindAllOrders
      * @request GET:/api/orders
+     * @secure
      */
     findAllOrders: (
       query?: {
@@ -1977,6 +2316,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/orders`,
         method: 'GET',
         query: query,
+        secure: true,
         ...params,
       }),
 
@@ -1986,11 +2326,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags order-controller
      * @name FindByIdOrder
      * @request GET:/api/orders/{id}
+     * @secure
      */
     findByIdOrder: (id: string, params: RequestParams = {}) =>
       this.request<OrderResponse, any>({
         path: `/api/orders/${id}`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -2000,11 +2342,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags entity-metadata-controller
      * @name FindFieldsByEntityName
      * @request GET:/api/entities/{entityName}/fields
+     * @secure
      */
     findFieldsByEntityName: (entityName: string, params: RequestParams = {}) =>
       this.request<FieldMetadata[], any>({
         path: `/api/entities/${entityName}/fields`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
 
@@ -2014,11 +2358,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags auth-controller
      * @name CurrentUser
      * @request GET:/api/auth/me
+     * @secure
      */
     currentUser: (params: RequestParams = {}) =>
-      this.request<UserResponse, any>({
+      this.request<CurrentUserResponse, any>({
         path: `/api/auth/me`,
         method: 'GET',
+        secure: true,
         ...params,
       }),
   };

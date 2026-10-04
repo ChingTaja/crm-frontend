@@ -1,3 +1,4 @@
+import { useAccess } from '@/features/access/view-models/use-access';
 import { AppLink } from '@/components/ui/app-link';
 import { filterValueLabel } from '@/lib/filter-fields';
 import { FilterMenu } from '@/components/ui/filter-menu';
@@ -27,6 +28,7 @@ export function EntityList({
   dataNotice?: string | null;
   allowCreate?: boolean;
 }) {
+  const { can } = useAccess();
   const { entity } = vm;
   const visibleFields = vm.fieldOrder.filter((field) => !vm.hiddenFields.includes(field));
   return (
@@ -37,8 +39,10 @@ export function EntityList({
           <span className="text-sm text-muted-foreground">· {vm.filteredTotal}</span>
         </EntityPageTitle>
         <div className="ml-auto flex items-center gap-2">
-          <DeleteRecordsButton title={vm.title} records={vm.selectedRecords} onDelete={vm.deleteSelected} />
-          {allowCreate && (
+          {can(`${entity}.delete`) && (
+            <DeleteRecordsButton title={vm.title} records={vm.selectedRecords} onDelete={vm.deleteSelected} />
+          )}
+          {allowCreate && can(`${entity}.create`) && (
             <Button onClick={vm.startCreate}>
               <Plus />
               新增{vm.title}
