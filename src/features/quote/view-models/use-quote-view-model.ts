@@ -1,140 +1,14 @@
 import { useAccess } from '@/features/access/view-models/use-access';
 import { useProductsQuery } from '@/features/product/view-models/use-products-query';
-import { useOpportunitiesQuery } from '@/features/opportunity/view-models/use-opportunities-query';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
-import { useState, useSyncExternalStore } from 'react';
-import { useRecordSelection } from '@/hooks/use-record-selection';
-import { useFieldOrder } from '@/hooks/use-field-order';
-import type { FieldFilter } from '@/components/ui/filter-menu';
-import { uniqueOptions, type FilterField } from '@/lib/filter-fields';
-import { createFilterGroup, matchesAdvancedFilter, type FilterGroup } from '../../filter/models/advanced-filter';
-import { quoteRepository } from '../models/quote-repository';
+import { useOpportunitiesQuery } from '@/features/opportunity/view-models/use-opportunities-query';
 import type { QuoteActor } from '../models/quote-types';
-import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
-
 export function useQuoteViewModel() {
-  const { me, can } = useAccess();
-  const actor: QuoteActor | null = me ? { id: me.id, name: me.username, role: 'system', permissionCodes: me.permissionCodes } : null;
-  const quotes = useSyncExternalStore(quoteRepository.subscribe, quoteRepository.getSnapshot);
-  const customers = useCustomersQuery().records;
+  const { me } = useAccess();
+  const customerQuery = useCustomersQuery();
   const productQuery = useProductsQuery();
-  const products = productQuery.records;
-  const opportunities = useOpportunitiesQuery().records;
-  const [query, updateQuery] = useState('');
-  const [filter, setFilter] = useState<FieldFilter | null>(null);
-  const [advancedFilter, setAdvanced] = useState(createFilterGroup);
-  const [hiddenFields, setHiddenFields] = useState<number[]>([]);
-  const order = useFieldOrder(7);
-  const [page, updatePage] = useState(1);
-  const [pageSize, updateSize] = useState(5);
-  const [sort, setSort] = useState(false);
-  const fields: FilterField[] = [
-    { label: '報價單', type: 'text', hideable: false },
-    { label: '客戶', type: 'lookup', options: customers.map((c) => ({ value: c.id ?? '', label: c.name ?? '' })) },
-    { label: '最新版本', type: 'number' },
-    { label: '狀態', type: 'option', options: uniqueOptions(['Draft', 'Sent', 'Accepted', 'Rejected', 'Expired']) },
-    {
-      label: '審批',
-      type: 'option',
-      options: uniqueOptions(['NotRequired', 'Required', 'Pending', 'Approved', 'Rejected']),
-    },
-    { label: '有效期限', type: 'date' },
-    { label: '含稅總額', type: 'number' },
-  ];
-  const rows = quotes.map((quote) => {
-    const version = quote.versions[quote.versions.length - 1]!;
-    const amount = quoteTotals(version.lines).totalCents;
-    return {
-      id: quote.id,
-      cells: [
-        `${quote.number} · ${version.name}`,
-        customers.find((c) => c.id === version.customerId)?.name ?? '—',
-        `v${version.version}`,
-        version.status,
-        version.approval,
-        version.validUntil,
-        money(amount),
-      ],
-      values: [
-        `${quote.number} ${version.name}`,
-        version.customerId,
-        String(version.version),
-        version.status,
-        version.approval,
-        version.validUntil,
-        String(amount / 100),
-      ],
-    };
-  });
-  const filtered = rows.filter(
-    (row) =>
-      row.cells.join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
-      (!filter || matchesAdvancedFilter(row.values, { ...filter, id: 'single', kind: 'rule' }, fields)) &&
-      matchesAdvancedFilter(row.values, advancedFilter, fields)
-  );
-  if (sort) filtered.sort((a, b) => a.cells[0].localeCompare(b.cells[0], 'zh-Hant'));
-  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(page, pageCount);
-  const pageRows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const selection = useRecordSelection(
-    rows.map((row) => ({ id: row.id, name: row.cells[0] })),
-    pageRows,
-    (ids) => quoteRepository.removeMany(ids, actor)
-  );
-  return {
-    ...selection,
-    quotes,
-    customers,
-    products,
-    productQuery,
-    opportunities,
-    actor,
-    canCreate: can('quotes.create'),
-    canDelete: can('quotes.delete'),
-    canManage: canManageQuote(actor),
-    fields,
-    ...order,
-    hiddenFields,
-    toggleVisibility: (field: number) => {
-      if (field !== 0)
-        setHiddenFields((current) =>
-          current.includes(field) ? current.filter((i) => i !== field) : [...current, field]
-        );
-    },
-    query,
-    setQuery: (value: string) => {
-      selection.clearSelection();
-      updateQuery(value);
-      updatePage(1);
-    },
-    filter,
-    setFilter: (value: FieldFilter | null) => {
-      selection.clearSelection();
-      setFilter(value);
-      updatePage(1);
-    },
-    advancedFilter,
-    setAdvanced: (value: FilterGroup) => {
-      selection.clearSelection();
-      setAdvanced(value);
-      updatePage(1);
-    },
-    sort,
-    toggleSort: () => {
-      setSort((value) => !value);
-      updatePage(1);
-    },
-    total: quotes.length,
-    filteredTotal: filtered.length,
-    page: currentPage,
-    pageCount,
-    pageSize,
-    setPage: updatePage,
-    setPageSize: (value: number) => {
-      updateSize(value);
-      updatePage(1);
-    },
-    rows: pageRows,
-  };
+  const opportunityQuery = useOpportunitiesQuery();
+  const actor: QuoteActor | null = me ? { id: me.id, name: me.username, role: 'system', permissionCodes: me.permissionCodes } : null;
+  return { actor, customers: customerQuery.records, products: productQuery.records, opportunities: opportunityQuery.records, productQuery, customerQuery, opportunityQuery };
 }
 export type QuoteViewModel = ReturnType<typeof useQuoteViewModel>;

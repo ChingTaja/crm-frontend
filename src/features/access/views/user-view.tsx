@@ -222,8 +222,8 @@ function UserForm({
   }
   return (
     <form onSubmit={submit} className="space-y-5" aria-busy={isSaving}>
-      <DialogTitle>{user ? '修改帳號' : '新增帳號'}</DialogTitle>
-      <DialogDescription>{user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}</DialogDescription>
+      <DialogTitle>{user ? editable ? '修改帳號' : '查看帳號' : '新增帳號'}</DialogTitle>
+      <DialogDescription>{!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}</DialogDescription>
       <fieldset disabled={isSaving || !editable} className="space-y-4">
         <label className="grid gap-2">
           帳號
@@ -267,7 +267,7 @@ function UserForm({
           <Lookup
             label="角色"
             required={!!user}
-            disabled={isSaving || (!!user && !canAssign)}
+            disabled={isSaving || !editable || (!!user && !canAssign)}
             value={draft.roleId ?? ''}
             onValueChange={(roleId) => setDraft({ ...draft, roleId })}
             options={[...(!user ? [{ value: '', label: '預設 USER' }] : []), ...options]}
@@ -284,9 +284,9 @@ function UserForm({
         <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
           取消
         </Button>
-        <Button type="submit" disabled={isSaving || !editable}>
+        {editable && <Button type="submit" disabled={isSaving}>
           {isSaving ? '儲存中…' : '儲存'}
-        </Button>
+        </Button>}
       </div>
     </form>
   );

@@ -1,15 +1,23 @@
 import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { orderApi } from '@/features/order/models/order-service';
-import { quoteRepository } from '../models/quote-repository';
+import { quoteApi, cacheQuote } from '../models/quote-service';
 import { canManageQuote } from '../models/quote-policy';
 import type { Quote, QuoteActor, QuoteVersion } from '../models/quote-types';
 
 type Decision = 'approve' | 'deny' | 'accept' | 'reject';
 export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: QuoteActor | null) {
   const { can } = useAccess();
+  const pending = useRef(false);
+  const [working, setWorking] = useState(false);
+  const workflow = useApi(async (signal: AbortSignal, action: 'review' | 'decision' | 'send' | 'requestApproval', decisionValue?: Decision, note?: string) => {
+    const body = { expectedRevision: version.revision };
+    if (action === 'review') return quoteApi.review(signal, quote.id, version.id, { ...body, decision: decisionValue === 'approve' ? 'approved' : 'rejected', reason: note });
+    if (action === 'decision') return quoteApi.decision(signal, quote.id, version.id, { ...body, decision: decisionValue === 'accept' ? 'accepted' : 'rejected', reason: note });
+    return quoteApi[action](signal, quote.id, version.id, body);
+  });
   const conversion = useApi(orderApi.convert);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [reason, setReason] = useState('');
@@ -19,32 +27,26 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
   const draft = version.status === 'Draft';
   const labels = { approve: '主管批准', deny: '拒絕審批', accept: '接受報價', reject: '拒絕報價' };
 
-  function act(action: () => void) {
-    setError('');
-    try {
-      action();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : '操作失敗。');
-    }
+  async function act(action: () => Promise<void>) {
+    if (pending.current) return;
+    pending.current = true; setWorking(true); setError('');
+    try { await action(); } catch (cause) { setError(cause instanceof Error ? cause.message : '操作失敗。'); }
+    finally { pending.current = false; setWorking(false); }
   }
   function confirm() {
-    act(() => {
-      if (decision === 'approve' || decision === 'deny') {
-        if (!actor) throw new Error('審批需要主管身分。');
-        quoteRepository.review(quote.id, version.id, decision === 'approve', reason, actor);
-      }
-      if (decision === 'accept' || decision === 'reject') {
-        if (!actor) throw new Error('接受或拒絕報價需要客戶身分。');
-        quoteRepository.decide(quote.id, version.id, decision === 'accept', reason, actor);
-      }
-      setDecision(null);
+    void act(async () => {
+      if (!decision) return;
+      if ((decision === 'deny' || decision === 'reject') && !reason.trim()) throw new Error('請填寫拒絕原因。');
+      const result = await workflow.execute(decision === 'approve' || decision === 'deny' ? 'review' : 'decision', decision, reason.trim());
+      setDecision(null); cacheQuote(result);
     });
   }
   return {
     decision,
     reason,
     error: error || conversion.error?.message,
-    isConverting: conversion.isLoading,
+    isConverting: conversion.isLoading || working,
+    working,
     setReason,
     confirm,
     decisionLabel: decision ? labels[decision] : '',
@@ -54,20 +56,16 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
       setReason('');
       setError('');
     },
-    close: () => setDecision(null),
+    close: () => { if (!pending.current) setDecision(null); },
     canRequest: can('quotes.update') && canManage && draft && ['Required', 'Rejected'].includes(version.approval),
     canSend: can('quotes.update') && canManage && draft && ['Approved', 'NotRequired'].includes(version.approval),
     canConvert: can('quotes.update') && canManage && version.status === 'Accepted',
     canReview: latest && can('quotes.update') && version.createdBy !== actor?.id && draft && version.approval === 'Pending',
     canDecide: latest && can('quotes.update') && version.status === 'Sent',
     requestApproval: () =>
-      act(() => {
-        quoteRepository.requestApproval(quote.id, version.id, actor);
-      }),
+      act(async () => { cacheQuote(await workflow.execute('requestApproval')); }),
     send: () =>
-      act(() => {
-        quoteRepository.send(quote.id, version.id, actor);
-      }),
+      act(async () => { cacheQuote(await workflow.execute('send')); }),
     convertToOrder: async () => {
       if (conversion.isLoading) return;
       if (quote.orderId) {

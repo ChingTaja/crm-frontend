@@ -11,6 +11,7 @@ import { useCustomerEditViewModel } from '../view-models/use-customer-edit-view-
 export function CustomerEditView({ customer }: { customer?: CustomerResponse }) {
   const { can } = useAccess();
   const vm = useCustomerEditViewModel(customer);
+  const editable = can(vm.isNew ? 'customers.create' : 'customers.update');
   return (
     <>
       <EntityPageHeader className="py-3">
@@ -19,7 +20,7 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
             <ArrowLeft />
           </Button>
           <EntityPageTitle>
-            <Building2 size={19} /> {vm.isNew ? '新增客戶' : '編輯客戶'}
+            <Building2 size={19} /> {vm.isNew ? '新增客戶' : editable ? '編輯客戶' : '查看客戶'}
           </EntityPageTitle>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -29,23 +30,23 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
             className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
             onClick={vm.back}
           >
-            取消
+            {editable ? '取消' : '返回列表'}
           </Button>
-          <Button type="button" variant="outline" onClick={vm.reset}>
+          {editable && <><Button type="button" variant="outline" onClick={vm.reset}>
             <RotateCcw /> 重置
           </Button>
           <Button type="submit" form="customer-edit-form" disabled={vm.isSaving || !can(vm.isNew ? 'customers.create' : 'customers.update')}>
             <Save /> {vm.isNew ? '建立資料' : '儲存變更'}
-          </Button>
+          </Button></>}
         </div>
       </EntityPageHeader>
       <form id="customer-edit-form" onSubmit={event => { if (can(vm.isNew ? 'customers.create' : 'customers.update')) vm.save(event); else event.preventDefault(); }} className="mx-auto w-full max-w-5xl py-8">
-        <Card>
+        <fieldset disabled={!editable || vm.isSaving}><Card>
           <CardHeader>
             <CardTitle>客戶基本資料</CardTitle>
-            <CardDescription>
+            {editable && <CardDescription>
               {vm.isNew ? '填寫客戶資訊與負責人。' : '更新客戶資訊與負責人。'}儲存後將返回列表。
-            </CardDescription>
+            </CardDescription>}
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             {(
@@ -72,7 +73,7 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
               </div>
             ))}
           </CardContent>
-        </Card>
+        </Card></fieldset>
         <p role="status" className="mt-3 text-sm text-destructive">
           {vm.error}
         </p>

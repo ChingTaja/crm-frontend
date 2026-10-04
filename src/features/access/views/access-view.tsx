@@ -1,5 +1,5 @@
 import { ShieldCheck, LockKeyhole, X, Search, Check, Trash2, LoaderCircle } from 'lucide-react';
-import { permissionOptions } from '../models/permission-options';
+import { permissionOptions, togglePermission, canGrantPermission } from '../models/permission-options';
 import { Input } from '@/components/ui/input';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RoleDetailResponse } from '../../../api/Api';
@@ -132,9 +132,9 @@ function RoleForm({ record, catalog, catalogReady, done, reload }: { record?: Ro
           return <section key={group} className="overflow-hidden rounded-xl border"><h3 className="border-b bg-muted/40 px-4 py-3 text-sm font-semibold">{group}</h3><div className="grid gap-2 p-3 sm:grid-cols-2">{visible.map(p => {
             const checked = p.codes.every(code => selected.includes(code));
             const partial = !checked && p.codes.some(code => selected.includes(code));
-            const grantable = p.codes.every(can);
+            const grantable = canGrantPermission(p.codes, catalog.map(permission => permission.code), me?.permissionCodes ?? []);
             return <label key={p.code} className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${checked ? 'border-emerald-200 bg-emerald-50/60' : 'border-transparent bg-muted/20'} ${editable && grantable ? 'cursor-pointer hover:border-emerald-300' : ''}`}>
-              {editable ? <input type="checkbox" className="mt-0.5 size-4 accent-emerald-700" disabled={saving || !grantable} checked={checked} ref={element => { if (element) element.indeterminate = partial; }} onChange={e => setSelected(e.target.checked ? [...new Set([...selected, ...p.codes])] : selected.filter(code => !p.codes.includes(code)))} /> : <span className="mt-0.5 text-emerald-700">{checked ? <Check size={16} /> : partial ? '−' : <span className="block size-4 rounded border" />}</span>}
+              {editable ? <input type="checkbox" className="mt-0.5 size-4 accent-emerald-700" disabled={saving || !grantable} checked={checked} ref={element => { if (element) element.indeterminate = partial; }} onChange={e => setSelected(togglePermission(selected, p.codes, e.target.checked))} /> : <span className="mt-0.5 text-emerald-700">{checked ? <Check size={16} /> : partial ? '−' : <span className="block size-4 rounded border" />}</span>}
               <span><span className="font-medium">{p.name}</span>{p.description && <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{p.description}</span>}{partial && <span className="mt-1 block text-xs text-amber-700">部分授權</span>}</span>
             </label>;
           })}</div></section>;

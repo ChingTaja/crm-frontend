@@ -19,7 +19,7 @@ export function LeadEditView({ record }: { record?: Lead }) {
       formId="lead-form"
       form={form}
       dataNotice={null}
-      headingAction={record && can('leads.qualify') && <LeadQualificationDialog lead={record} disabled={form.isDirty || form.isSaving} />}
+      headingAction={record && can('leads.update') && can('leads.qualify') && <LeadQualificationDialog lead={record} disabled={form.isDirty || form.isSaving} />}
       notice={
         <>
           <LeadQualificationSummary lead={record} dirty={form.isDirty} />

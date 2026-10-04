@@ -1,6 +1,7 @@
 import { useAccess } from '@/features/access/view-models/use-access';
-import { useState } from 'react';
-import { quoteRepository } from '../models/quote-repository';
+import { useRef, useState } from 'react';
+import { quoteApi, cacheQuote } from '../models/quote-service';
+import { useApi } from '@/hooks/use-api';
 import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
 import type { ApprovalStatus, Quote, QuoteActor, QuoteStatus } from '../models/quote-types';
 
@@ -27,6 +28,8 @@ export function useQuoteVersions(
   onSelect: (id: string) => void
 ) {
   const { can } = useAccess();
+  const request = useApi(quoteApi.newVersion);
+  const busy = useRef(false);
   const [error, setError] = useState('');
   const latest = quote.versions[quote.versions.length - 1];
   const blockedReason = dirty
@@ -39,20 +42,23 @@ export function useQuoteVersions(
           ? '最新版本正在審批，完成審批後才能建立新版本。'
           : '';
 
-  function createVersion() {
-    if (blockedReason) return;
+  async function createVersion() {
+    if (blockedReason || busy.current) return;
+    busy.current = true;
     setError('');
     try {
-      const updated = quoteRepository.newVersion(quote.id, latest.id, actor);
+      const updated = await request.execute(quote.id, latest.id, { expectedRevision: latest.revision });
+      cacheQuote(updated);
       onSelect(updated.versions[updated.versions.length - 1].id);
     } catch (error) {
       setError(error instanceof Error ? error.message : '建立版本失敗。');
-    }
+    } finally { busy.current = false; }
   }
 
   return {
     error,
-    blockedReason,
+    blockedReason: request.isLoading ? '建立版本中…' : blockedReason,
+    canCreateVersion: can('quotes.update'),
     createVersion,
     latestNumber: latest.version,
     nextNumber: latest.version + 1,
@@ -66,7 +72,7 @@ export function useQuoteVersions(
       latest: version.id === latest.id,
       status: statusLabels[version.status],
       approval: approvalLabels[version.approval],
-      total: money(quoteTotals(version.lines).totalCents),
+      total: money(version.totals?.totalCents ?? quoteTotals(version.lines).totalCents),
       validUntil: version.validUntil,
       createdAt: new Date(version.createdAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       createdBy: version.createdBy,

@@ -33,10 +33,10 @@ export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect 
             新版本會複製最新的 v{vm.latestNumber}，並保留在這張報價單中。點選版本即可查看下方內容。
           </CardDescription>
         </div>
-        <Button type="button" variant="outline" disabled={!!vm.blockedReason} onClick={vm.createVersion}>
+        {vm.canCreateVersion && <Button type="button" variant="outline" disabled={!!vm.blockedReason} onClick={vm.createVersion}>
           <Plus />
           建立 v{vm.nextNumber}
-        </Button>
+        </Button>}
       </CardHeader>
       <CardContent className="space-y-3">
         {vm.blockedReason && <p className="text-xs text-muted-foreground">{vm.blockedReason}</p>}

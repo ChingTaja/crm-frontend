@@ -43,7 +43,7 @@ export function EntityEditLayout({
             <ArrowLeft />
           </Button>
           <EntityPageTitle>
-            {isNew ? '新增' : '編輯'}
+            {isNew ? '新增' : editable ? '編輯' : '查看'}
             {title}
           </EntityPageTitle>
           {headingAction}
@@ -55,16 +55,16 @@ export function EntityEditLayout({
             disabled={form.isSaving}
             onClick={form.back}
           >
-            取消
+            {editable ? '取消' : '返回列表'}
           </Button>
-          <Button variant="outline" disabled={form.isSaving || !editable} onClick={form.reset}>
+          {editable && <><Button variant="outline" disabled={form.isSaving} onClick={form.reset}>
             <RotateCcw />
             重置
           </Button>
           <Button type="submit" form={formId} disabled={form.isSaving || !editable}>
             <Save />
             {form.isSaving ? '儲存中…' : '儲存'}
-          </Button>
+          </Button></>}
         </div>
       </EntityPageHeader>
       {notice}

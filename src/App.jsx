@@ -10,7 +10,6 @@ import { OpportunityView } from './features/opportunity/views/opportunity-view';
 import { LeadView } from './features/lead/views/lead-view';
 import { ContactView } from './features/contact/views/contact-view';
 import { QuoteView } from './features/quote/views/quote-view';
-import { useQuoteClock } from './features/quote/view-models/use-quote-clock';
 import { WorkspaceHeader } from './components/layout/workspace-header';
 import { useEffect, useSyncExternalStore } from 'react';
 import { LoginView } from './features/auth/views/login-view';
@@ -49,7 +48,6 @@ const entityViews = {
 };
 
 function App() {
-  useQuoteClock();
   const location = useSyncExternalStore(subscribeToLocation, getLocation);
   const [pathname, query = ''] = location.split('?');
   const route = resolveRoute(pathname);

@@ -1,29 +1,11 @@
-export type QuoteStatus = 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'Expired';
-export type ApprovalStatus = 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
+import type { QuoteLineResponse, QuoteVersionResponse, CreateQuoteRequest, QuoteTotals as ApiQuoteTotals } from '../../../api/Api';
+export type QuoteStatus = NonNullable<QuoteVersionResponse['status']>;
+export type ApprovalStatus = NonNullable<QuoteVersionResponse['approval']>;
 export type QuoteActor = { id: string; name: string; role: 'sales' | 'manager' | 'customer' | 'system'; permissionCodes?: string[] };
-export interface QuoteLine {
-  id: string;
-  productId: string;
-  productName: string;
-  sku: string;
-  catalogPrice: number;
-  quantity: number;
-  unitPrice: number;
-  discountPercent: number;
-  taxPercent: number;
-}
-export interface QuoteContent {
-  name: string;
-  customerId: string;
-  opportunityId: string;
-  validUntil: string;
-  lines: QuoteLine[];
-  paymentTerms: string;
-  deliveryTerms: string;
-  warranty: string;
-  notes: string;
-}
+export type QuoteLine = Required<QuoteLineResponse>;
+export type QuoteContent = Required<Omit<CreateQuoteRequest, 'lines'>> & { lines: QuoteLine[] };
 export interface QuoteVersion extends QuoteContent {
+  totals?: ApiQuoteTotals;
   id: string;
   version: number;
   revision: number;

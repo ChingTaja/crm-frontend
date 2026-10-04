@@ -20,13 +20,13 @@ export function QuoteActions({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         {vm.canRequest && (
-          <Button disabled={dirty} onClick={vm.requestApproval}>
+          <Button disabled={dirty || vm.working} onClick={vm.requestApproval}>
             提交主管審批
           </Button>
         )}
         {vm.canSend && (
-          <Button disabled={dirty} onClick={vm.send}>
-            模擬送出報價
+          <Button disabled={dirty || vm.working} onClick={vm.send}>
+            送出報價
           </Button>
         )}
         {vm.canConvert && (
@@ -36,16 +36,16 @@ export function QuoteActions({
         )}
         {vm.canReview && (
           <>
-            <Button onClick={() => vm.open('approve')}>批准</Button>
-            <Button variant="destructive" onClick={() => vm.open('deny')}>
+            <Button disabled={vm.working || dirty} onClick={() => vm.open('approve')}>批准</Button>
+            <Button variant="destructive" disabled={vm.working || dirty} onClick={() => vm.open('deny')}>
               拒絕審批
             </Button>
           </>
         )}
         {vm.canDecide && (
           <>
-            <Button onClick={() => vm.open('accept')}>接受報價</Button>
-            <Button variant="destructive" onClick={() => vm.open('reject')}>
+            <Button disabled={vm.working || dirty} onClick={() => vm.open('accept')}>接受報價</Button>
+            <Button variant="destructive" disabled={vm.working || dirty} onClick={() => vm.open('reject')}>
               拒絕報價
             </Button>
           </>
@@ -88,7 +88,7 @@ export function QuoteActions({
               <Button type="button" variant="outline" onClick={vm.close}>
                 取消
               </Button>
-              <Button type="submit">確認</Button>
+              <Button type="submit" disabled={vm.working}>{vm.working ? '處理中…' : '確認'}</Button>
             </div>
           </form>
         </DialogContent>

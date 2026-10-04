@@ -74,7 +74,7 @@ export function QuoteEditorView({
             quote={quote}
             selectedId={version.id}
             actor={vm.actor}
-            dirty={editor.dirty}
+            dirty={editor.dirty || editor.isSaving}
             onSelect={onVersion}
           />
         )}
@@ -92,7 +92,7 @@ export function QuoteEditorView({
             )}
           </div>
         )}
-        {quote && version && <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty} />}
+        {quote && version && <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty || editor.isSaving} />}
         {version?.approvalReason && <p className="rounded-lg border p-3 text-sm">審批意見：{version.approvalReason}</p>}
         {version?.decisionAt && (
           <p className="rounded-lg border p-3 text-sm">
@@ -182,6 +182,7 @@ export function QuoteEditorView({
               <Button type="button" variant="outline" onClick={vm.productQuery.reload}>重試</Button>
             </div>
           )}
+          {(vm.customerQuery.error || vm.opportunityQuery.error) && <div role="alert" className="text-sm text-destructive">{vm.customerQuery.error?.message || vm.opportunityQuery.error?.message}<Button type="button" variant="outline" onClick={() => { vm.customerQuery.reload(); vm.opportunityQuery.reload(); }}>重試</Button></div>}
           <QuoteLines editor={editor} products={vm.products} />
           <Card>
             <CardHeader>

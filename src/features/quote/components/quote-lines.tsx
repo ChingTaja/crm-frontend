@@ -3,23 +3,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lookup } from '@/components/ui/lookup';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { ProductResponse } from '../../../api/Api';
+import type { ProductResponse, QuoteTotals as ApiQuoteTotals } from '../../../api/Api';
 import type { QuoteEditor } from '../view-models/use-quote-editor';
 import { money, quoteLineTotals, quoteTotals } from '../models/quote-policy';
 import type { QuoteLine } from '../models/quote-types';
 
-export function QuoteTotals({ lines }: { lines: QuoteLine[] }) {
-  const totals = quoteTotals(lines);
+export function QuoteTotals({ lines, snapshot }: { lines: QuoteLine[]; snapshot?: ApiQuoteTotals }) {
+  const totals = snapshot ?? quoteTotals(lines);
   return (
     <dl className="ml-auto grid w-full max-w-sm grid-cols-2 gap-3 text-sm">
       <dt>未稅原價</dt>
-      <dd className="text-right">{money(totals.subtotalCents)}</dd>
+      <dd className="text-right">{totals.subtotalCents == null ? '—' : money(totals.subtotalCents)}</dd>
       <dt>折扣</dt>
-      <dd className="text-right">− {money(totals.discountCents)}</dd>
+      <dd className="text-right">− {totals.discountCents == null ? '—' : money(totals.discountCents)}</dd>
       <dt>稅金</dt>
-      <dd className="text-right">{money(totals.taxCents)}</dd>
+      <dd className="text-right">{totals.taxCents == null ? '—' : money(totals.taxCents)}</dd>
       <dt className="border-t pt-3 font-semibold">含稅總金額</dt>
-      <dd className="border-t pt-3 text-right text-lg font-semibold">{money(totals.totalCents)}</dd>
+      <dd className="border-t pt-3 text-right text-lg font-semibold">{totals.totalCents == null ? '—' : money(totals.totalCents)}</dd>
     </dl>
   );
 }
@@ -112,7 +112,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
           </table>
         </div>
         {!editor.draft.lines.length && <p className="text-sm text-muted-foreground">尚無明細。</p>}
-        <QuoteTotals lines={editor.draft.lines} />
+        <QuoteTotals lines={editor.draft.lines} snapshot={editor.totals} />
         <p className="text-xs text-muted-foreground">稅金按折後金額計算，金額四捨五入至小數點後兩位。</p>
       </CardContent>
     </Card>

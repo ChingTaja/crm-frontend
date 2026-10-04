@@ -1,7 +1,9 @@
 import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
-import { useState } from 'react';
-import { quoteRepository } from '../models/quote-repository';
+import { useRef, useState } from 'react';
+import { quoteApi, cacheQuote } from '../models/quote-service';
+import { quotePayload } from '../models/quote-api';
+import { useApi } from '@/hooks/use-api';
 import { canEditQuote, canManageQuote, quoteToday } from '../models/quote-policy';
 import type { ProductResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
@@ -66,28 +68,25 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
       ),
     }));
   }
-  function run(action: () => void) {
-    setError('');
+  const create = useApi(quoteApi.create), mutation = useApi(quoteApi.update);
+  const busy = useRef(false);
+  async function save() {
+    if (busy.current || !editable) return;
+    busy.current = true; setError('');
     try {
-      action();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : '操作失敗。');
-    }
-  }
-  function save() {
-    run(() => {
-      if (!editable) throw new Error('此版本不可修改。');
-      if (quote && version) quoteRepository.update(quote.id, version.id, version.revision, draft, actor);
-      else {
-        const created = quoteRepository.create(draft, actor);
-        navigate(`/quotes/${created.id}/edit`);
-      }
-    });
+      const payload = quotePayload(draft, version?.lines.map(line => line.id));
+      const result = quote && version ? await mutation.execute(quote.id, version.id, { ...payload, expectedRevision: version.revision }) : await create.execute(payload);
+      cacheQuote(result);
+      if (!quote) navigate(`/quotes/${result.id}/edit`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : '無法儲存報價。'); }
+    finally { busy.current = false; }
   }
   return {
     draft,
+    isSaving: create.isLoading || mutation.isLoading,
+    totals: !dirty ? version?.totals : undefined,
     error,
-    editable,
+    editable: editable && !create.isLoading && !mutation.isLoading,
     latest,
     dirty,
     update,
