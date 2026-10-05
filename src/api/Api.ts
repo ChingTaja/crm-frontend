@@ -182,7 +182,21 @@ export interface QuoteTotals {
   totalCents?: number;
 }
 
+export interface ReviewerOption {
+  id: string;
+  username: string;
+}
+
+export interface RequestApprovalRequest extends QuoteActionRequest {
+  reviewerId: string;
+}
+
 export interface QuoteVersionResponse {
+  reviewerId?: string;
+  reviewerName?: string;
+  approvalRequestedBy?: string;
+  approvalRequestedAt?: string;
+  allowedActions?: string[];
   id?: string;
   /** @format int32 */
   version?: number;
@@ -1783,7 +1797,30 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/quotes/{id}/versions/{versionId}/request-approval
      * @secure
      */
-    requestApproval: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
+    reviewerOptions: (id: string, query?: { keyword?: string }, params: RequestParams = {}) =>
+      this.request<ReviewerOption[], any>({
+        path: `/api/quotes/${id}/reviewer-options`,
+        method: 'GET',
+        query,
+        format: 'json',
+        ...params,
+      }),
+    findMyQuoteReviews: (query?: { page?: number; size?: number }, params: RequestParams = {}) =>
+      this.request<PageResponseQuoteSummaryResponse, any>({
+        path: '/api/quote-reviews',
+        method: 'GET',
+        query,
+        format: 'json',
+        ...params,
+      }),
+    findMyQuoteReview: (quoteId: string, params: RequestParams = {}) =>
+      this.request<QuoteResponse, any>({
+        path: `/api/quote-reviews/${quoteId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+    requestApproval: (id: string, versionId: string, data: RequestApprovalRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/request-approval`,
         method: 'POST',

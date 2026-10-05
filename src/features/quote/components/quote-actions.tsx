@@ -12,14 +12,16 @@ export function QuoteActions({
   actor,
   dirty,
   reviewOnly = false,
+  onReviewed,
 }: {
   quote: Quote;
   version: QuoteVersion;
   actor: QuoteActor | null;
   dirty: boolean;
   reviewOnly?: boolean;
+  onReviewed?: (quote: Quote) => void;
 }) {
-  const vm = useQuoteActions(quote, version, actor);
+  const vm = useQuoteActions(quote, version, actor, onReviewed);
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -61,7 +63,7 @@ export function QuoteActions({
           </>
         )}
       </div>
-      {version.reviewerId && (
+      {!reviewOnly && version.reviewerId && (
         <p className="text-sm text-muted-foreground">審核人：{version.reviewerName || version.reviewerId}</p>
       )}
       <Dialog
@@ -102,7 +104,7 @@ export function QuoteActions({
                 .filter((option) => option.id !== actor?.id && option.id !== version.createdBy)
                 .map((option) => ({
                   value: option.id,
-                  label: option.displayName ? `${option.displayName}（${option.username}）` : option.username,
+                  label: option.username,
                 }))}
               onValueChange={vm.setReviewerId}
             />

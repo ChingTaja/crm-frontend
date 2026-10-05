@@ -7,6 +7,7 @@ export function useOrderEditViewModel(id: string) {
   const [record, setRecord] = useState<OrderResponse>();
   const [reason, setReason] = useState('');
   const busy = useRef(false);
+  const [success, setSuccess] = useState<string | null>(null);
   const read = useApi(orderApi.get);
   const mutation = useApi(orderApi.updateStatus);
   const { execute, cancel } = read;
@@ -17,15 +18,18 @@ export function useOrderEditViewModel(id: string) {
     return cancel;
   }, [id, execute, cancel]);
   function reload() {
+    setSuccess(null);
     mutation.reset();
     void execute(id)
       .then(setRecord)
       .catch(() => {});
   }
   async function changeStatus(status: UpdateOrderStatusRequest['status']) {
-    if (busy.current || !record?.allowedTransitions?.includes(status) || record.revision == null) return;
+    if (read.isLoading || busy.current || !record?.allowedTransitions?.includes(status) || record.revision == null)
+      return;
     if (status === 'Cancelled' && !reason.trim()) return;
     busy.current = true;
+    setSuccess(null);
     try {
       setRecord(
         await mutation.execute(id, {
@@ -35,6 +39,8 @@ export function useOrderEditViewModel(id: string) {
         })
       );
       setReason('');
+      setSuccess('訂單狀態已更新。');
+      return true;
     } catch {
       /* useApi exposes the backend error; keep the user's reason for retry. */
     } finally {
@@ -43,6 +49,7 @@ export function useOrderEditViewModel(id: string) {
   }
   return {
     record,
+    success,
     reason,
     setReason,
     reload,

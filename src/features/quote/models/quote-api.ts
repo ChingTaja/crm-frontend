@@ -91,7 +91,7 @@ export function createQuoteApi(client: Api<unknown>['api']) {
     await client.deleteQuotes(encodeURIComponent(id), { signal });
   };
   const action =
-    (name: 'send' | 'requestApproval' | 'newVersion') =>
+    (name: 'send' | 'newVersion') =>
     async (signal: AbortSignal, id: string, versionId: string, body: QuoteActionRequest) =>
       quoteRecord(
         await unwrapResponse(client[name](encodeURIComponent(id), encodeURIComponent(versionId), body, params(signal)))
@@ -119,7 +119,17 @@ export function createQuoteApi(client: Api<unknown>['api']) {
         )
       ),
     send: action('send'),
-    requestApproval: action('requestApproval'),
+    requestApproval: async (
+      signal: AbortSignal,
+      id: string,
+      versionId: string,
+      body: import('../../../api/Api').RequestApprovalRequest
+    ) =>
+      quoteRecord(
+        await unwrapResponse(
+          client.requestApproval(encodeURIComponent(id), encodeURIComponent(versionId), body, params(signal))
+        )
+      ),
     newVersion: action('newVersion'),
     review: async (signal: AbortSignal, id: string, versionId: string, body: ReviewQuoteRequest) =>
       quoteRecord(

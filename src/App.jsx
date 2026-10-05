@@ -1,3 +1,4 @@
+import { QuoteReviewView } from './features/quote/views/quote-review-view';
 import { AccessProvider, AccessPage } from './features/access/views/access-provider';
 import { UserView } from './features/access/views/user-view';
 import { getLocation, navigate, resolveRoute, subscribeToLocation } from './lib/router';
@@ -45,6 +46,7 @@ const entityViews = {
   orders: OrderView,
   products: ProductView,
   quotes: QuoteView,
+  'quote-reviews': QuoteReviewView,
 };
 
 function App() {
@@ -70,6 +72,7 @@ function App() {
       orders: '訂單',
       products: '產品',
       quotes: '報價單',
+      'quote-reviews': '待我審核',
     };
     document.title = `${titles[route] ?? `${route.endsWith('/new') ? '新增' : '編輯'}${titles[route.split('/')[0]]}`} | Connect CRM`;
   }, [route]);

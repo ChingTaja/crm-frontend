@@ -10,20 +10,20 @@ import { canManageQuote } from '../models/quote-policy';
 import type { Quote, QuoteActor, QuoteVersion } from '../models/quote-types';
 
 type Decision = 'approve' | 'deny' | 'accept' | 'reject';
-export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: QuoteActor | null) {
+export function useQuoteActions(
+  quote: Quote,
+  version: QuoteVersion,
+  actor: QuoteActor | null,
+  onReviewed?: (quote: Quote) => void
+) {
   const { can } = useAccess();
   const pending = useRef(false);
   const [working, setWorking] = useState(false);
   const workflow = useApi(
-    async (
-      signal: AbortSignal,
-      action: 'review' | 'decision' | 'send' | 'requestApproval',
-      decisionValue?: Decision,
-      note?: string
-    ) => {
+    async (signal: AbortSignal, action: 'review' | 'decision' | 'send', decisionValue?: Decision, note?: string) => {
       const body = { expectedRevision: version.revision };
       if (action === 'review')
-        return quoteApi.review(signal, quote.id, version.id, {
+        return quoteReviewApi.review(signal, quote.id, version.id, {
           ...body,
           decision: decisionValue === 'approve' ? 'approved' : 'rejected',
           reason: note,
@@ -80,7 +80,10 @@ export function useQuoteActions(quote: Quote, version: QuoteVersion, actor: Quot
         reason.trim()
       );
       setDecision(null);
-      cacheQuote(result);
+      if (decision === 'approve' || decision === 'deny') {
+        if (onReviewed) onReviewed(result);
+        else cacheQuote(await quoteApi.get(new AbortController().signal, quote.id));
+      } else cacheQuote(result);
     });
   }
   return {

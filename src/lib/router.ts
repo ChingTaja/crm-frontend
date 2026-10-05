@@ -1,4 +1,4 @@
-const entities = ['customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes'];
+const entities = ['customers', 'contacts', 'leads', 'opportunities', 'orders', 'products', 'quotes', 'quote-reviews'];
 const pages = ['login', 'forgot-password', 'reset-password', 'users', 'roles', 'dashboard', ...entities];
 
 export function resolveRoute(pathname: string) {
