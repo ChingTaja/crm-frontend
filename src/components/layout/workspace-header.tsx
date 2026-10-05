@@ -11,9 +11,14 @@ export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => vo
   async function logout() {
     if (busy.current) return;
     busy.current = true;
-    try { await request.execute(); onReturnToLogin(); }
-    catch { /* The server error remains visible; do not pretend logout succeeded. */ }
-    finally { busy.current = false; }
+    try {
+      await request.execute();
+      onReturnToLogin();
+    } catch {
+      /* The server error remains visible; do not pretend logout succeeded. */
+    } finally {
+      busy.current = false;
+    }
   }
   return (
     <header className="border-b bg-white px-4 py-4 sm:px-10">
@@ -28,11 +33,18 @@ export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => vo
           </span>
           Connect <span className="text-xs font-normal tracking-widest text-muted-foreground">CRM</span>
         </AppLink>
+        <AppLink href="/quote-reviews" className="ml-auto mr-4 text-sm hover:underline">
+          待我審核
+        </AppLink>
         <Button variant="outline" disabled={request.isLoading} onClick={logout}>
           <LogOut /> {request.isLoading ? '登出中…' : '登出'}
         </Button>
       </div>
-      {request.error && <p role="alert" className="mx-auto mt-3 max-w-6xl text-sm text-destructive">登出失敗：{request.error.message}</p>}
+      {request.error && (
+        <p role="alert" className="mx-auto mt-3 max-w-6xl text-sm text-destructive">
+          登出失敗：{request.error.message}
+        </p>
+      )}
     </header>
   );
 }

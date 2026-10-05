@@ -92,23 +92,28 @@ export function QuoteEditorView({
             )}
           </div>
         )}
-        {quote && version && <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty || editor.isSaving} />}
+        {quote && version && (
+          <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty || editor.isSaving} />
+        )}
         {version?.approvalReason && <p className="rounded-lg border p-3 text-sm">審批意見：{version.approvalReason}</p>}
         {version?.decisionAt && (
           <p className="rounded-lg border p-3 text-sm">
-            客戶決策：{version.status} · {version.decisionBy} · {new Date(version.decisionAt).toLocaleString('zh-TW')}
+            客戶決策：{version.status}· {new Date(version.decisionAt).toLocaleString('zh-TW')}
             <br />
             原因／備註：{version.decisionReason || '未填寫'}
           </p>
         )}
-        <aside aria-label="主管審批注意事項" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-          <p className="font-semibold">主管審批注意事項</p>
+        <aside
+          aria-label="審核注意事項"
+          className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
+        >
+          <p className="font-semibold">審核注意事項</p>
           <p className="mt-1 leading-relaxed">
             任一明細折扣<strong>超過 {quotePolicy.discountThresholdPercent}%</strong>，或含稅總金額
-            <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>，需要主管審批，批准後才能送出報價單。
+            <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>，需要指定審核人審核，批准後才能送出報價單。
           </p>
           {(requiresQuoteApproval(d) || version?.requiresReapproval) && (
-            <p className="mt-2 font-semibold">此版本需要主管審批。</p>
+            <p className="mt-2 font-semibold">此版本需要指定審核人審核。</p>
           )}
         </aside>
         <p className="text-xs text-muted-foreground">有效期限以台北時間當日 23:59:59 為止。</p>
@@ -179,10 +184,26 @@ export function QuoteEditorView({
           {vm.productQuery.error && (
             <div role="alert" className="text-sm text-destructive">
               無法載入產品：{vm.productQuery.error.message}
-              <Button type="button" variant="outline" onClick={vm.productQuery.reload}>重試</Button>
+              <Button type="button" variant="outline" onClick={vm.productQuery.reload}>
+                重試
+              </Button>
             </div>
           )}
-          {(vm.customerQuery.error || vm.opportunityQuery.error) && <div role="alert" className="text-sm text-destructive">{vm.customerQuery.error?.message || vm.opportunityQuery.error?.message}<Button type="button" variant="outline" onClick={() => { vm.customerQuery.reload(); vm.opportunityQuery.reload(); }}>重試</Button></div>}
+          {(vm.customerQuery.error || vm.opportunityQuery.error) && (
+            <div role="alert" className="text-sm text-destructive">
+              {vm.customerQuery.error?.message || vm.opportunityQuery.error?.message}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  vm.customerQuery.reload();
+                  vm.opportunityQuery.reload();
+                }}
+              >
+                重試
+              </Button>
+            </div>
+          )}
           <QuoteLines editor={editor} products={vm.products} />
           <Card>
             <CardHeader>

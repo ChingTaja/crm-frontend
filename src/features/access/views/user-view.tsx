@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
+const defaultRoleId = '055a46a66-27a6-4e6f-8e06-de8f448f935f';
+
 export function UserView() {
   const access = useAccess();
   const query = usePaginatedQuery(userApi.list);
@@ -28,8 +30,11 @@ export function UserView() {
   const optionsRequest = useApi(roleApi.options);
   const { execute: loadOptions, cancel: cancelOptions } = optionsRequest;
   const canLoadOptions = access.can('users.create') || access.can('users.update') || access.can('users.assign-role');
-  useEffect(() => { if (canLoadOptions) void loadOptions().catch(() => {}); return cancelOptions; }, [loadOptions, cancelOptions, canLoadOptions]);
-  const roleOptions = (optionsRequest.data ?? []).map(role => ({ value: role.id, label: role.name }));
+  useEffect(() => {
+    if (canLoadOptions) void loadOptions().catch(() => {});
+    return cancelOptions;
+  }, [loadOptions, cancelOptions, canLoadOptions]);
+  const roleOptions = (optionsRequest.data ?? []).map((role) => ({ value: role.id, label: role.name }));
   const fields = metadataFields.map((field) =>
     ['role', 'roleId', 'role.id'].includes(field.apiFieldName ?? '') ? { ...field, options: roleOptions } : field
   );
@@ -87,7 +92,18 @@ export function UserView() {
       ) : (
         <EntityList vm={vm} dataNotice={null} />
       )}
-      {optionsRequest.error && <p role="alert">{optionsRequest.error.message}<Button onClick={() => { void loadOptions().catch(() => {}); }}>重新載入角色</Button></p>}
+      {optionsRequest.error && (
+        <p role="alert">
+          {optionsRequest.error.message}
+          <Button
+            onClick={() => {
+              void loadOptions().catch(() => {});
+            }}
+          >
+            重新載入角色
+          </Button>
+        </p>
+      )}
       <Dialog
         open={editingId !== null}
         onOpenChange={(open) => {
@@ -173,7 +189,7 @@ function UserForm({
     username: user?.username ?? '',
     email: user?.email ?? '',
     password: '',
-    roleId: user?.role?.id ?? '',
+    roleId: user ? (user.role?.id ?? '') : defaultRoleId,
   });
   const create = useApi(userApi.create);
   const update = useApi(userApi.update);
@@ -195,8 +211,12 @@ function UserForm({
       setValidationError('請輸入帳號。');
       return;
     }
-    if (user && !draft.roleId) {
+    if (!draft.roleId) {
       setValidationError('請選擇角色。');
+      return;
+    }
+    if (!user && !roleOptions.some((role) => role.value === draft.roleId)) {
+      setValidationError('請選擇可指派的角色。');
       return;
     }
     setValidationError('');
@@ -204,12 +224,16 @@ function UserForm({
     onSaving(true);
     try {
       const fields = { username: draft.username.trim(), email: draft.email.trim() };
-      if (user?.id) await update.execute(user.id, { ...fields, ...(canAssign && draft.roleId !== user.role?.id ? { roleId: draft.roleId } : {}) });
+      if (user?.id)
+        await update.execute(user.id, {
+          ...fields,
+          ...(canAssign && draft.roleId !== user.role?.id ? { roleId: draft.roleId } : {}),
+        });
       else
         await create.execute({
           ...fields,
           password: draft.password,
-          ...(draft.roleId ? { roleId: draft.roleId } : {}),
+          roleId: draft.roleId,
         });
       setDraft({ username: '', email: '', password: '' });
       onSaved();
@@ -222,8 +246,10 @@ function UserForm({
   }
   return (
     <form onSubmit={submit} className="space-y-5" aria-busy={isSaving}>
-      <DialogTitle>{user ? editable ? '修改帳號' : '查看帳號' : '新增帳號'}</DialogTitle>
-      <DialogDescription>{!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}</DialogDescription>
+      <DialogTitle>{user ? (editable ? '修改帳號' : '查看帳號') : '新增帳號'}</DialogTitle>
+      <DialogDescription>
+        {!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}
+      </DialogDescription>
       <fieldset disabled={isSaving || !editable} className="space-y-4">
         <label className="grid gap-2">
           帳號
@@ -263,14 +289,14 @@ function UserForm({
           </label>
         )}
         <div className="space-y-2">
-          <p>角色{user ? ' *' : ''}</p>
+          <p>角色 *</p>
           <Lookup
             label="角色"
-            required={!!user}
+            required
             disabled={isSaving || !editable || (!!user && !canAssign)}
             value={draft.roleId ?? ''}
             onValueChange={(roleId) => setDraft({ ...draft, roleId })}
-            options={[...(!user ? [{ value: '', label: '預設 USER' }] : []), ...options]}
+            options={options}
           />
           {!options.length && <p className="text-sm text-muted-foreground">目前沒有可選的角色。</p>}
         </div>
@@ -284,9 +310,11 @@ function UserForm({
         <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
           取消
         </Button>
-        {editable && <Button type="submit" disabled={isSaving}>
-          {isSaving ? '儲存中…' : '儲存'}
-        </Button>}
+        {editable && (
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? '儲存中…' : '儲存'}
+          </Button>
+        )}
       </div>
     </form>
   );

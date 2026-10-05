@@ -1,10 +1,21 @@
-import type { QuoteLineResponse, QuoteVersionResponse, CreateQuoteRequest, QuoteTotals as ApiQuoteTotals } from '../../../api/Api';
+import type { ReviewAssignment } from './quote-review-contract';
+import type {
+  QuoteLineResponse,
+  QuoteVersionResponse,
+  CreateQuoteRequest,
+  QuoteTotals as ApiQuoteTotals,
+} from '../../../api/Api';
 export type QuoteStatus = NonNullable<QuoteVersionResponse['status']>;
 export type ApprovalStatus = NonNullable<QuoteVersionResponse['approval']>;
-export type QuoteActor = { id: string; name: string; role: 'sales' | 'manager' | 'customer' | 'system'; permissionCodes?: string[] };
+export type QuoteActor = {
+  id: string;
+  name: string;
+  role: 'sales' | 'manager' | 'customer' | 'system';
+  permissionCodes?: string[];
+};
 export type QuoteLine = Required<QuoteLineResponse>;
 export type QuoteContent = Required<Omit<CreateQuoteRequest, 'lines'>> & { lines: QuoteLine[] };
-export interface QuoteVersion extends QuoteContent {
+export interface QuoteVersion extends QuoteContent, ReviewAssignment {
   totals?: ApiQuoteTotals;
   id: string;
   version: number;
