@@ -35,11 +35,15 @@ export function UserView() {
     return cancelOptions;
   }, [loadOptions, cancelOptions, canLoadOptions]);
   const roleOptions = (optionsRequest.data ?? []).map((role) => ({ value: role.id, label: role.name }));
-  const fields = metadataFields.map((field) =>
+  const baseFields = metadataFields.map((field) =>
     ['role', 'roleId', 'role.id'].includes(field.apiFieldName ?? '') ? { ...field, options: roleOptions } : field
   );
+  const fields = [
+    ...baseFields.filter(field => !['enabled', 'accountStatus'].includes(field.apiFieldName ?? '')),
+    { apiFieldName: 'accountStatus', label: '帳號狀態', type: 'option' as const, options: [{ value: 'enabled', label: '啟用' }, { value: 'disabled', label: '停用' }, { value: 'unknown', label: '尚未支援' }] },
+  ];
   const rows = metadataRows(
-    query.records.map((user) => ({ ...user, name: user.username, roleId: user.role?.id })),
+    query.records.map((user) => ({ ...user, name: user.username, roleId: user.role?.id, accountStatus: user.enabled === true ? 'enabled' : user.enabled === false ? 'disabled' : 'unknown' })),
     fields
   );
   async function removeMany(ids: string[]) {
@@ -63,10 +67,10 @@ export function UserView() {
   function reload() {
     void Promise.all([metadata.reload(), query.reload()]).catch(() => {});
   }
-  function saved() {
+  function saved(message = '帳號已儲存。') {
     setEditingId(null);
     setSaving(false);
-    setNotice('帳號已儲存。');
+    setNotice(message);
     access.refresh();
     list.clearSelection();
     void query.reload().catch(() => {});
@@ -137,7 +141,7 @@ function UserEditor({
   id: string;
   roleOptions: LookupOption[];
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (message?: string) => void;
   onSaving: (value: boolean) => void;
 }) {
   const { execute, cancel, data, error } = useApi(userApi.get);
@@ -179,7 +183,7 @@ function UserForm({
   user?: UserResponse;
   roleOptions: LookupOption[];
   onCancel: () => void;
-  onSaved: () => void;
+  onSaved: (message?: string) => void;
   onSaving: (value: boolean) => void;
 }) {
   const access = useAccess();
@@ -193,9 +197,14 @@ function UserForm({
   });
   const create = useApi(userApi.create);
   const update = useApi(userApi.update);
+  const statusMutation = useApi(userApi.updateStatus);
+  const [confirmStatus, setConfirmStatus] = useState(false);
+  const statusSupported = typeof user?.enabled === 'boolean';
+  const isSelf = !!user && user.id === access.me?.id;
+  const canChangeStatus = access.can('users.update') && !isSelf && statusSupported;
   const [validationError, setValidationError] = useState('');
   const busy = useRef(false);
-  const isSaving = create.isLoading || update.isLoading;
+  const isSaving = create.isLoading || update.isLoading || statusMutation.isLoading;
   const options = [
     ...new Map(
       [
@@ -206,7 +215,7 @@ function UserForm({
   ];
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current || !editable) return;
+    if (busy.current || !editable || confirmStatus) return;
     if (!draft.username.trim()) {
       setValidationError('請輸入帳號。');
       return;
@@ -244,12 +253,34 @@ function UserForm({
       onSaving(false);
     }
   }
+  async function changeStatus() {
+    if (busy.current || !canChangeStatus || !user?.id) return;
+    busy.current = true;
+    onSaving(true);
+    try {
+      await statusMutation.execute(user.id, { enabled: !user.enabled });
+      onSaved(user.enabled ? '帳號已停用。' : '帳號已重新啟用。');
+    } catch {
+      // Keep the confirmation open so backend errors are visible.
+    } finally {
+      busy.current = false;
+      onSaving(false);
+    }
+  }
   return (
     <form onSubmit={submit} className="space-y-5" aria-busy={isSaving}>
       <DialogTitle>{user ? (editable ? '修改帳號' : '查看帳號') : '新增帳號'}</DialogTitle>
       <DialogDescription>
         {!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}
       </DialogDescription>
+      {user && <section className="space-y-3 rounded-xl border bg-muted/30 p-4" aria-label="帳號狀態">
+        <div className="flex items-center justify-between gap-3"><h3 className="font-medium">帳號狀態</h3><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${user.enabled === false ? 'bg-red-50 text-red-700' : user.enabled === true ? 'bg-emerald-50 text-emerald-700' : 'bg-muted text-muted-foreground'}`}>{user.enabled === true ? '啟用' : user.enabled === false ? '停用' : '尚未支援'}</span></div>
+        <p className="text-xs leading-relaxed text-muted-foreground">停用後將無法登入，既有資料與操作紀錄仍會保留。</p>
+        {!statusSupported && <p className="text-xs text-muted-foreground">後端尚未提供帳號狀態。</p>}
+        {isSelf && <p className="text-xs text-muted-foreground">無法停用目前登入的帳號。</p>}
+        {canChangeStatus && !confirmStatus && <Button type="button" variant={user.enabled ? 'destructive' : 'outline'} disabled={isSaving} onClick={() => { statusMutation.reset(); setConfirmStatus(true); }}>{user.enabled ? '停用帳號' : '重新啟用'}</Button>}
+        {confirmStatus && <div className="space-y-3 border-t pt-3"><p className="text-sm">確定要{user.enabled ? '停用' : '重新啟用'}帳號「{user.username}」嗎？此操作不會儲存下方尚未儲存的修改。</p>{statusMutation.error && <p role="alert" className="text-sm text-destructive">{statusMutation.error.message}</p>}<div className="flex gap-2"><Button type="button" variant="outline" disabled={isSaving} onClick={() => setConfirmStatus(false)}>返回</Button><Button type="button" variant={user.enabled ? 'destructive' : 'default'} disabled={isSaving} onClick={() => void changeStatus()}>{statusMutation.isLoading ? '更新中…' : user.enabled ? '確認停用' : '確認啟用'}</Button></div></div>}
+      </section>}
       <fieldset disabled={isSaving || !editable} className="space-y-4">
         <label className="grid gap-2">
           帳號
@@ -311,7 +342,7 @@ function UserForm({
           取消
         </Button>
         {editable && (
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving || confirmStatus}>
             {isSaving ? '儲存中…' : '儲存'}
           </Button>
         )}

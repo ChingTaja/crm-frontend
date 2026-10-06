@@ -31,7 +31,13 @@ export interface RoleResponse {
   name: string;
 }
 
+/** Account status contract; keep in sync with the backend OpenAPI schema. */
+export interface UpdateUserStatusRequest {
+  enabled: boolean;
+}
+
 export interface UserResponse {
+  enabled?: boolean;
   id?: string;
   username?: string;
   email?: string;
@@ -1247,6 +1253,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UserResponse, any>({
         path: `/api/users/${id}`,
         method: 'PUT',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /** PATCH /api/users/{id}/status — pending backend implementation. */
+    updateUserStatus: (id: string, data: UpdateUserStatusRequest, params: RequestParams = {}) =>
+      this.request<UserResponse, any>({
+        path: `/api/users/${id}/status`,
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,

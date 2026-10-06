@@ -1,4 +1,4 @@
-import type { Api, RegisterRequest, UpdateUserRequest, UserResponse } from '../../../api/Api';
+import type { Api, RegisterRequest, UpdateUserRequest, UpdateUserStatusRequest, UserResponse } from '../../../api/Api';
 import { unwrapResponse, deleteRecords } from '../../../lib/api-operations';
 
 function userRecord(record: UserResponse) {
@@ -28,6 +28,12 @@ export function createUserApi(client: Api<unknown>['api']) {
       unwrapResponse(client.createUsers(data, { signal, format: 'json' })),
     update: (signal: AbortSignal, id: string, data: UpdateUserRequest) =>
       unwrapResponse(client.updateUsers(encodeURIComponent(id), data, { signal, format: 'json' })),
+    async updateStatus(signal: AbortSignal, id: string, data: UpdateUserStatusRequest) {
+      const record = userRecord(await unwrapResponse(client.updateUserStatus(encodeURIComponent(id), data, { signal, format: 'json' })));
+      if (record.id !== id || record.enabled !== data.enabled)
+        throw new Error('帳號狀態回傳格式不正確，請重新載入確認。');
+      return record;
+    },
     remove,
     removeMany: (signal: AbortSignal, ids: string[]) => deleteRecords(signal, ids, remove),
   };
