@@ -3,7 +3,7 @@ import { useLeadsQuery } from '@/features/lead/view-models/use-leads-query';
 import { useEntityFields } from '@/hooks/use-entity-fields';
 import { metadataRows } from '@/lib/entity-fields';
 import { useEntityList } from '@/hooks/use-entity-list';
-import { opportunityRepository } from '../models/opportunity-model';
+import { opportunityOutcome, opportunityStageLabel, opportunityRepository } from '../models/opportunity-model';
 import { useApi } from '@/hooks/use-api';
 import { opportunityApi } from '../models/opportunity-service';
 import { usePaginatedQuery } from '@/hooks/use-paginated-query';
@@ -28,11 +28,17 @@ export function useOpportunityViewModel() {
   const fields = metadata.fields.map((field) => {
     const records =
       field.apiFieldName === 'customerId' ? customers.records : field.apiFieldName === 'leadId' ? leads.records : null;
+    if (field.apiFieldName === 'stage') return { ...field, options: field.options?.map(option => ({ ...option, label: opportunityStageLabel(option.value) })) };
     return records
       ? { ...field, options: records.map((record) => ({ value: record.id ?? '', label: record.name ?? '' })) }
       : field;
   });
-  const rows = metadataRows(opportunities, fields);
+  const rows = metadataRows(opportunities, fields).map((row, index) => ({
+    ...row,
+    displayValues: row.displayValues.map((value, fieldIndex) => fields[fieldIndex].apiFieldName === 'stage'
+      ? `${opportunityStageLabel(opportunities[index].stage)}${opportunityOutcome(opportunities[index].stage) === 'lost' ? ` · ${opportunities[index].closeDescription || '未填寫理由'}` : ''}`
+      : value),
+  }));
   const list = useEntityList('opportunities', '商機', fields, rows, removeMany, true, query.pagination);
   return {
     ...list,

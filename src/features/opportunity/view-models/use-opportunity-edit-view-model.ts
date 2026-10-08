@@ -17,7 +17,6 @@ export function useOpportunityEditViewModel(record?: OpportunityResponse) {
     amount: record?.amount ?? 0,
     expectedCloseDate: record?.expectedCloseDate ?? '',
     owner: record?.owner ?? '',
-    stage: record?.stage ?? '需求確認',
   };
   const form = useEntityForm('opportunities', initial, async (draft) => {
     if (!draft.customerId) throw new Error('請選擇所屬客戶。');

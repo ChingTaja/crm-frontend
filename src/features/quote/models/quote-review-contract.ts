@@ -1,7 +1,7 @@
 import type { QuoteVersionResponse } from '../../../api/Api';
 export type {
   ReviewerOption,
-  RequestApprovalRequest as RequestQuoteReview,
+  RequestQuoteApprovalRequest as RequestQuoteReview,
   QuoteResponse as AssignedQuoteResponse,
 } from '../../../api/Api';
 export type ReviewAssignment = Pick<

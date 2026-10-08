@@ -101,6 +101,8 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       const data = await unwrapResponse(client.findAllQuotes(query, params(signal)));
       if (!Array.isArray(data?.content) || !Number.isInteger(data.totalElements) || !Number.isInteger(data.totalPages))
         throw new Error('報價列表回傳格式不正確。');
+      if (query?.opportunityId && data.content.some(record => record.opportunityId !== query.opportunityId))
+        throw new Error('後端尚未正確套用商機報價篩選，請確認 API 支援 opportunityId。');
       return data;
     },
     get: async (signal: AbortSignal, id: string) =>
@@ -123,7 +125,7 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       signal: AbortSignal,
       id: string,
       versionId: string,
-      body: import('../../../api/Api').RequestApprovalRequest
+      body: import('../../../api/Api').RequestQuoteApprovalRequest
     ) =>
       quoteRecord(
         await unwrapResponse(

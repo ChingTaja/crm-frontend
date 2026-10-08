@@ -7,7 +7,7 @@ const client = createGeneratedApi(import.meta.env.VITE_API_BASE_URL || '/api');
 export const quoteReviewApi = {
   async reviewers(signal: AbortSignal, id: string, keyword: string) {
     const data = await unwrapResponse(
-      client.api.reviewerOptions(encodeURIComponent(id), { keyword: keyword.trim() }, { signal })
+      client.api.reviewerOptions(encodeURIComponent(id), { keyword: keyword.trim() }, { signal, format: 'json' })
     );
     if (!Array.isArray(data) || data.some((item) => !item.id || !item.username))
       throw new Error('審核人選項格式不正確。');
@@ -22,12 +22,12 @@ export const quoteReviewApi = {
     );
     const result = quoteRecord(data);
     const version = result.versions.find((v) => v.id === versionId);
-    if (version?.reviewerId !== body.reviewerId || version.approval !== 'Pending')
+    if (!version || version.reviewerId !== body.reviewerId || version.approval !== 'Pending')
       throw new Error('後端未確認指定審核人，請重新載入確認送審結果。');
     return result;
   },
   async list(signal: AbortSignal, query: { page: number; size: number }) {
-    const data = await unwrapResponse(client.api.findMyQuoteReviews(query, { signal }));
+    const data = await unwrapResponse(client.api.findMyQuoteReviews(query, { signal, format: 'json' }));
     if (!Array.isArray(data.content) || !Number.isInteger(data.totalPages)) throw new Error('待審核列表格式不正確。');
     return data;
   },
@@ -39,6 +39,6 @@ export const quoteReviewApi = {
     );
   },
   async get(signal: AbortSignal, id: string) {
-    return quoteRecord(await unwrapResponse(client.api.findMyQuoteReview(encodeURIComponent(id), { signal })));
+    return quoteRecord(await unwrapResponse(client.api.findMyQuoteReview(encodeURIComponent(id), { signal, format: 'json' })));
   },
 };

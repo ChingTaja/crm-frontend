@@ -1,3 +1,5 @@
+import { canCreateOpportunityQuote } from '@/features/opportunity/models/opportunity-model';
+import { opportunityApi } from '@/features/opportunity/models/opportunity-service';
 import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
 import { useRef, useState } from 'react';
@@ -5,10 +7,10 @@ import { quoteApi, cacheQuote } from '../models/quote-service';
 import { quotePayload } from '../models/quote-api';
 import { useApi } from '@/hooks/use-api';
 import { canEditQuote, canManageQuote, quoteToday } from '../models/quote-policy';
-import type { ProductResponse } from '../../../api/Api';
+import type { ProductResponse, OpportunityResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
 
-export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?: QuoteVersion) {
+export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?: QuoteVersion, initialOpportunity?: OpportunityResponse, onCreated?: (quote: Quote) => void) {
   const { can } = useAccess();
   const [initial] = useState<QuoteContent>(() =>
     version
@@ -25,8 +27,8 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
         })
       : {
           name: '',
-          customerId: '',
-          opportunityId: '',
+          customerId: initialOpportunity?.customerId ?? '',
+          opportunityId: initialOpportunity?.id ?? '',
           validUntil: quoteToday(new Date(Date.now() + 30 * 86400000)),
           lines: [],
           paymentTerms: '確認訂單後 30 日內付款',
@@ -38,9 +40,10 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState('');
   const latest = !quote || quote.versions[quote.versions.length - 1]?.id === version?.id;
-  const editable = can(quote ? 'quotes.update' : 'quotes.create') && canManageQuote(actor) && latest && (!version || canEditQuote(version));
+  const editable = (quote ? !!version?.opportunityId : canCreateOpportunityQuote(initialOpportunity)) && can(quote ? 'quotes.update' : 'quotes.create') && canManageQuote(actor) && latest && (!version || canEditQuote(version));
   const dirty = JSON.stringify(initial) !== JSON.stringify(draft);
   function update<K extends keyof QuoteContent>(field: K, value: QuoteContent[K]) {
+    if (field === 'customerId' || field === 'opportunityId') return;
     setDraft((current) => ({ ...current, [field]: value, ...(field === 'customerId' ? { opportunityId: '' } : {}) }));
     setError('');
   }
@@ -69,24 +72,28 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
     }));
   }
   const create = useApi(quoteApi.create), mutation = useApi(quoteApi.update);
+  const parentCheck = useApi(opportunityApi.get);
   const busy = useRef(false);
   async function save() {
     if (busy.current || !editable) return;
     busy.current = true; setError('');
     try {
+      if (!draft.opportunityId || !draft.customerId) throw new Error('報價必須隸屬商機及其客戶。');
+      if (!quote && !canCreateOpportunityQuote(await parentCheck.execute(draft.opportunityId))) throw new Error('商機已結案或狀態已變更，無法新增報價單。');
       const payload = quotePayload(draft, version?.lines.map(line => line.id));
       const result = quote && version ? await mutation.execute(quote.id, version.id, { ...payload, expectedRevision: version.revision }) : await create.execute(payload);
       cacheQuote(result);
-      if (!quote) navigate(`/quotes/${result.id}/edit`);
+      if (!quote && onCreated) onCreated(result);
+      else if (!quote) navigate(`/quotes/${encodeURIComponent(result.id)}/edit${initialOpportunity?.id ? `?opportunityId=${encodeURIComponent(initialOpportunity.id)}` : ''}`);
     } catch (cause) { setError(cause instanceof Error ? cause.message : '無法儲存報價。'); }
     finally { busy.current = false; }
   }
   return {
     draft,
-    isSaving: create.isLoading || mutation.isLoading,
+    isSaving: create.isLoading || mutation.isLoading || parentCheck.isLoading,
     totals: !dirty ? version?.totals : undefined,
     error,
-    editable: editable && !create.isLoading && !mutation.isLoading,
+    editable: editable && !create.isLoading && !mutation.isLoading && !parentCheck.isLoading,
     latest,
     dirty,
     update,

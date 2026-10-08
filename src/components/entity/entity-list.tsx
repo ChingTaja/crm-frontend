@@ -23,10 +23,18 @@ export function EntityList({
   vm,
   dataNotice = '示範資料 · 尚未連接後端',
   allowCreate = true,
+  allowDelete = true,
+  headingTitle,
+  emptyMessage = '沒有符合條件的資料',
+  recordHref,
 }: {
   vm: EntityListViewModel;
   dataNotice?: string | null;
   allowCreate?: boolean;
+  allowDelete?: boolean;
+  headingTitle?: string;
+  emptyMessage?: string;
+  recordHref?: (id: string) => string;
 }) {
   const { can } = useAccess();
   const { entity } = vm;
@@ -35,11 +43,11 @@ export function EntityList({
     <>
       <EntityPageHeader>
         <EntityPageTitle>
-          全部{vm.title}
+          {headingTitle ?? `全部${vm.title}`}
           <span className="text-sm text-muted-foreground">· {vm.filteredTotal}</span>
         </EntityPageTitle>
         <div className="ml-auto flex items-center gap-2">
-          {can(`${entity}.delete`) && (
+          {allowDelete && can(`${entity}.delete`) && (
             <DeleteRecordsButton title={vm.title} records={vm.selectedRecords} onDelete={vm.deleteSelected} />
           )}
           {allowCreate && can(`${entity}.create`) && (
@@ -131,7 +139,7 @@ export function EntityList({
                 return (
                   <EntityTableCell key={field}>
                     {isName ? (
-                      <AppLink className="font-medium hover:underline" href={`/${entity}/${row.id}/edit`}>
+                      <AppLink className="font-medium hover:underline" href={recordHref?.(row.id) ?? `/${entity}/${row.id}/edit`}>
                         {value || '—'}
                       </AppLink>
                     ) : (
@@ -145,7 +153,7 @@ export function EntityList({
           {!vm.rows.length && (
             <tr>
               <EntityTableCell colSpan={visibleFields.length + 1} className="py-10 text-center text-muted-foreground">
-                沒有符合條件的資料
+                {emptyMessage}
               </EntityTableCell>
             </tr>
           )}

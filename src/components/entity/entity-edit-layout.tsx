@@ -7,6 +7,7 @@ import { EntityPageHeader, EntityPageTitle } from '@/components/layout/entity-pa
 interface EntityEditLayoutProps {
   title: string;
   isNew: boolean;
+  readOnly?: boolean;
   formId: string;
   form: {
     back: () => void;
@@ -23,6 +24,7 @@ interface EntityEditLayoutProps {
 export function EntityEditLayout({
   title,
   isNew,
+  readOnly = false,
   formId,
   form,
   headingAction,
@@ -32,7 +34,7 @@ export function EntityEditLayout({
 }: EntityEditLayoutProps) {
   const { can } = useAccess();
   const entity = formId.replace(/-form$/, '');
-  const editable = can(
+  const editable = !readOnly && can(
     `${entity === 'opportunity' ? 'opportunities' : entity === 'company' ? 'customers' : entity + 's'}.${isNew ? 'create' : 'update'}`
   );
   return (

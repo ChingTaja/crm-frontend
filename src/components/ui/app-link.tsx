@@ -4,7 +4,8 @@ import { navigate } from '@/lib/router';
 
 export function AppLink({ onClick, ...props }: ComponentProps<'a'>) {
   const { can } = useAccess();
-  const entity = props.href?.split('/')[1];
+  const target = props.href ? new URL(props.href, window.location.href) : undefined;
+  const entity = target?.pathname.split('/')[1];
   const protectedEntities = [
     'customers',
     'contacts',

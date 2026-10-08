@@ -16,10 +16,11 @@ interface QuoteVersionManagerProps {
   selectedId: string;
   actor: QuoteActor | null;
   dirty: boolean;
+  readOnly?: boolean;
   onSelect: (id: string) => void;
 }
 
-export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect }: QuoteVersionManagerProps) {
+export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect, readOnly = false }: QuoteVersionManagerProps) {
   const vm = useQuoteVersions(quote, selectedId, actor, dirty, onSelect);
   return (
     <Card>
@@ -33,7 +34,7 @@ export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect 
             新版本會複製最新的 v{vm.latestNumber}，並保留在這張報價單中。點選版本即可查看下方內容。
           </CardDescription>
         </div>
-        {vm.canCreateVersion && <Button type="button" variant="outline" disabled={!!vm.blockedReason} onClick={vm.createVersion}>
+        {vm.canCreateVersion && !readOnly && <Button type="button" variant="outline" disabled={!!vm.blockedReason} onClick={vm.createVersion}>
           <Plus />
           建立 v{vm.nextNumber}
         </Button>}

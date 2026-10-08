@@ -166,6 +166,7 @@ export function createQuoteRepository(
         version: 1,
         revision: 0,
         status: 'Draft',
+        allowedActions: [],
         approval: requiresQuoteApproval(data) ? 'Required' : 'NotRequired',
         createdAt: now().toISOString(),
         createdBy: actor?.name,

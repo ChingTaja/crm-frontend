@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import type { OpportunityResponse } from '../../../api/Api';
 import { navigate } from '@/lib/router';
 import { ArrowLeft, RotateCcw, Save, LockKeyhole } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,40 +22,54 @@ export function QuoteEditorView({
   quote,
   version,
   onVersion,
+  initialOpportunity,
+  backHref = '/opportunities',
+  onCreated,
+  onDirtyChange,
+  onSavingChange,
+  embedded = false,
 }: {
   vm: QuoteViewModel;
   quote?: Quote;
   version?: QuoteVersion;
   onVersion: (id: string) => void;
+  initialOpportunity?: OpportunityResponse;
+  backHref?: string;
+  onCreated?: (quote: Quote) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onSavingChange?: (saving: boolean) => void;
+  embedded?: boolean;
 }) {
-  const editor = useQuoteEditor(vm.actor, quote, version);
+  const editor = useQuoteEditor(vm.actor, quote, version, initialOpportunity, onCreated);
   const d = editor.draft;
+  useEffect(() => { onSavingChange?.(editor.isSaving); }, [onSavingChange, editor.isSaving]);
+  useEffect(() => { onDirtyChange?.(editor.dirty || editor.isSaving); }, [onDirtyChange, editor.dirty, editor.isSaving]);
   return (
     <>
       <EntityPageHeader>
         <div className="flex items-center gap-2">
-          <Button
+          {!embedded && <Button
             variant="ghost"
             size="icon"
             aria-label="返回報價單"
             onClick={() => {
-              navigate('/quotes');
+              navigate(backHref);
             }}
           >
             <ArrowLeft />
-          </Button>
+          </Button>}
           <EntityPageTitle>{quote ? quote.number : '新增報價單'}</EntityPageTitle>
         </div>
         <div className="ml-auto flex gap-2">
-          <Button
+          {!embedded && <Button
             variant="outline"
             className="border-red-200 bg-red-50 text-red-700"
             onClick={() => {
-              navigate('/quotes');
+              navigate(backHref);
             }}
           >
             返回列表
-          </Button>
+          </Button>}
           {editor.editable && (
             <>
               <Button variant="outline" onClick={editor.reset}>
@@ -69,12 +85,14 @@ export function QuoteEditorView({
         </div>
       </EntityPageHeader>
       <div className="mx-auto max-w-6xl space-y-5 py-6">
+        {quote && version && !version.opportunityId && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">此舊報價尚未綁定商機，暫時僅供查閱。請先由管理員完成資料歸屬。</p>}
         {quote && version && (
           <QuoteVersionManager
             quote={quote}
             selectedId={version.id}
             actor={vm.actor}
             dirty={editor.dirty || editor.isSaving}
+            readOnly={!version.opportunityId}
             onSelect={onVersion}
           />
         )}
@@ -92,7 +110,7 @@ export function QuoteEditorView({
             )}
           </div>
         )}
-        {quote && version && (
+        {quote && version && !!version.opportunityId && (
           <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty || editor.isSaving} />
         )}
         {version?.approvalReason && <p className="rounded-lg border p-3 text-sm">審批意見：{version.approvalReason}</p>}
@@ -155,21 +173,21 @@ export function QuoteEditorView({
                   <Lookup
                     id="quote-customer"
                     label="客戶"
-                    disabled={!editor.editable}
+                    disabled={true}
                     value={d.customerId}
                     options={vm.customers.map((c) => ({ value: c.id ?? '', label: c.name ?? '' }))}
                     onValueChange={(value) => editor.update('customerId', value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="quote-opportunity">來源商機</Label>
+                  <Label htmlFor="quote-opportunity">所屬商機</Label>
                   <Lookup
                     id="quote-opportunity"
-                    label="來源商機"
-                    disabled={!editor.editable}
+                    label="所屬商機"
+                    disabled={true}
                     value={d.opportunityId}
                     options={[
-                      { value: '', label: '無' },
+                      { value: '', label: '舊報價尚未綁定商機' },
                       ...vm.opportunities
                         .filter((o) => o.customerId === d.customerId)
                         .map((o) => ({ value: o.id ?? '', label: o.name ?? '' })),

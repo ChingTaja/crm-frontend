@@ -34,8 +34,8 @@ function OrderListView() {
       </div>
       <p className="text-sm text-muted-foreground">
         訂單由已接受的報價單轉換建立。
-        <AppLink className="ml-2 underline" href="/quotes">
-          前往報價單
+        <AppLink className="ml-2 underline" href="/opportunities">
+          前往商機查看報價
         </AppLink>
       </p>
       <form
@@ -176,8 +176,8 @@ export function OrderView({ recordId }: { recordId?: string }) {
       ) : recordId === 'new' ? (
         <p className="py-10">
           訂單由已接受的報價單轉換建立。
-          <AppLink href="/quotes" className="ml-2 underline">
-            前往報價單
+          <AppLink href="/opportunities" className="ml-2 underline">
+            前往商機查看報價
           </AppLink>
         </p>
       ) : (

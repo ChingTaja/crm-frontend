@@ -1,4 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useAccess } from '@/features/access/view-models/use-access';
+import { OpportunityQuotesView } from './opportunity-quotes-view';
+import { OpportunityTabs } from './opportunity-tabs';
+import type { OpportunityResponse } from '../../../api/Api';
 import { useOpportunityViewModel } from '../view-models/use-opportunity-view-model';
 import { OpportunityEditView } from './opportunity-edit-view';
 import { EntityWorkspace } from '@/components/layout/entity-workspace';
@@ -7,7 +11,7 @@ import { EntityList } from '@/components/entity/entity-list';
 import { EntityRequestError } from '@/components/entity/entity-request-error';
 import { useApi } from '@/hooks/use-api';
 import { opportunityApi } from '../models/opportunity-service';
-import { cacheOpportunity } from '../models/opportunity-model';
+import { canCreateOpportunityQuote, opportunityOutcome, cacheOpportunity } from '../models/opportunity-model';
 
 function OpportunityListView() {
   const vm = useOpportunityViewModel();
@@ -25,6 +29,9 @@ function OpportunityListView() {
 }
 
 function OpportunityDetailView({ id }: { id: string }) {
+  const { can } = useAccess();
+  const [closed, setClosed] = useState<OpportunityResponse>();
+  const quotes = new URLSearchParams(window.location.search).get('tab') === 'quotes';
   const { data, error, execute, cancel } = useApi(opportunityApi.get);
   useEffect(() => {
     void execute(id)
@@ -51,7 +58,7 @@ function OpportunityDetailView({ id }: { id: string }) {
         載入商機資料…
       </p>
     );
-  return <OpportunityEditView record={data} />;
+  return <><OpportunityTabs recordId={id} quotes={quotes} />{quotes ? can('quotes.read') ? <OpportunityQuotesView key={id} opportunityId={id} opportunityName={(closed ?? data).name} allowCreate={canCreateOpportunityQuote(closed ?? data)} allowDelete={opportunityOutcome((closed ?? data).stage) !== 'won'} /> : <p role="alert" className="py-8">沒有報價單的存取權限。</p> : <OpportunityEditView key={`${id}-${closed?.stage ?? data.stage}`} record={closed ?? data} onClosed={setClosed} />}</>;
 }
 
 export function OpportunityView({ recordId }: { recordId?: string }) {

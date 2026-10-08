@@ -26,12 +26,12 @@ function DashboardView() {
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {[
             { title: '客戶管理', description: '集中管理客戶資訊與聯絡紀錄。', icon: Users, href: can('customers.read') ? '/customers' : '/contacts' },
-            { title: '商機追蹤', description: '掌握商機進度與每一次合作機會。', icon: Handshake, href: can('leads.read') ? '/leads' : '/opportunities' },
+            { title: '商機追蹤', description: '掌握商機進度、報價版本與結案結果。', icon: Handshake, href: can('opportunities.read') ? '/opportunities' : '/leads' },
             {
               title: '銷售管理',
-              description: '管理報價版本、訂單明細與產品資訊。',
+              description: '管理訂單明細與產品資訊。',
               icon: ShoppingCart,
-              href: can('orders.read') ? '/orders' : can('quotes.read') ? '/quotes' : '/products',
+              href: can('orders.read') ? '/orders' : '/products',
             },
             { title: '權限管理', description: '管理成員角色與存取權限。', icon: ShieldCheck, href: can('users.read') ? '/users' : '/roles' },
           ].filter(item => can(`${item.href.slice(1)}.read`)).map(({ title, description, icon: Icon, href }) => (
@@ -64,8 +64,8 @@ function DashboardView() {
                       : title === '客戶管理'
                         ? '查看客戶與聯絡人 →'
                         : title === '商機追蹤'
-                          ? '查看 潛在客戶 與 商機 →'
-                          : '查看報價單、訂單與產品 →'
+                          ? '查看商機、報價單與潛在客戶 →'
+                          : '查看訂單與產品 →'
                     : '功能準備中'}
                 </span>
               </CardContent>
