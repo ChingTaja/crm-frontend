@@ -1,16 +1,17 @@
-import { createAuthFetch } from './auth-fetch';
-import { Api, type ApiConfig } from './Api';
+import { createAuthTransport } from './auth-transport';
+import { Api } from './Api';
+import type { HttpTransport } from './http-transport';
 import { ApiError } from '../lib/api-client';
 
 // Generated endpoints already include /api; preserve the existing API base URL setting.
-export function createGeneratedApi(baseUrl = '/api', customFetch?: ApiConfig<unknown>['customFetch']) {
+export function createGeneratedApi(baseUrl = '/api', transport?: HttpTransport) {
   const root = baseUrl.replace(/\/$/, '').replace(/\/api$/, '');
-  const authenticatedFetch = createAuthFetch(root, customFetch ?? fetch);
+  const authenticatedRequest = createAuthTransport(root, transport);
   return new Api({
     baseUrl: root,
     baseApiParams: { credentials: 'include', headers: { Accept: 'application/json' } },
-    customFetch: async (...args) => {
-      const response = await authenticatedFetch(...args);
+    customRequest: async (...args) => {
+      const response = await authenticatedRequest(...args);
       if (!response.ok) {
         let details: unknown;
         try {

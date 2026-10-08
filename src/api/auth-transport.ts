@@ -1,3 +1,4 @@
+import { createAxiosTransport, type HttpTransport } from './http-transport';
 import { authSession } from './auth-session';
 import { navigate } from '../lib/router';
 
@@ -8,7 +9,7 @@ const publicPosts = new Set([
   '/api/auth/reset-password',
 ]);
 
-export function createAuthFetch(baseUrl: string, fetcher: typeof fetch = fetch): typeof fetch {
+export function createAuthTransport(baseUrl: string, transport: HttpTransport = createAxiosTransport()): HttpTransport {
   const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
   const base = new URL(baseUrl || '/', origin);
   const prefix = base.pathname.replace(/\/$/, '');
@@ -25,7 +26,7 @@ export function createAuthFetch(baseUrl: string, fetcher: typeof fetch = fetch):
       headers.delete('Authorization');
       if (token) headers.set('Authorization', `Bearer ${token}`);
     }
-    const response = await fetcher(input, { ...init, headers });
+    const response = await transport(input, { ...init, headers });
     if (
       protectedRequest &&
       response.status === 401 &&

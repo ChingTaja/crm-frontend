@@ -56,7 +56,7 @@ export function qualifyLead(leadId: string, decision: QualificationDecision) {
           owner: lead.owner ?? '',
           amount: 0,
           expectedCloseDate: '',
-          stage: '需求確認',
+          stage: '需求討論中',
         }).id
       : undefined);
   return leadRepository.save({

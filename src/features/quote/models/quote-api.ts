@@ -69,7 +69,7 @@ export function quotePayload(content: QuoteContent, existingLineIds: string[] = 
   return {
     name: content.name.trim(),
     customerId: content.customerId,
-    opportunityId: content.opportunityId || undefined,
+    opportunityId: content.opportunityId,
     validUntil: content.validUntil,
     paymentTerms: content.paymentTerms,
     deliveryTerms: content.deliveryTerms,

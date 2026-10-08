@@ -1,3 +1,4 @@
+import { createAxiosTransport, type HttpTransport } from '../api/http-transport';
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -17,7 +18,7 @@ interface ApiClientOptions {
   baseUrl: string;
   headers?: HeadersInit;
   credentials?: RequestCredentials;
-  fetcher?: typeof fetch;
+  transport?: HttpTransport;
 }
 
 function errorMessage(details: unknown, status: number): string {
@@ -37,7 +38,7 @@ export function createApiClient({
   baseUrl,
   headers: defaultHeaders,
   credentials = 'same-origin',
-  fetcher = fetch,
+  transport = createAxiosTransport(),
 }: ApiClientOptions) {
   return async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
     const { body, headers: requestHeaders, ...init } = options;
@@ -46,7 +47,7 @@ export function createApiClient({
     if (!headers.has('Accept')) headers.set('Accept', 'application/json');
     if (body !== undefined && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
     const url = `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
-    const response = await fetcher(url, {
+    const response = await transport(url, {
       credentials,
       ...init,
       headers,
