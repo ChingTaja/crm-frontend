@@ -9,14 +9,10 @@ export function createAuthApi(client: Api<unknown>['api']) {
       signal.throwIfAborted();
       if (!result?.accessToken?.trim()) throw new Error('登入回應缺少驗證 token，請重新登入。');
       if (result.tokenType && result.tokenType.toLowerCase() !== 'bearer') throw new Error('不支援的登入驗證格式。');
-      authSession.setToken(result.accessToken);
+      authSession.setToken(result.accessToken, result.expiresIn);
       return result;
     },
     currentUser: (signal: AbortSignal) => unwrapResponse(client.currentUser({ signal, format: 'json' })),
-    logout: async (signal: AbortSignal) => {
-      const token = authSession.getToken();
-      await client.logout({ signal });
-      if (authSession.getToken() === token) authSession.clear();
-    },
+    logout: async (signal: AbortSignal) => { await client.logout({ signal }); },
   };
 }
