@@ -1,4 +1,3 @@
-import { createSearchRequest } from '@/features/filter/models/filter-query';
 import { navigate } from '@/lib/router';
 import { useState } from 'react';
 import { useRecordSelection } from './use-record-selection';
@@ -67,8 +66,6 @@ export function useEntityList(
     total: pagination?.total ?? records.length,
     filteredTotal: pagination?.total ?? filtered.length,
     serverPaginated: !!pagination,
-    buildSearchRequest: () => createSearchRequest(fields, advancedFilter, filter, page - 1, pageSize, query,
-      sortAscending ? [{ field: fields.find(field => field.apiFieldName === 'name' || field.apiFieldName === 'username')?.apiFieldName ?? 'name', direction: 'asc' }] : []),
     advancedFilter,
     applyAdvancedFilter: (value: FilterGroup) => {
       selection.clearSelection();

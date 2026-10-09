@@ -8,7 +8,7 @@ export function useQuoteViewModel() {
   const customerQuery = useCustomersQuery();
   const productQuery = useProductsQuery();
   const opportunityQuery = useOpportunitiesQuery();
-  const actor: QuoteActor | null = me ? { id: me.id, name: me.username, role: 'system', permissionCodes: me.permissionCodes } : null;
+  const actor: QuoteActor | null = me ? { id: me.id, name: me.username, permissionCodes: me.permissionCodes } : null;
   return { actor, customers: customerQuery.records, products: productQuery.records, opportunities: opportunityQuery.records, productQuery, customerQuery, opportunityQuery };
 }
 export type QuoteViewModel = ReturnType<typeof useQuoteViewModel>;

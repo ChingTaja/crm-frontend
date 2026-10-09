@@ -30,7 +30,7 @@ export function EntityEditLayout({
   headingAction,
   notice,
   children,
-  dataNotice = '前端示範資料，重新整理會還原。',
+  dataNotice = null,
 }: EntityEditLayoutProps) {
   const { can } = useAccess();
   const entity = formId.replace(/-form$/, '');

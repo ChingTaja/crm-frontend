@@ -21,7 +21,7 @@ import { DeleteRecordsButton } from './delete-records-button';
 
 export function EntityList({
   vm,
-  dataNotice = '示範資料 · 尚未連接後端',
+  dataNotice = null,
   allowCreate = true,
   allowDelete = true,
   headingTitle,

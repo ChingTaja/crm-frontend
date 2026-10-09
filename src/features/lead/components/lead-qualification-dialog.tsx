@@ -4,7 +4,7 @@ import { ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { disqualificationReasons } from '../models/lead-qualification';
+import { disqualificationReasons } from '../models/lead-qualification-options';
 import { useLeadQualification } from '../view-models/use-lead-qualification';
 import type { Lead } from '../../../api/Api';
 

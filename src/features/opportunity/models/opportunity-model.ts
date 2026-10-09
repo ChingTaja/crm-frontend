@@ -1,7 +1,6 @@
 import type { OpportunityResponse } from '../../../api/Api';
 import { createRepository } from '../../../lib/in-memory-repository';
 
-export const opportunityStages = ['需求討論中', '需求成交', '失單'] as const;
 export function opportunityStageLabel(stage?: string) {
   if (!stage) return '尚未回傳狀態';
   if (['需求確認', '提案報價', '協商中'].includes(stage)) return '需求討論中';

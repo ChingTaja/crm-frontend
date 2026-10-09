@@ -10,7 +10,6 @@ export type ApprovalStatus = NonNullable<QuoteVersionResponse['approval']>;
 export type QuoteActor = {
   id: string;
   name: string;
-  role: 'sales' | 'manager' | 'customer' | 'system';
   permissionCodes?: string[];
 };
 export type QuoteLine = Required<QuoteLineResponse>;

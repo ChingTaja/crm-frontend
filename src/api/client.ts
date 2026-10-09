@@ -1,7 +1,7 @@
 import { createAuthTransport } from './auth-transport';
 import { Api } from './Api';
 import type { HttpTransport } from './http-transport';
-import { ApiError } from '../lib/api-client';
+import { ApiError } from './api-error';
 
 // Generated endpoints already include /api; preserve the existing API base URL setting.
 export function createGeneratedApi(baseUrl = '/api', transport?: HttpTransport) {

@@ -1,5 +1,5 @@
 import { authSession } from '../../../api/auth-session';
-import type { Api, LoginRequest, RegisterRequest } from '../../../api/Api';
+import type { Api, LoginRequest } from '../../../api/Api';
 import { unwrapResponse } from '../../../lib/api-operations';
 
 export function createAuthApi(client: Api<unknown>['api']) {
@@ -12,8 +12,6 @@ export function createAuthApi(client: Api<unknown>['api']) {
       authSession.setToken(result.accessToken);
       return result;
     },
-    register: (signal: AbortSignal, data: RegisterRequest) =>
-      unwrapResponse(client.register(data, { signal, format: 'json' })),
     currentUser: (signal: AbortSignal) => unwrapResponse(client.currentUser({ signal, format: 'json' })),
     logout: async (signal: AbortSignal) => {
       const token = authSession.getToken();

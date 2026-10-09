@@ -342,7 +342,7 @@ function ReviewDetail({ id }: { id: string }) {
               onReviewed={setReviewed}
               quote={quote}
               version={version}
-              actor={me ? { id: me.id, name: me.username, role: 'system', permissionCodes: me.permissionCodes } : null}
+              actor={me ? { id: me.id, name: me.username, permissionCodes: me.permissionCodes } : null}
               dirty={false}
             />
           </div>

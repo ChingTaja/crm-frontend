@@ -1,6 +1,5 @@
 export function createRepository<T extends { id?: string }>(
-  initial: T[],
-  validateSave?: (record: T, existing: T | undefined) => void
+  initial: T[]
 ) {
   let records = initial;
   const listeners = new Set<() => void>();
@@ -23,13 +22,6 @@ export function createRepository<T extends { id?: string }>(
       records = next;
       listeners.forEach((listener) => listener());
     },
-    save(record: T) {
-      const existing = records.find((item) => item.id === record.id);
-      validateSave?.(record, existing);
-      const saved = { ...record, id: record.id || crypto.randomUUID() };
-      records = record.id ? records.map((item) => (item.id === record.id ? saved : item)) : [saved, ...records];
-      listeners.forEach((listener) => listener());
-      return saved;
-    },
+
   };
 }
