@@ -13,7 +13,7 @@ import { opportunityOutcome } from '../models/opportunity-model';
 export function OpportunityQuotesView({ opportunityId, opportunityName, allowCreate, allowDelete }: { opportunityId: string; opportunityName?: string; allowCreate: boolean; allowDelete: boolean }) {
   const { can } = useAccess();
   const request = useCallback((signal: AbortSignal) => collectPages(signal, (signal, page) => quoteApi.list(signal, { ...page, opportunityId })), [opportunityId]);
-  const { data, error, execute, cancel, isLoading } = useApi(request);
+  const { data, error, execute, cancel } = useApi(request);
   const parentCheck = useApi(opportunityApi.get);
   const deletion = useApi(quoteApi.removeMany);
   const [selected, setSelected] = useState('');
@@ -38,16 +38,22 @@ export function OpportunityQuotesView({ opportunityId, opportunityName, allowCre
     if (!allowDelete || !current?.id) return;
     const parent = await parentCheck.execute(opportunityId);
     if (opportunityOutcome(parent.stage) === 'won') throw new Error('商機已需求成交，無法刪除報價單。');
-    const result = await deletion.execute([current.id]);
+    let result;
+    try {
+      result = await deletion.execute([current.id]);
+    } catch (error) {
+      await execute().catch(() => {});
+      throw error;
+    }
     quoteCache.removeMany(result.deleted);
-    if (result.failed.length) throw new Error(result.failed[0].message);
     setSelected('');
     setDirty(false);
     await execute();
   }
-  if (error) return <div role="alert" className="space-y-3 py-8"><p>無法載入商機報價：{error.message}</p><Button variant="outline" onClick={() => { void execute().catch(() => {}); }}>重試</Button></div>;
-  if (!data || isLoading) return <p role="status" className="py-8 text-muted-foreground">載入商機報價…</p>;
+  if (error && !data) return <div role="alert" className="space-y-3 py-8"><p>無法載入商機報價：{error.message}</p><Button variant="outline" onClick={() => { void execute().catch(() => {}); }}>重試</Button></div>;
+  if (!data) return <p role="status" className="py-8 text-muted-foreground">載入商機報價…</p>;
   return <div>
+    {error && <p role="alert">無法重新載入商機報價：{error.message}</p>}
     <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
       <div className="space-y-2"><p className="text-xs text-muted-foreground">「{opportunityName || '此商機'}」的報價單</p>{records.length > 0 && <label className="flex items-center gap-2 text-sm">報價單<select aria-label="切換此商機的報價單" className="max-w-full rounded-lg border bg-background px-3 py-2" value={currentId} disabled={saving || deletion.isLoading} onChange={event => switchQuote(event.target.value)}>{records.map(record => <option key={record.id} value={record.id}>{record.number || record.id} · {record.name || '未命名報價'}</option>)}{currentId === 'new' && <option value="new">新增報價單</option>}</select></label>}</div>
       <div className="flex gap-2">{allowDelete && current && can('quotes.delete') && <DeleteRecordsButton title="報價單" includesVersions records={[{ id: current.id!, name: current.name || current.number || '報價單' }]} onDelete={remove} disabled={dirty || deletion.isLoading} />}{allowCreate && can('quotes.create') && currentId !== 'new' && <Button disabled={saving || deletion.isLoading} onClick={() => switchQuote('new')}>新增報價單</Button>}</div>

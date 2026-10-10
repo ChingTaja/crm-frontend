@@ -10,7 +10,6 @@ const statusLabels: Record<QuoteStatus, string> = {
   Sent: '已送出',
   Accepted: '已接受',
   Rejected: '已拒絕',
-  Expired: '已過期',
 };
 const approvalLabels: Record<ApprovalStatus, string> = {
   NotRequired: '無須審批',
@@ -73,7 +72,6 @@ export function useQuoteVersions(
       status: statusLabels[version.status],
       approval: approvalLabels[version.approval],
       total: money(version.totals?.totalCents ?? quoteTotals(version.lines).totalCents),
-      validUntil: version.validUntil,
       createdAt: new Date(version.createdAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       createdBy: version.createdBy,
     })),

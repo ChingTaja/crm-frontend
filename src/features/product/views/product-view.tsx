@@ -11,15 +11,15 @@ import { cacheProduct, productRepository } from '../models/product-model';
 
 function ProductListView() {
   const vm = useProductViewModel();
-  if (vm.request.error)
+  if (vm.request.error && !vm.request.data)
     return <EntityRequestError title="產品" entity="products" error={vm.request.error} retry={vm.request.reload} />;
-  if (!vm.request.data || vm.request.isLoading)
+  if (!vm.request.data)
     return (
       <p role="status" className="py-10 text-muted-foreground">
         載入產品…
       </p>
     );
-  return <EntityList vm={vm} dataNotice={null} />;
+  return <>{vm.request.error && <p role="alert" className="py-3 text-destructive">{vm.request.error.message}</p>}<EntityList vm={vm} dataNotice={null} /></>;
 }
 
 function ProductDetailView({ id }: { id: string }) {

@@ -26,7 +26,7 @@ export function useEntityList(
   title: string,
   fields: FilterField[],
   records: EntityListRow[],
-  removeMany: (ids: string[]) => void | Promise<void>,
+  removeMany: (ids: string[]) => void | string | Promise<void | string>,
   numericSort = false,
   pagination?: ServerPagination
 ) {

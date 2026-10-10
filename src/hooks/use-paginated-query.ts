@@ -29,7 +29,7 @@ export function usePaginatedQuery<T>(
     void reload().catch(() => {});
     return cancel;
   }, [reload, cancel]);
-  const current = state.data?.page === page - 1 && state.data?.size === pageSize && !state.isLoading;
+  const current = state.data?.page === page - 1 && state.data?.size === pageSize;
   return {
     ...state,
     reload,

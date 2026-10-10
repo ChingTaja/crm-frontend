@@ -19,7 +19,17 @@ export function useOpportunityEditViewModel(record?: OpportunityResponse) {
     owner: record?.owner ?? '',
   };
   const form = useEntityForm('opportunities', initial, async (draft) => {
-    if (!draft.customerId) throw new Error('請選擇所屬客戶。');
+    if (
+      customerQuery.isLoading ||
+      customerQuery.error ||
+      !customerQuery.records.some((customer) => customer.id === draft.customerId)
+    )
+      throw new Error('請選擇有效的所屬客戶，或重新載入客戶資料。');
+    if (
+      draft.leadId &&
+      (leadQuery.isLoading || leadQuery.error || !leadQuery.records.some((lead) => lead.id === draft.leadId))
+    )
+      throw new Error('請選擇有效的來源 Lead，或重新載入 Lead 資料。');
     if (!Number.isFinite(draft.amount) || draft.amount < 0) throw new Error('金額必須為非負數。');
     const saved = await request.execute(
       { ...draft, leadId: draft.leadId || undefined, expectedCloseDate: draft.expectedCloseDate || undefined },

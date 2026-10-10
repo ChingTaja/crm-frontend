@@ -117,7 +117,6 @@ function ReviewList() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {q.customerName || '未提供客戶名稱'}
                       <span className="mx-2">·</span>版本 {q.version}
-                      <span className="mx-2">·</span>有效期限 {q.validUntil || '—'}
                     </p>
                   </div>
                 </div>
@@ -322,7 +321,6 @@ function ReviewDetail({ id }: { id: string }) {
                   ? new Date(version.approvalRequestedAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
                   : '—',
               ],
-              ['有效期限', version.validUntil || '—'],
             ].map(([label, value]) => (
               <div key={label}>
                 <dt className="text-xs text-muted-foreground">{label}</dt>

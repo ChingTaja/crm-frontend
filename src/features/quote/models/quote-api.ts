@@ -2,12 +2,13 @@ import type { AssignedQuoteResponse } from './quote-review-contract';
 import type {
   Api,
   CreateQuoteRequest,
+  UpdateQuoteRequest,
   QuoteActionRequest,
   ReviewQuoteRequest,
   DecideQuoteRequest,
 } from '../../../api/Api';
 import type { Quote, QuoteContent } from './quote-types';
-import { unwrapResponse, deleteRecords } from '../../../lib/api-operations';
+import { unwrapResponse } from '../../../lib/api-operations';
 
 // Normalize optional generated response fields for the existing editor.
 export function quoteRecord(data: AssignedQuoteResponse): Quote {
@@ -30,7 +31,6 @@ export function quoteRecord(data: AssignedQuoteResponse): Quote {
           name: v.name ?? '',
           customerId: v.customerId ?? '',
           opportunityId: v.opportunityId ?? '',
-          validUntil: v.validUntil ?? '',
           paymentTerms: v.paymentTerms ?? '',
           deliveryTerms: v.deliveryTerms ?? '',
           warranty: v.warranty ?? '',
@@ -66,11 +66,12 @@ export function quoteRecord(data: AssignedQuoteResponse): Quote {
   };
 }
 export function quotePayload(content: QuoteContent, existingLineIds: string[] = []): CreateQuoteRequest {
+  if (!content.customerId.trim() || !content.opportunityId.trim() || content.lines.some(line => !line.productId.trim()))
+    throw new Error('請選擇有效的客戶、商機與產品。');
   return {
     name: content.name.trim(),
     customerId: content.customerId,
-    opportunityId: content.opportunityId,
-    validUntil: content.validUntil,
+    opportunityId: content.opportunityId.trim(),
     paymentTerms: content.paymentTerms,
     deliveryTerms: content.deliveryTerms,
     warranty: content.warranty,
@@ -87,9 +88,6 @@ export function quotePayload(content: QuoteContent, existingLineIds: string[] = 
 }
 export function createQuoteApi(client: Api<unknown>['api']) {
   const params = (signal: AbortSignal) => ({ signal, format: 'json' as const });
-  const remove = async (signal: AbortSignal, id: string) => {
-    await client.deleteQuotes(encodeURIComponent(id), { signal });
-  };
   const action =
     (name: 'send' | 'newVersion') =>
     async (signal: AbortSignal, id: string, versionId: string, body: QuoteActionRequest) =>
@@ -101,8 +99,8 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       const data = await unwrapResponse(client.findAllQuotes(query, params(signal)));
       if (!Array.isArray(data?.content) || !Number.isInteger(data.totalElements) || !Number.isInteger(data.totalPages))
         throw new Error('報價列表回傳格式不正確。');
-      if (query?.opportunityId && data.content.some(record => record.opportunityId !== query.opportunityId))
-        throw new Error('後端尚未正確套用商機報價篩選，請確認 API 支援 opportunityId。');
+      if (query?.opportunityId && data.content.some((record) => record.opportunityId !== query.opportunityId))
+        throw new Error('系統尚未正確套用商機報價篩選，請確認 API 支援 opportunityId。');
       return data;
     },
     get: async (signal: AbortSignal, id: string) =>
@@ -113,7 +111,7 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       signal: AbortSignal,
       id: string,
       versionId: string,
-      body: import('../../../api/Api').UpdateQuoteRequest
+      body: UpdateQuoteRequest
     ) =>
       quoteRecord(
         await unwrapResponse(
@@ -143,6 +141,11 @@ export function createQuoteApi(client: Api<unknown>['api']) {
           client.decision(encodeURIComponent(id), encodeURIComponent(versionId), body, params(signal))
         )
       ),
-    removeMany: (signal: AbortSignal, ids: string[]) => deleteRecords(signal, ids, remove),
+    async removeMany(signal: AbortSignal, ids: string[]) {
+      const uniqueIds = [...new Set(ids)];
+      if (!uniqueIds.length) return { deleted: [], failed: [] };
+      await client.deleteQuotesBatch({ ids: uniqueIds }, { signal });
+      return { deleted: uniqueIds, failed: [] };
+    },
   };
 }

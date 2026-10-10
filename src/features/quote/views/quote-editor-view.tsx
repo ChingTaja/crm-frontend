@@ -134,7 +134,6 @@ export function QuoteEditorView({
             <p className="mt-2 font-semibold">此版本需要指定審核人審核。</p>
           )}
         </aside>
-        <p className="text-xs text-muted-foreground">有效期限以台北時間當日 23:59:59 為止。</p>
         <form
           id="quote-form"
           className="space-y-5"
@@ -156,16 +155,6 @@ export function QuoteEditorView({
                     required
                     value={d.name}
                     onChange={(e) => editor.update('name', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="quote-until">有效期限 *</Label>
-                  <Input
-                    id="quote-until"
-                    type="date"
-                    required
-                    value={d.validUntil}
-                    onChange={(e) => editor.update('validUntil', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

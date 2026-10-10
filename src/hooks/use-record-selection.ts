@@ -8,7 +8,7 @@ interface SelectableRecord {
 export function useRecordSelection(
   records: SelectableRecord[],
   pageRecords: { id: string }[],
-  removeMany: (ids: string[]) => void | Promise<void>
+  removeMany: (ids: string[]) => void | string | Promise<void | string>
 ) {
   const [requestedIds, setRequestedIds] = useState<string[]>([]);
   const selectedRecords = records.filter((record) => requestedIds.includes(record.id));
@@ -32,8 +32,9 @@ export function useRecordSelection(
       ),
     deleteSelected: async () => {
       if (!selectedIds.length) return;
-      await removeMany(selectedIds);
+      const summary = await removeMany(selectedIds);
       setRequestedIds((ids) => ids.filter((id) => !selectedIds.includes(id)));
+      return summary;
     },
   };
 }

@@ -11,15 +11,15 @@ import { cacheContact } from '../models/contact-model';
 
 function ContactListView() {
   const vm = useContactViewModel();
-  if (vm.request.error)
+  if (vm.request.error && !vm.request.data)
     return <EntityRequestError title="聯絡人" entity="contacts" error={vm.request.error} retry={vm.request.reload} />;
-  if (!vm.request.data || vm.request.isLoading)
+  if (!vm.request.data)
     return (
       <p role="status" className="py-10 text-muted-foreground">
         載入聯絡人…
       </p>
     );
-  return <EntityList vm={vm} dataNotice={null} />;
+  return <>{vm.request.error && <p role="alert" className="py-3 text-destructive">{vm.request.error.message}</p>}<EntityList vm={vm} dataNotice={null} /></>;
 }
 
 function ContactDetailView({ id }: { id: string }) {

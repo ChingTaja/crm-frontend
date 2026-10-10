@@ -46,7 +46,7 @@ export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect,
             <caption className="sr-only">{quote.number} 的所有報價版本</caption>
             <thead>
               <tr>
-                {['版本', '狀態', '審批', '含稅總額', '有效期限', '建立資訊', '操作'].map((label) => (
+                {['版本', '狀態', '審批', '含稅總額', '建立資訊', '操作'].map((label) => (
                   <EntityTableHead key={label}>{label}</EntityTableHead>
                 ))}
               </tr>
@@ -63,7 +63,6 @@ export function QuoteVersionManager({ quote, selectedId, actor, dirty, onSelect,
                   <EntityTableCell>{row.status}</EntityTableCell>
                   <EntityTableCell>{row.approval}</EntityTableCell>
                   <EntityTableCell>{row.total}</EntityTableCell>
-                  <EntityTableCell>{row.validUntil}</EntityTableCell>
                   <EntityTableCell>
                     <p>{row.createdAt}</p>
                     {row.createdBy && <p className="mt-1 text-xs text-muted-foreground">{row.createdBy}</p>}

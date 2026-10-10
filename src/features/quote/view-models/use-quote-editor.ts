@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { quoteApi, cacheQuote } from '../models/quote-service';
 import { quotePayload } from '../models/quote-api';
 import { useApi } from '@/hooks/use-api';
-import { canEditQuote, canManageQuote, quoteToday } from '../models/quote-policy';
+import { canEditQuote, canManageQuote } from '../models/quote-policy';
 import type { ProductResponse, OpportunityResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
 
@@ -18,7 +18,6 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
           name: version.name,
           customerId: version.customerId,
           opportunityId: version.opportunityId,
-          validUntil: version.validUntil,
           lines: version.lines,
           paymentTerms: version.paymentTerms,
           deliveryTerms: version.deliveryTerms,
@@ -29,7 +28,6 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
           name: '',
           customerId: initialOpportunity?.customerId ?? '',
           opportunityId: initialOpportunity?.id ?? '',
-          validUntil: quoteToday(new Date(Date.now() + 30 * 86400000)),
           lines: [],
           paymentTerms: '確認訂單後 30 日內付款',
           deliveryTerms: '',

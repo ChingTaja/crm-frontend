@@ -15,17 +15,17 @@ import { canCreateOpportunityQuote, opportunityOutcome, cacheOpportunity } from 
 
 function OpportunityListView() {
   const vm = useOpportunityViewModel();
-  if (vm.request.error)
+  if (vm.request.error && !vm.request.data)
     return (
       <EntityRequestError title="商機" entity="opportunities" error={vm.request.error} retry={vm.request.reload} />
     );
-  if (!vm.request.data || vm.request.isLoading)
+  if (!vm.request.data)
     return (
       <p role="status" className="py-10 text-muted-foreground">
         載入商機…
       </p>
     );
-  return <EntityList vm={vm} dataNotice={null} />;
+  return <>{vm.request.error && <p role="alert" className="py-3 text-destructive">{vm.request.error.message}</p>}<EntityList vm={vm} dataNotice={null} /></>;
 }
 
 function OpportunityDetailView({ id }: { id: string }) {

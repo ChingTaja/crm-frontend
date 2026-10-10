@@ -110,8 +110,6 @@ export interface UpdateQuoteRequest {
   customerId: string;
   /** @minLength 1 */
   opportunityId: string;
-  /** @format date */
-  validUntil: string;
   /**
    * @maxItems 200
    * @minItems 0
@@ -196,8 +194,6 @@ export interface QuoteVersionResponse {
   name: string;
   customerId: string;
   opportunityId?: string;
-  /** @format date */
-  validUntil: string;
   lines: QuoteLineResponse[];
   totals: QuoteTotals;
   currency: string;
@@ -205,8 +201,8 @@ export interface QuoteVersionResponse {
   deliveryTerms: string;
   warranty: string;
   notes: string;
-  status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-  approval: "NotRequired" | "Required" | "Pending" | "Approved" | "Rejected";
+  status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected';
+  approval: 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
   requiresReapproval: boolean;
   /** @format date-time */
   createdAt: string;
@@ -293,7 +289,7 @@ export interface OpportunityResponse {
   /** @format date */
   expectedCloseDate?: string;
   owner?: string;
-  stage: "需求討論中" | "需求成交" | "失單";
+  stage: '需求討論中' | '需求成交' | '失單';
   closeDescription?: string;
   /** @format date-time */
   closedAt?: string;
@@ -446,8 +442,6 @@ export interface CreateQuoteRequest {
   customerId: string;
   /** @minLength 1 */
   opportunityId: string;
-  /** @format date */
-  validUntil: string;
   /**
    * @maxItems 200
    * @minItems 0
@@ -721,7 +715,7 @@ export interface UpdateUserStatusRequest {
 }
 
 export interface UpdateOrderStatusRequest {
-  status: "Confirmed" | "Processing" | "Completed" | "Cancelled";
+  status: 'Confirmed' | 'Processing' | 'Completed' | 'Cancelled';
   /**
    * @format int64
    * @exclusiveMin 0
@@ -797,12 +791,7 @@ export interface OrderResponse {
   cancelledAt?: string;
   cancellationReason?: string;
   audit?: OrderAudit[];
-  allowedTransitions?: (
-    | "Confirmed"
-    | "Processing"
-    | "Completed"
-    | "Cancelled"
-  )[];
+  allowedTransitions?: ('Confirmed' | 'Processing' | 'Completed' | 'Cancelled')[];
 }
 
 export interface QuoteSource {
@@ -886,10 +875,8 @@ export interface QuoteSummaryResponse {
   opportunityId?: string;
   /** @format int32 */
   version: number;
-  status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
-  approval: "NotRequired" | "Required" | "Pending" | "Approved" | "Rejected";
-  /** @format date */
-  validUntil: string;
+  status: 'Draft' | 'Sent' | 'Accepted' | 'Rejected';
+  approval: 'NotRequired' | 'Required' | 'Pending' | 'Approved' | 'Rejected';
   /** @format int64 */
   totalCents: number;
   currency: string;
@@ -1045,9 +1032,9 @@ export interface DeleteQuotesRequest {
 }
 
 export type QueryParamsType = Record<string | number, any>;
-export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
+export type ResponseFormat = keyof Omit<Body, 'body' | 'bodyUsed'>;
 
-export interface FullRequestParams extends Omit<RequestInit, "body"> {
+export interface FullRequestParams extends Omit<RequestInit, 'body'> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -1066,22 +1053,16 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
   cancelToken?: CancelToken;
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, 'body' | 'method' | 'query' | 'path'>;
 
 export interface ApiConfig<SecurityDataType = unknown> {
   baseUrl?: string;
-  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-  securityWorker?: (
-    securityData: SecurityDataType | null,
-  ) => Promise<RequestParams | void> | RequestParams | void;
+  baseApiParams?: Omit<RequestParams, 'baseUrl' | 'cancelToken' | 'signal'>;
+  securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
   customRequest?: HttpTransport;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-  extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
   data: D;
   error: E;
 }
@@ -1089,25 +1070,25 @@ export interface HttpResponse<D extends unknown, E extends unknown = unknown>
 type CancelToken = Symbol | string | number;
 
 export enum ContentType {
-  Json = "application/json",
-  JsonApi = "application/vnd.api+json",
-  FormData = "multipart/form-data",
-  UrlEncoded = "application/x-www-form-urlencoded",
-  Text = "text/plain",
+  Json = 'application/json',
+  JsonApi = 'application/vnd.api+json',
+  FormData = 'multipart/form-data',
+  UrlEncoded = 'application/x-www-form-urlencoded',
+  Text = 'text/plain',
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "http://localhost:8080";
+  public baseUrl: string = 'http://localhost:8080';
   private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
+  private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
   private abortControllers = new Map<CancelToken, AbortController>();
   private customRequest: HttpTransport = createAxiosTransport();
 
   private baseApiParams: RequestParams = {
-    credentials: "same-origin",
+    credentials: 'same-origin',
     headers: {},
-    redirect: "follow",
-    referrerPolicy: "no-referrer",
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
   };
 
   constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
@@ -1120,7 +1101,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected encodeQueryParam(key: string, value: any) {
     const encodedKey = encodeURIComponent(key);
-    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
+    return `${encodedKey}=${encodeURIComponent(typeof value === 'number' ? value : `${value}`)}`;
   }
 
   protected addQueryParam(query: QueryParamsType, key: string) {
@@ -1129,41 +1110,28 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected addArrayQueryParam(query: QueryParamsType, key: string) {
     const value = query[key];
-    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join('&');
   }
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
     const query = rawQuery || {};
-    const keys = Object.keys(query).filter(
-      (key) => "undefined" !== typeof query[key],
-    );
+    const keys = Object.keys(query).filter((key) => 'undefined' !== typeof query[key]);
     return keys
-      .map((key) =>
-        Array.isArray(query[key])
-          ? this.addArrayQueryParam(query, key)
-          : this.addQueryParam(query, key),
-      )
-      .join("&");
+      .map((key) => (Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)))
+      .join('&');
   }
 
   protected addQueryParams(rawQuery?: QueryParamsType): string {
     const queryString = this.toQueryString(rawQuery);
-    return queryString ? `?${queryString}` : "";
+    return queryString ? `?${queryString}` : '';
   }
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
-        ? JSON.stringify(input)
-        : input,
+      input !== null && (typeof input === 'object' || typeof input === 'string') ? JSON.stringify(input) : input,
     [ContentType.JsonApi]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
-        ? JSON.stringify(input)
-        : input,
-    [ContentType.Text]: (input: any) =>
-      input !== null && typeof input !== "string"
-        ? JSON.stringify(input)
-        : input,
+      input !== null && (typeof input === 'object' || typeof input === 'string') ? JSON.stringify(input) : input,
+    [ContentType.Text]: (input: any) => (input !== null && typeof input !== 'string' ? JSON.stringify(input) : input),
     [ContentType.FormData]: (input: any) => {
       if (input instanceof FormData) {
         return input;
@@ -1175,9 +1143,9 @@ export class HttpClient<SecurityDataType = unknown> {
           key,
           property instanceof Blob
             ? property
-            : typeof property === "object" && property !== null
+            : typeof property === 'object' && property !== null
               ? JSON.stringify(property)
-              : `${property}`,
+              : `${property}`
         );
         return formData;
       }, new FormData());
@@ -1185,10 +1153,7 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
-  protected mergeRequestParams(
-    params1: RequestParams,
-    params2?: RequestParams,
-  ): RequestParams {
+  protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
     return {
       ...this.baseApiParams,
       ...params1,
@@ -1201,9 +1166,7 @@ export class HttpClient<SecurityDataType = unknown> {
     };
   }
 
-  protected createAbortSignal = (
-    cancelToken: CancelToken,
-  ): AbortSignal | undefined => {
+  protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
     if (this.abortControllers.has(cancelToken)) {
       const abortController = this.abortControllers.get(cancelToken);
       if (abortController) {
@@ -1238,7 +1201,7 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<HttpResponse<T, E>> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+      ((typeof secure === 'boolean' ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
@@ -1247,26 +1210,15 @@ export class HttpClient<SecurityDataType = unknown> {
     const payloadFormatter = this.contentFormatters[type || ContentType.Json];
     const responseFormat = format || requestParams.format;
 
-    return this.customRequest(
-      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
-      {
-        ...requestParams,
-        headers: {
-          ...(requestParams.headers || {}),
-          ...(type && type !== ContentType.FormData
-            ? { "Content-Type": type }
-            : {}),
-        },
-        signal:
-          (cancelToken
-            ? this.createAbortSignal(cancelToken)
-            : requestParams.signal) || null,
-        body:
-          typeof body === "undefined" || body === null
-            ? null
-            : payloadFormatter(body),
+    return this.customRequest(`${baseUrl || this.baseUrl || ''}${path}${queryString ? `?${queryString}` : ''}`, {
+      ...requestParams,
+      headers: {
+        ...(requestParams.headers || {}),
+        ...(type && type !== ContentType.FormData ? { 'Content-Type': type } : {}),
       },
-    ).then(async (response) => {
+      signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
+      body: typeof body === 'undefined' || body === null ? null : payloadFormatter(body),
+    }).then(async (response) => {
       const r = response as HttpResponse<T, E>;
       r.data = null as unknown as T;
       r.error = null as unknown as E;
@@ -1303,9 +1255,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version v0
  * @baseUrl http://localhost:8080
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -1318,7 +1268,7 @@ export class Api<
     findByIdUser: (id: string, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1331,14 +1281,10 @@ export class Api<
      * @request PUT:/api/users/{id}
      * @secure
      */
-    updateUsers: (
-      id: string,
-      data: UpdateUserRequest,
-      params: RequestParams = {},
-    ) =>
+    updateUsers: (id: string, data: UpdateUserRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1356,7 +1302,7 @@ export class Api<
     deleteUsers: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/users/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1372,7 +1318,7 @@ export class Api<
     findByIdRole: (id: string, params: RequestParams = {}) =>
       this.request<RoleDetailResponse, any>({
         path: `/api/roles/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1385,14 +1331,10 @@ export class Api<
      * @request PUT:/api/roles/{id}
      * @secure
      */
-    updateRoles: (
-      id: string,
-      data: UpdateRoleRequest,
-      params: RequestParams = {},
-    ) =>
+    updateRoles: (id: string, data: UpdateRoleRequest, params: RequestParams = {}) =>
       this.request<RoleDetailResponse, any>({
         path: `/api/roles/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1410,7 +1352,7 @@ export class Api<
     deleteRoles: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/roles/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1423,15 +1365,10 @@ export class Api<
      * @request PUT:/api/quotes/{id}/versions/{versionId}
      * @secure
      */
-    updateQuotes: (
-      id: string,
-      versionId: string,
-      data: UpdateQuoteRequest,
-      params: RequestParams = {},
-    ) =>
+    updateQuotes: (id: string, versionId: string, data: UpdateQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1449,7 +1386,7 @@ export class Api<
     findByIdProduct: (id: string, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1462,14 +1399,10 @@ export class Api<
      * @request PUT:/api/products/{id}
      * @secure
      */
-    updateProducts: (
-      id: string,
-      data: UpdateProductRequest,
-      params: RequestParams = {},
-    ) =>
+    updateProducts: (id: string, data: UpdateProductRequest, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1487,7 +1420,7 @@ export class Api<
     deleteProducts: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/products/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1503,7 +1436,7 @@ export class Api<
     findByIdOpportunity: (id: string, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1516,14 +1449,10 @@ export class Api<
      * @request PUT:/api/opportunities/{id}
      * @secure
      */
-    updateOpportunities: (
-      id: string,
-      data: UpdateOpportunityRequest,
-      params: RequestParams = {},
-    ) =>
+    updateOpportunities: (id: string, data: UpdateOpportunityRequest, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1541,7 +1470,7 @@ export class Api<
     deleteOpportunities: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/opportunities/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1557,7 +1486,7 @@ export class Api<
     findByIdLead: (id: string, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1573,7 +1502,7 @@ export class Api<
     updateLeads: (id: string, data: Lead, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1591,7 +1520,7 @@ export class Api<
     deleteLeads: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/leads/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1607,7 +1536,7 @@ export class Api<
     findByIdCustomer: (id: string, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1620,14 +1549,10 @@ export class Api<
      * @request PUT:/api/customers/{id}
      * @secure
      */
-    updateCustomers: (
-      id: string,
-      data: UpdateCustomerRequest,
-      params: RequestParams = {},
-    ) =>
+    updateCustomers: (id: string, data: UpdateCustomerRequest, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1645,7 +1570,7 @@ export class Api<
     deleteCustomers: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/customers/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1661,7 +1586,7 @@ export class Api<
     findByIdContact: (id: string, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -1674,14 +1599,10 @@ export class Api<
      * @request PUT:/api/contacts/{id}
      * @secure
      */
-    updateContacts: (
-      id: string,
-      data: UpdateContactRequest,
-      params: RequestParams = {},
-    ) =>
+    updateContacts: (id: string, data: UpdateContactRequest, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1699,7 +1620,7 @@ export class Api<
     deleteContacts: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/contacts/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -1712,14 +1633,10 @@ export class Api<
      * @request POST:/api/{entity}/search
      * @secure
      */
-    searchEntities: (
-      entity: string,
-      data: EntitySearchRequest,
-      params: RequestParams = {},
-    ) =>
+    searchEntities: (entity: string, data: EntitySearchRequest, params: RequestParams = {}) =>
       this.request<PageResponseObject, any>({
         path: `/api/${entity}/search`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1747,11 +1664,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseUserResponse, any>({
         path: `/api/users`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -1768,7 +1685,7 @@ export class Api<
     createUsers: (data: RegisterRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1797,11 +1714,11 @@ export class Api<
         size?: number;
         keyword?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseRoleSummaryResponse, any>({
         path: `/api/roles`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -1818,7 +1735,7 @@ export class Api<
     createRoles: (data: CreateRoleRequest, params: RequestParams = {}) =>
       this.request<RoleDetailResponse, any>({
         path: `/api/roles`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1847,11 +1764,11 @@ export class Api<
         size?: number;
         opportunityId?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseQuoteSummaryResponse, any>({
         path: `/api/quotes`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -1868,7 +1785,7 @@ export class Api<
     createQuotes: (data: CreateQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1883,13 +1800,10 @@ export class Api<
      * @request DELETE:/api/quotes
      * @secure
      */
-    deleteQuotesBatch: (
-      data: DeleteQuotesRequest,
-      params: RequestParams = {},
-    ) =>
+    deleteQuotesBatch: (data: DeleteQuotesRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/quotes`,
-        method: "DELETE",
+        method: 'DELETE',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1904,15 +1818,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/send
      * @secure
      */
-    send: (
-      id: string,
-      versionId: string,
-      data: QuoteActionRequest,
-      params: RequestParams = {},
-    ) =>
+    send: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/send`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1927,15 +1836,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/review
      * @secure
      */
-    review: (
-      id: string,
-      versionId: string,
-      data: ReviewQuoteRequest,
-      params: RequestParams = {},
-    ) =>
+    review: (id: string, versionId: string, data: ReviewQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/review`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1950,15 +1854,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/request-approval
      * @secure
      */
-    requestApproval: (
-      id: string,
-      versionId: string,
-      data: RequestQuoteApprovalRequest,
-      params: RequestParams = {},
-    ) =>
+    requestApproval: (id: string, versionId: string, data: RequestQuoteApprovalRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/request-approval`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1973,15 +1872,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/new-version
      * @secure
      */
-    newVersion: (
-      id: string,
-      versionId: string,
-      data: QuoteActionRequest,
-      params: RequestParams = {},
-    ) =>
+    newVersion: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/new-version`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1996,15 +1890,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/decision
      * @secure
      */
-    decision: (
-      id: string,
-      versionId: string,
-      data: DecideQuoteRequest,
-      params: RequestParams = {},
-    ) =>
+    decision: (id: string, versionId: string, data: DecideQuoteRequest, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/decision`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2019,15 +1908,10 @@ export class Api<
      * @request POST:/api/quotes/{id}/versions/{versionId}/convert-to-order
      * @secure
      */
-    convertToOrder: (
-      id: string,
-      versionId: string,
-      data: QuoteActionRequest,
-      params: RequestParams = {},
-    ) =>
+    convertToOrder: (id: string, versionId: string, data: QuoteActionRequest, params: RequestParams = {}) =>
       this.request<ConvertQuoteToOrderResponse, any>({
         path: `/api/quotes/${id}/versions/${versionId}/convert-to-order`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2055,11 +1939,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseProductResponse, any>({
         path: `/api/products`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2076,7 +1960,7 @@ export class Api<
     createProducts: (data: CreateProductRequest, params: RequestParams = {}) =>
       this.request<ProductResponse, any>({
         path: `/api/products`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2104,11 +1988,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseOpportunityResponse, any>({
         path: `/api/opportunities`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2122,13 +2006,10 @@ export class Api<
      * @request POST:/api/opportunities
      * @secure
      */
-    createOpportunities: (
-      data: CreateOpportunityRequest,
-      params: RequestParams = {},
-    ) =>
+    createOpportunities: (data: CreateOpportunityRequest, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2144,14 +2025,10 @@ export class Api<
      * @request POST:/api/opportunities/{id}/close
      * @secure
      */
-    closeOpportunity: (
-      id: string,
-      data: CloseOpportunityRequest,
-      params: RequestParams = {},
-    ) =>
+    closeOpportunity: (id: string, data: CloseOpportunityRequest, params: RequestParams = {}) =>
       this.request<OpportunityResponse, any>({
         path: `/api/opportunities/${id}/close`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2179,11 +2056,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseLead, any>({
         path: `/api/leads`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2200,7 +2077,7 @@ export class Api<
     createLeads: (data: CreateLeadRequest, params: RequestParams = {}) =>
       this.request<CreateLeadResponse, any>({
         path: `/api/leads`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2215,14 +2092,10 @@ export class Api<
      * @request POST:/api/leads/{id}/qualification
      * @secure
      */
-    qualifyLead: (
-      id: string,
-      data: QualifyLeadRequest,
-      params: RequestParams = {},
-    ) =>
+    qualifyLead: (id: string, data: QualifyLeadRequest, params: RequestParams = {}) =>
       this.request<Lead, any>({
         path: `/api/leads/${id}/qualification`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2250,11 +2123,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseCustomerResponse, any>({
         path: `/api/customers`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2268,13 +2141,10 @@ export class Api<
      * @request POST:/api/customers
      * @secure
      */
-    createCustomers: (
-      data: CreateCustomerRequest,
-      params: RequestParams = {},
-    ) =>
+    createCustomers: (data: CreateCustomerRequest, params: RequestParams = {}) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2302,11 +2172,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseContactResponse, any>({
         path: `/api/contacts`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2323,7 +2193,7 @@ export class Api<
     createContacts: (data: CreateContactRequest, params: RequestParams = {}) =>
       this.request<ContactResponse, any>({
         path: `/api/contacts`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2340,7 +2210,7 @@ export class Api<
     resetPassword: (data: ResetPasswordRequest, params: RequestParams = {}) =>
       this.request<Record<string, string>, any>({
         path: `/api/auth/reset-password`,
-        method: "POST",
+        method: 'POST',
         body: data,
         type: ContentType.Json,
         ...params,
@@ -2356,7 +2226,7 @@ export class Api<
     register: (data: RegisterRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/auth/register`,
-        method: "POST",
+        method: 'POST',
         body: data,
         type: ContentType.Json,
         ...params,
@@ -2373,7 +2243,7 @@ export class Api<
     refresh: (params: RequestParams = {}) =>
       this.request<RefreshResponse, any>({
         path: `/api/auth/refresh`,
-        method: "POST",
+        method: 'POST',
         secure: true,
         ...params,
       }),
@@ -2389,7 +2259,7 @@ export class Api<
     logout: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/auth/logout`,
-        method: "POST",
+        method: 'POST',
         secure: true,
         ...params,
       }),
@@ -2405,7 +2275,7 @@ export class Api<
     login: (data: LoginRequest, params: RequestParams = {}) =>
       this.request<LoginResponse, any>({
         path: `/api/auth/login`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2422,7 +2292,7 @@ export class Api<
     forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
       this.request<Record<string, string>, any>({
         path: `/api/auth/forgot-password`,
-        method: "POST",
+        method: 'POST',
         body: data,
         type: ContentType.Json,
         ...params,
@@ -2437,14 +2307,10 @@ export class Api<
      * @request PATCH:/api/users/{id}/status
      * @secure
      */
-    updateUserStatus: (
-      id: string,
-      data: UpdateUserStatusRequest,
-      params: RequestParams = {},
-    ) =>
+    updateUserStatus: (id: string, data: UpdateUserStatusRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/users/${id}/status`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2459,14 +2325,10 @@ export class Api<
      * @request PATCH:/api/orders/{id}/status
      * @secure
      */
-    updateOrderStatus: (
-      id: string,
-      data: UpdateOrderStatusRequest,
-      params: RequestParams = {},
-    ) =>
+    updateOrderStatus: (id: string, data: UpdateOrderStatusRequest, params: RequestParams = {}) =>
       this.request<OrderResponse, any>({
         path: `/api/orders/${id}/status`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -2485,11 +2347,11 @@ export class Api<
       query?: {
         keyword?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<RoleOptionResponse[], any>({
         path: `/api/roles/options`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2506,7 +2368,7 @@ export class Api<
     findByIdQuote: (id: string, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quotes/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2522,7 +2384,7 @@ export class Api<
     deleteQuotes: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/quotes/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),
@@ -2540,11 +2402,11 @@ export class Api<
       query?: {
         keyword?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<ReviewerOption[], any>({
         path: `/api/quotes/${id}/reviewer-options`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2571,11 +2433,11 @@ export class Api<
          */
         size?: number;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseQuoteSummaryResponse, any>({
         path: `/api/quote-reviews`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2592,7 +2454,7 @@ export class Api<
     findMyQuoteReview: (quoteId: string, params: RequestParams = {}) =>
       this.request<QuoteResponse, any>({
         path: `/api/quote-reviews/${quoteId}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2608,7 +2470,7 @@ export class Api<
     findAllPermissions: (params: RequestParams = {}) =>
       this.request<PermissionResponse[], any>({
         path: `/api/permissions`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2634,7 +2496,7 @@ export class Api<
          */
         size?: number;
         keyword?: string;
-        status?: "Confirmed" | "Processing" | "Completed" | "Cancelled";
+        status?: 'Confirmed' | 'Processing' | 'Completed' | 'Cancelled';
         customerId?: string;
         /** @format date */
         createdFrom?: string;
@@ -2645,11 +2507,11 @@ export class Api<
         /** @default "desc" */
         direction?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<PageResponseOrderSummaryResponse, any>({
         path: `/api/orders`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
         ...params,
@@ -2666,7 +2528,7 @@ export class Api<
     findByIdOrder: (id: string, params: RequestParams = {}) =>
       this.request<OrderResponse, any>({
         path: `/api/orders/${id}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2682,7 +2544,7 @@ export class Api<
     findFieldsByEntityName: (entityName: string, params: RequestParams = {}) =>
       this.request<FieldMetadata[], any>({
         path: `/api/entities/${entityName}/fields`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2698,7 +2560,7 @@ export class Api<
     currentUser: (params: RequestParams = {}) =>
       this.request<CurrentUserResponse, any>({
         path: `/api/auth/me`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -2713,7 +2575,7 @@ export class Api<
     csrf: (params: RequestParams = {}) =>
       this.request<CsrfResponse, any>({
         path: `/api/auth/csrf`,
-        method: "GET",
+        method: 'GET',
         ...params,
       }),
   };

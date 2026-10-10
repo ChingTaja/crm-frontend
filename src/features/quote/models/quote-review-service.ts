@@ -23,7 +23,7 @@ export const quoteReviewApi = {
     const result = quoteRecord(data);
     const version = result.versions.find((v) => v.id === versionId);
     if (!version || version.reviewerId !== body.reviewerId || version.approval !== 'Pending')
-      throw new Error('後端未確認指定審核人，請重新載入確認送審結果。');
+      throw new Error('系統未確認指定審核人，請重新載入確認送審結果。');
     return result;
   },
   async list(signal: AbortSignal, query: { page: number; size: number }) {
@@ -39,6 +39,8 @@ export const quoteReviewApi = {
     );
   },
   async get(signal: AbortSignal, id: string) {
-    return quoteRecord(await unwrapResponse(client.api.findMyQuoteReview(encodeURIComponent(id), { signal, format: 'json' })));
+    return quoteRecord(
+      await unwrapResponse(client.api.findMyQuoteReview(encodeURIComponent(id), { signal, format: 'json' }))
+    );
   },
 };

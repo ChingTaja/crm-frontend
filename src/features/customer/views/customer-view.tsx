@@ -11,15 +11,24 @@ import { cacheCustomer } from '../models/customer-model';
 
 function CustomerListView() {
   const vm = useCustomerViewModel();
-  if (vm.request.error)
+  if (vm.request.error && !vm.request.data)
     return <EntityRequestError title="客戶" entity="customers" error={vm.request.error} retry={vm.request.reload} />;
-  if (!vm.request.data || vm.request.isLoading)
+  if (!vm.request.data)
     return (
       <p role="status" className="py-10 text-muted-foreground">
         載入客戶…
       </p>
     );
-  return <EntityList vm={vm} dataNotice={null} />;
+  return (
+    <>
+      {vm.request.error && (
+        <p role="alert" className="py-3 text-destructive">
+          {vm.request.error.message}
+        </p>
+      )}
+      <EntityList vm={vm} dataNotice={null} />
+    </>
+  );
 }
 
 function CustomerDetailView({ id }: { id: string }) {

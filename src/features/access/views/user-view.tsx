@@ -1,3 +1,4 @@
+import { deletionSummary } from '@/lib/api-operations';
 import { useAccess } from '../view-models/use-access';
 import { roleApi } from '../models/role-service';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
@@ -39,20 +40,33 @@ export function UserView() {
     ['role', 'roleId', 'role.id'].includes(field.apiFieldName ?? '') ? { ...field, options: roleOptions } : field
   );
   const fields = [
-    ...baseFields.filter(field => !['enabled', 'accountStatus'].includes(field.apiFieldName ?? '')),
-    { apiFieldName: 'accountStatus', label: '帳號狀態', type: 'option' as const, options: [{ value: 'enabled', label: '啟用' }, { value: 'disabled', label: '停用' }, { value: 'unknown', label: '尚未支援' }] },
+    ...baseFields.filter((field) => !['enabled', 'accountStatus'].includes(field.apiFieldName ?? '')),
+    {
+      apiFieldName: 'accountStatus',
+      label: '帳號狀態',
+      type: 'option' as const,
+      options: [
+        { value: 'enabled', label: '啟用' },
+        { value: 'disabled', label: '停用' },
+        { value: 'unknown', label: '尚未支援' },
+      ],
+    },
   ];
   const rows = metadataRows(
-    query.records.map((user) => ({ ...user, name: user.username, roleId: user.role?.id, accountStatus: user.enabled === true ? 'enabled' : user.enabled === false ? 'disabled' : 'unknown' })),
+    query.records.map((user) => ({
+      ...user,
+      name: user.username,
+      roleId: user.role?.id,
+      accountStatus: user.enabled === true ? 'enabled' : user.enabled === false ? 'disabled' : 'unknown',
+    })),
     fields
   );
   async function removeMany(ids: string[]) {
     const result = await deletion.execute(ids);
-    await query.reload();
-    if (result.failed.length)
-      throw new Error(
-        `已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗：${result.failed[0].message}`
-      );
+    const summary = deletionSummary(result, query.records);
+    await query.reload().catch(() => {});
+    if (result.failed.length) throw new Error(summary);
+    return summary;
   }
   const list = useEntityList('users', '帳號', fields, rows, removeMany, true, query.pagination);
   const vm = {
@@ -82,19 +96,26 @@ export function UserView() {
           {notice}
         </p>
       )}
-      {error ? (
+      {error && !query.data ? (
         <div role="alert" className="flex items-center gap-3 py-6 text-sm text-destructive">
           無法載入帳號：{error.message}
           <Button variant="outline" onClick={reload}>
             重試
           </Button>
         </div>
-      ) : !metadata.data || !query.data || query.isLoading ? (
+      ) : !metadata.data || !query.data ? (
         <p role="status" className="py-6">
           載入帳號…
         </p>
       ) : (
-        <EntityList vm={vm} dataNotice={null} />
+        <>
+          {error && (
+            <p role="alert" className="py-3 text-destructive">
+              {error.message}
+            </p>
+          )}
+          <EntityList vm={vm} dataNotice={null} />
+        </>
       )}
       {optionsRequest.error && (
         <p role="alert">
@@ -224,7 +245,7 @@ function UserForm({
       setValidationError('請選擇角色。');
       return;
     }
-    if (!user && !roleOptions.some((role) => role.value === draft.roleId)) {
+    if ((!user || draft.roleId !== user.role?.id) && !roleOptions.some((role) => role.value === draft.roleId)) {
       setValidationError('請選擇可指派的角色。');
       return;
     }
@@ -273,14 +294,61 @@ function UserForm({
       <DialogDescription>
         {!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}
       </DialogDescription>
-      {user && <section className="space-y-3 rounded-xl border bg-muted/30 p-4" aria-label="帳號狀態">
-        <div className="flex items-center justify-between gap-3"><h3 className="font-medium">帳號狀態</h3><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${user.enabled === false ? 'bg-red-50 text-red-700' : user.enabled === true ? 'bg-emerald-50 text-emerald-700' : 'bg-muted text-muted-foreground'}`}>{user.enabled === true ? '啟用' : user.enabled === false ? '停用' : '尚未支援'}</span></div>
-        <p className="text-xs leading-relaxed text-muted-foreground">停用後將無法登入，既有資料與操作紀錄仍會保留。</p>
-        {!statusSupported && <p className="text-xs text-muted-foreground">後端尚未提供帳號狀態。</p>}
-        {isSelf && <p className="text-xs text-muted-foreground">無法停用目前登入的帳號。</p>}
-        {canChangeStatus && !confirmStatus && <Button type="button" variant={user.enabled ? 'destructive' : 'outline'} disabled={isSaving} onClick={() => { statusMutation.reset(); setConfirmStatus(true); }}>{user.enabled ? '停用帳號' : '重新啟用'}</Button>}
-        {confirmStatus && <div className="space-y-3 border-t pt-3"><p className="text-sm">確定要{user.enabled ? '停用' : '重新啟用'}帳號「{user.username}」嗎？此操作不會儲存下方尚未儲存的修改。</p>{statusMutation.error && <p role="alert" className="text-sm text-destructive">{statusMutation.error.message}</p>}<div className="flex gap-2"><Button type="button" variant="outline" disabled={isSaving} onClick={() => setConfirmStatus(false)}>返回</Button><Button type="button" variant={user.enabled ? 'destructive' : 'default'} disabled={isSaving} onClick={() => void changeStatus()}>{statusMutation.isLoading ? '更新中…' : user.enabled ? '確認停用' : '確認啟用'}</Button></div></div>}
-      </section>}
+      {user && (
+        <section className="space-y-3 rounded-xl border bg-muted/30 p-4" aria-label="帳號狀態">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-medium">帳號狀態</h3>
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs font-medium ${user.enabled === false ? 'bg-red-50 text-red-700' : user.enabled === true ? 'bg-emerald-50 text-emerald-700' : 'bg-muted text-muted-foreground'}`}
+            >
+              {user.enabled === true ? '啟用' : user.enabled === false ? '停用' : '尚未支援'}
+            </span>
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            停用後將無法登入，既有資料與操作紀錄仍會保留。
+          </p>
+          {!statusSupported && <p className="text-xs text-muted-foreground">尚未提供帳號狀態。</p>}
+          {isSelf && <p className="text-xs text-muted-foreground">無法停用目前登入的帳號。</p>}
+          {canChangeStatus && !confirmStatus && (
+            <Button
+              type="button"
+              variant={user.enabled ? 'destructive' : 'outline'}
+              disabled={isSaving}
+              onClick={() => {
+                statusMutation.reset();
+                setConfirmStatus(true);
+              }}
+            >
+              {user.enabled ? '停用帳號' : '重新啟用'}
+            </Button>
+          )}
+          {confirmStatus && (
+            <div className="space-y-3 border-t pt-3">
+              <p className="text-sm">
+                確定要{user.enabled ? '停用' : '重新啟用'}帳號「{user.username}」嗎？此操作不會儲存下方尚未儲存的修改。
+              </p>
+              {statusMutation.error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {statusMutation.error.message}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" disabled={isSaving} onClick={() => setConfirmStatus(false)}>
+                  返回
+                </Button>
+                <Button
+                  type="button"
+                  variant={user.enabled ? 'destructive' : 'default'}
+                  disabled={isSaving}
+                  onClick={() => void changeStatus()}
+                >
+                  {statusMutation.isLoading ? '更新中…' : user.enabled ? '確認停用' : '確認啟用'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
       <fieldset disabled={isSaving || !editable} className="space-y-4">
         <label className="grid gap-2">
           帳號

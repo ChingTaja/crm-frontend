@@ -360,10 +360,6 @@ export function OrderEditView({ id }: { id: string }) {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 border-t bg-amber-50/60 px-5 py-4 text-xs leading-5 text-amber-800">
-                  <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                  <p>訂單完成僅表示處理完成，付款狀態需另行確認。</p>
-                </div>
               </section>
               <section className={panel}>
                 <h2 className="border-b px-6 py-4 font-semibold">來源報價</h2>
@@ -435,7 +431,7 @@ export function OrderEditView({ id }: { id: string }) {
             {order?.number} ·{' '}
             {pendingStatus === 'Cancelled'
               ? '請填寫取消原因並確認取消此訂單。'
-              : '請確認此訂單已處理完成。完成訂單不代表已付款。'}
+              : '請確認此訂單已處理完成。'}
           </DialogDescription>
           <form
             className="mt-4 space-y-4"

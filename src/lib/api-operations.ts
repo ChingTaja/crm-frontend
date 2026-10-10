@@ -25,3 +25,15 @@ export async function deleteRecords(
   }
   return { deleted, failed };
 }
+
+export function deletionSummary(
+  result: { deleted: string[]; failed: { id: string; message: string }[] },
+  records: { id?: string; name?: string }[]
+) {
+  const label = (id: string) => records.find(record => record.id === id)?.name || id;
+  return [
+    `已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗。`,
+    ...result.deleted.map(id => `${label(id)}：已刪除`),
+    ...result.failed.map(item => `${label(item.id)}：${item.message}`),
+  ].join('\n');
+}

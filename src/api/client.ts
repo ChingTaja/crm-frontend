@@ -29,6 +29,9 @@ export function createGeneratedApi(baseUrl = '/api', transport?: HttpTransport) 
           details
         );
       }
+      const method = (args[1]?.method ?? (args[0] instanceof Request ? args[0].method : 'GET')).toUpperCase();
+      if (method === 'DELETE' && response.status !== 204)
+        throw new ApiError('刪除未回傳預期的 204，請重新載入確認資料。', response.status);
       return response;
     },
   });

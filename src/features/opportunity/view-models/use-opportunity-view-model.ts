@@ -1,3 +1,4 @@
+import { deletionSummary } from '@/lib/api-operations';
 import { useCustomersQuery } from '@/features/customer/view-models/use-customers-query';
 import { useLeadsQuery } from '@/features/lead/view-models/use-leads-query';
 import { useEntityFields } from '@/hooks/use-entity-fields';
@@ -18,12 +19,12 @@ export function useOpportunityViewModel() {
   async function removeMany(ids: string[]) {
     const result = await deletion.execute(ids);
     opportunityRepository.removeMany(result.deleted);
-    await query.reload();
+    const summary = deletionSummary(result, query.records);
+    await query.reload().catch(() => {});
     if (result.failed.length) {
-      throw new Error(
-        `已刪除 ${result.deleted.length} 筆，${result.failed.length} 筆失敗：${result.failed[0].message}`
-      );
+      throw new Error(summary);
     }
+    return summary;
   }
   const fields = metadata.fields.map((field) => {
     const records =

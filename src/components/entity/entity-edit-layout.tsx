@@ -34,9 +34,11 @@ export function EntityEditLayout({
 }: EntityEditLayoutProps) {
   const { can } = useAccess();
   const entity = formId.replace(/-form$/, '');
-  const editable = !readOnly && can(
-    `${entity === 'opportunity' ? 'opportunities' : entity === 'company' ? 'customers' : entity + 's'}.${isNew ? 'create' : 'update'}`
-  );
+  const editable =
+    !readOnly &&
+    can(
+      `${entity === 'opportunity' ? 'opportunities' : entity === 'company' ? 'customers' : entity + 's'}.${isNew ? 'create' : 'update'}`
+    );
   return (
     <>
       <EntityPageHeader>
@@ -59,14 +61,18 @@ export function EntityEditLayout({
           >
             {editable ? '取消' : '返回列表'}
           </Button>
-          {editable && <><Button variant="outline" disabled={form.isSaving} onClick={form.reset}>
-            <RotateCcw />
-            重置
-          </Button>
-          <Button type="submit" form={formId} disabled={form.isSaving || !editable}>
-            <Save />
-            {form.isSaving ? '儲存中…' : '儲存'}
-          </Button></>}
+          {editable && (
+            <>
+              <Button variant="outline" disabled={form.isSaving} onClick={form.reset}>
+                <RotateCcw />
+                重置
+              </Button>
+              <Button type="submit" form={formId} disabled={form.isSaving || !editable}>
+                <Save />
+                {form.isSaving ? '儲存中…' : '儲存'}
+              </Button>
+            </>
+          )}
         </div>
       </EntityPageHeader>
       {notice}
