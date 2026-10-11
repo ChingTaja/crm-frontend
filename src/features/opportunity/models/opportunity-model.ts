@@ -2,7 +2,7 @@ import type { OpportunityResponse } from '../../../api/Api';
 import { createRepository } from '../../../lib/in-memory-repository';
 
 export function opportunityStageLabel(stage?: string) {
-  if (!stage) return '尚未回傳狀態';
+  if (!stage) return '狀態不明';
   if (['需求確認', '提案報價', '協商中'].includes(stage)) return '需求討論中';
   if (stage === '已成交') return '需求成交';
   if (stage === '已失單') return '失單';

@@ -48,7 +48,14 @@ export function EntityList({
         </EntityPageTitle>
         <div className="ml-auto flex items-center gap-2">
           {allowDelete && can(`${entity}.delete`) && (
-            <DeleteRecordsButton title={vm.title} records={vm.selectedRecords} onDelete={vm.deleteSelected} />
+            <DeleteRecordsButton
+              title={vm.title}
+              records={vm.selectedRecords}
+              onDelete={vm.deleteSelected}
+              confirmationMessage={entity === 'users'
+                ? `確定刪除已選取的 ${vm.selectedRecords.length} 筆帳號？刪除後將無法使用這些帳號登入。`
+                : undefined}
+            />
           )}
           {allowCreate && can(`${entity}.create`) && (
             <Button onClick={vm.startCreate}>

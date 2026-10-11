@@ -2,7 +2,7 @@ import type { HttpResponse } from '../api/Api';
 
 export async function unwrapResponse<T>(pending: Promise<HttpResponse<T>>) {
   const response = await pending;
-  if (response.error) throw new Error('API 回傳格式不是 JSON。');
+  if (response.error) throw new Error('無法讀取資料，請重新載入。');
   return response.data;
 }
 

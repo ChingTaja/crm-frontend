@@ -48,7 +48,7 @@ export function UserView() {
       options: [
         { value: 'enabled', label: '啟用' },
         { value: 'disabled', label: '停用' },
-        { value: 'unknown', label: '尚未支援' },
+        { value: 'unknown', label: '狀態不明' },
       ],
     },
   ];
@@ -301,13 +301,13 @@ function UserForm({
             <span
               className={`rounded-full px-2.5 py-1 text-xs font-medium ${user.enabled === false ? 'bg-red-50 text-red-700' : user.enabled === true ? 'bg-emerald-50 text-emerald-700' : 'bg-muted text-muted-foreground'}`}
             >
-              {user.enabled === true ? '啟用' : user.enabled === false ? '停用' : '尚未支援'}
+              {user.enabled === true ? '啟用' : user.enabled === false ? '停用' : '狀態不明'}
             </span>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">
             停用後將無法登入，既有資料與操作紀錄仍會保留。
           </p>
-          {!statusSupported && <p className="text-xs text-muted-foreground">尚未提供帳號狀態。</p>}
+          {!statusSupported && <p className="text-xs text-muted-foreground">無法確認帳號狀態，請重新載入。</p>}
           {isSelf && <p className="text-xs text-muted-foreground">無法停用目前登入的帳號。</p>}
           {canChangeStatus && !confirmStatus && (
             <Button

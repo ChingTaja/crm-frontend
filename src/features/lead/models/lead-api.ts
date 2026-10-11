@@ -12,7 +12,7 @@ function toLead(record: Lead | CreateLeadResponse): Lead {
       ? leadStatuses[statusKeys.findIndex((key) => key === rawStatus.key)]
       : rawStatus;
   if (!record.id || !leadStatuses.some((value) => value === status)) {
-    throw new Error('Lead API 回傳的 ID 或狀態不正確。');
+    throw new Error('Lead 資料格式不正確，請重新載入。');
   }
   return {
     ...record,

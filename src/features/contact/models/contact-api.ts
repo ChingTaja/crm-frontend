@@ -3,7 +3,7 @@ import { collectPages } from '../../../lib/api-pagination';
 import type { Api, ContactResponse } from '../../../api/Api';
 
 function contact(record: ContactResponse) {
-  if (!record?.id) throw new Error('Contact API 回傳的 ID 不正確。');
+  if (!record?.id) throw new Error('聯絡人資料格式不正確，請重新載入。');
   return record;
 }
 export function createContactApi(client: Api<unknown>['api']) {
@@ -21,7 +21,7 @@ export function createContactApi(client: Api<unknown>['api']) {
       !Number.isInteger(data.totalPages) ||
       !Number.isInteger(data.totalElements)
     ) {
-      throw new Error('Contact 列表回傳格式不正確。');
+      throw new Error('聯絡人列表回傳格式不正確。');
     }
     return { ...data, content: data.content.map(contact) };
   };

@@ -85,7 +85,6 @@ export function QuoteEditorView({
         </div>
       </EntityPageHeader>
       <div className="mx-auto max-w-6xl space-y-5 py-6">
-        {quote && version && !version.opportunityId && <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">此舊報價尚未綁定商機，暫時僅供查閱。請先由管理員完成資料歸屬。</p>}
         {quote && version && (
           <QuoteVersionManager
             quote={quote}
@@ -176,7 +175,6 @@ export function QuoteEditorView({
                     disabled={true}
                     value={d.opportunityId}
                     options={[
-                      { value: '', label: '舊報價尚未綁定商機' },
                       ...vm.opportunities
                         .filter((o) => o.customerId === d.customerId)
                         .map((o) => ({ value: o.id ?? '', label: o.name ?? '' })),

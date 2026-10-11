@@ -4,7 +4,7 @@ import { collectPages } from '../../../lib/api-pagination';
 import type { Api, OpportunityResponse, CreateOpportunityRequest, CloseOpportunityRequest } from '../../../api/Api';
 
 function opportunity(record: OpportunityResponse) {
-  if (!record?.id) throw new Error('Opportunity API 回傳的 ID 不正確。');
+  if (!record?.id) throw new Error('商機資料格式不正確，請重新載入。');
   return record;
 }
 export function createOpportunityApi(client: Api<unknown>['api']) {
@@ -22,7 +22,7 @@ export function createOpportunityApi(client: Api<unknown>['api']) {
       !Number.isInteger(data.totalPages) ||
       !Number.isInteger(data.totalElements)
     ) {
-      throw new Error('Opportunity 列表回傳格式不正確。');
+      throw new Error('商機列表回傳格式不正確。');
     }
     return { ...data, content: data.content.map(opportunity) };
   };

@@ -5,7 +5,7 @@ import type { Api, ProductResponse, CreateProductRequest } from '../../../api/Ap
 function product(record: ProductResponse): Required<ProductResponse> {
   if (!record?.id || typeof record.name !== 'string' || typeof record.sku !== 'string' ||
     typeof record.price !== 'number' || !Number.isFinite(record.price) || record.price < 0 ||
-    !['啟用', '停用'].includes(record.status ?? '')) throw new Error('產品 API 回傳格式不正確。');
+    !['啟用', '停用'].includes(record.status ?? '')) throw new Error('產品資料格式不正確，請重新載入。');
   return { id: record.id, name: record.name, sku: record.sku, price: record.price, status: record.status! };
 }
 export function createProductApi(client: Api<unknown>['api']) {
@@ -23,7 +23,7 @@ export function createProductApi(client: Api<unknown>['api']) {
       !Number.isInteger(data.totalPages) ||
       !Number.isInteger(data.totalElements)
     ) {
-      throw new Error('Product 列表回傳格式不正確。');
+      throw new Error('產品列表回傳格式不正確。');
     }
     return { ...data, content: data.content.map(product) };
   };

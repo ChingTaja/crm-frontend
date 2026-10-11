@@ -15,7 +15,7 @@ export async function problemCode(response: Response): Promise<string | undefine
 async function json<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => undefined);
   if (!response.ok) throw new ApiError(data?.detail ?? `請求失敗（HTTP ${response.status}）。`, response.status, data);
-  if (!data) throw new Error('驗證 API 回傳格式不正確。');
+  if (!data) throw new Error('無法完成登入驗證，請稍後再試。');
   return data;
 }
 export function waitForAuth<T>(pending: Promise<T>, signal?: AbortSignal | null): Promise<T> {
@@ -36,7 +36,7 @@ export function createRefreshCoordinator(root: string, scope: string, transport:
     if (!state.csrfPending) {
       state.csrfPending = (async () => {
         const result = await json<CsrfResponse>(await transport(`${root}/api/auth/csrf`, { method: 'GET', credentials: 'include', cache: 'no-store', headers: { Accept: 'application/json' } }));
-        if (!result.token?.trim() || result.headerName !== 'X-CSRF-TOKEN') throw new Error('CSRF Token 回傳格式不正確。');
+        if (!result.token?.trim() || result.headerName !== 'X-CSRF-TOKEN') throw new Error('無法完成安全驗證，請重新載入。');
         state.csrf = result;
         return result;
       })().finally(() => { state.csrfPending = undefined; });
@@ -67,7 +67,7 @@ export function createRefreshCoordinator(root: string, scope: string, transport:
       state.refreshPending = withCookieLock(async () => {
         if (authSession.getGeneration() !== expectedGeneration) throw new DOMException('登入狀態已變更。', 'AbortError');
         const result = await json<RefreshResponse>(await cookieRequest(`${root}/api/auth/refresh`, { method: 'POST', headers: { Accept: 'application/json' } }));
-        if (!result.accessToken?.trim() || result.tokenType?.toLowerCase() !== 'bearer' || !Number.isFinite(result.expiresIn) || result.expiresIn <= 0) throw new Error('續期 API 回傳格式不正確。');
+        if (!result.accessToken?.trim() || result.tokenType?.toLowerCase() !== 'bearer' || !Number.isFinite(result.expiresIn) || result.expiresIn <= 0) throw new Error('無法延續登入狀態，請稍後再試。');
         if (!authSession.updateFromRefresh(result.accessToken, result.expiresIn, expectedGeneration)) throw new DOMException('登入狀態已變更。', 'AbortError');
         return result;
       }).finally(() => { state.refreshPending = undefined; });

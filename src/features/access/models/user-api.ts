@@ -2,7 +2,7 @@ import type { Api, RegisterRequest, UpdateUserRequest, UpdateUserStatusRequest, 
 import { unwrapResponse, deleteRecords } from '../../../lib/api-operations';
 
 function userRecord(record: UserResponse) {
-  if (!record?.id) throw new Error('帳號 API 回傳的 ID 不正確。');
+  if (!record?.id) throw new Error('帳號資料格式不正確，請重新載入。');
   return record;
 }
 

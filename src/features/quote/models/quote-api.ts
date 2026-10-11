@@ -100,7 +100,7 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       if (!Array.isArray(data?.content) || !Number.isInteger(data.totalElements) || !Number.isInteger(data.totalPages))
         throw new Error('報價列表回傳格式不正確。');
       if (query?.opportunityId && data.content.some((record) => record.opportunityId !== query.opportunityId))
-        throw new Error('系統尚未正確套用商機報價篩選，請確認 API 支援 opportunityId。');
+        throw new Error('無法確認報價所屬商機，請重新載入；若問題持續，請聯絡管理員。');
       return data;
     },
     get: async (signal: AbortSignal, id: string) =>
