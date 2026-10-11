@@ -65,11 +65,12 @@ export function DeleteRecordsButton({
         <DialogContent>
           <DialogTitle className="text-lg font-semibold">刪除{title}</DialogTitle>
           <DialogDescription className="mt-2 text-sm text-muted-foreground">
-            {summary ? (
-              '刪除作業已完成，以下為逐筆結果。'
-            ) : confirmationMessage ?? (includesVersions
-              ? `確定刪除${records.length === 1 ? '此報價單' : `已選取的 ${records.length} 筆報價單`}及其所有版本、明細與操作紀錄？`
-              : `確定刪除已選取的 ${records.length} 筆${title}？`)}
+            {summary
+              ? '刪除作業已完成，以下為逐筆結果。'
+              : (confirmationMessage ??
+                (includesVersions
+                  ? `確定刪除${records.length === 1 ? '此報價單' : `已選取的 ${records.length} 筆報價單`}及其所有版本、明細與操作紀錄？`
+                  : `確定刪除已選取的 ${records.length} 筆${title}？`))}
           </DialogDescription>
           <ul className="my-4 max-h-48 space-y-2 overflow-y-auto rounded-lg bg-muted/40 p-3 text-sm">
             {records.map((record) => (

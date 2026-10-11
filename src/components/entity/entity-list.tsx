@@ -52,9 +52,11 @@ export function EntityList({
               title={vm.title}
               records={vm.selectedRecords}
               onDelete={vm.deleteSelected}
-              confirmationMessage={entity === 'users'
-                ? `確定刪除已選取的 ${vm.selectedRecords.length} 筆帳號？刪除後將無法使用這些帳號登入。`
-                : undefined}
+              confirmationMessage={
+                entity === 'users'
+                  ? `確定刪除已選取的 ${vm.selectedRecords.length} 筆帳號？刪除後將無法使用這些帳號登入。`
+                  : undefined
+              }
             />
           )}
           {allowCreate && can(`${entity}.create`) && (
@@ -146,7 +148,10 @@ export function EntityList({
                 return (
                   <EntityTableCell key={field}>
                     {isName ? (
-                      <AppLink className="font-medium hover:underline" href={recordHref?.(row.id) ?? `/${entity}/${row.id}/edit`}>
+                      <AppLink
+                        className="font-medium hover:underline"
+                        href={recordHref?.(row.id) ?? `/${entity}/${row.id}/edit`}
+                      >
                         {value || '—'}
                       </AppLink>
                     ) : (
