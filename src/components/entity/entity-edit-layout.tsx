@@ -37,7 +37,7 @@ export function EntityEditLayout({
   const editable =
     !readOnly &&
     can(
-      `${entity === 'opportunity' ? 'opportunities' : entity === 'company' ? 'customers' : entity + 's'}.${isNew ? 'create' : 'update'}`
+      `${entity === 'opportunity' ? 'opportunities' : entity === 'currency' ? 'currencies' : entity === 'company' ? 'customers' : entity + 's'}.${isNew ? 'create' : 'update'}`
     );
   return (
     <>

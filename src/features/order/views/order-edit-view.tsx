@@ -1,3 +1,4 @@
+import { formatMoney } from '@/features/currency/models/currency-model';
 import { useState } from 'react';
 import {
   ArrowLeft,
@@ -24,13 +25,12 @@ import { useOrderEditViewModel } from '../view-models/use-order-edit-view-model'
 import { orderStatusLabels } from '../models/order-api';
 import type { UpdateOrderStatusRequest } from '../../../api/Api';
 
-const amount = (cents?: number) =>
-  cents == null ? '—' : `NT$ ${(cents / 100).toLocaleString('zh-TW', { minimumFractionDigits: 2 })}`;
 const statusLabel = (status?: string) =>
   orderStatusLabels[status as UpdateOrderStatusRequest['status']] ?? status ?? '—';
 export function OrderEditView({ id }: { id: string }) {
   const vm = useOrderEditViewModel(id);
   const order = vm.record;
+  const amount = (cents?: number) => cents == null ? '—' : formatMoney(cents, order?.currency || 'TWD');
   const [pendingStatus, setPendingStatus] = useState<UpdateOrderStatusRequest['status'] | null>(null);
   const panel = 'overflow-hidden rounded-2xl border bg-card shadow-sm';
   const statusColors: Record<string, string> = {
@@ -207,7 +207,7 @@ export function OrderEditView({ id }: { id: string }) {
                     <caption className="sr-only">訂單商品、數量、價格、折扣及稅金明細</caption>
                     <thead className="bg-muted/50 text-xs text-muted-foreground">
                       <tr>
-                        {['商品 / SKU', '數量', '單價', '折扣', '稅金', '原價小計', '含稅小計'].map((label, index) => (
+                        {['商品 / SKU', '數量', '單價', '幣別', '折扣', '稅金', '原價小計', '含稅小計'].map((label, index) => (
                           <th
                             key={label}
                             scope="col"
@@ -229,6 +229,7 @@ export function OrderEditView({ id }: { id: string }) {
                           <td className="px-4 py-5 text-right tabular-nums">
                             {amount(line.unitPrice == null ? undefined : line.unitPrice * 100)}
                           </td>
+                          <td className="px-4 py-5 text-right">{order.currency || 'TWD'}</td>
                           <td className="px-4 py-5 text-right tabular-nums">
                             <p>{line.discountPercent ?? 0}%</p>
                             <p className="mt-1 text-xs text-muted-foreground">{amount(line.discountCents)}</p>
@@ -245,7 +246,7 @@ export function OrderEditView({ id }: { id: string }) {
                       ))}
                       {!order.lines?.length && (
                         <tr>
-                          <td colSpan={7} className="px-6 py-14 text-center text-muted-foreground">
+                          <td colSpan={8} className="px-6 py-14 text-center text-muted-foreground">
                             此訂單沒有明細。
                           </td>
                         </tr>

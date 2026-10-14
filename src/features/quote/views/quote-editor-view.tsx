@@ -125,10 +125,10 @@ export function QuoteEditorView({
           className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
         >
           <p className="font-semibold">審核注意事項</p>
-          <p className="mt-1 leading-relaxed">
+          {d.currency !== 'TWD' ? <p className="mt-1 leading-relaxed">非台幣報價須指定審核人審核，批准後才能送出報價單</p> : <p className="mt-1 leading-relaxed">
             任一明細折扣<strong>超過 {quotePolicy.discountThresholdPercent}%</strong>，或含稅總金額
             <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>，需要指定審核人審核，批准後才能送出報價單。
-          </p>
+          </p>}
           {(requiresQuoteApproval(d) || version?.requiresReapproval) && (
             <p className="mt-2 font-semibold">此版本需要指定審核人審核。</p>
           )}

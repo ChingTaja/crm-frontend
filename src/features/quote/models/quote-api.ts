@@ -1,3 +1,4 @@
+import { defaultCurrency } from '../../currency/models/currency-model';
 import type { AssignedQuoteResponse } from './quote-review-contract';
 import type {
   Api,
@@ -28,6 +29,7 @@ export function quoteRecord(data: AssignedQuoteResponse): Quote {
           revision: v.revision,
           status: v.status,
           approval: v.approval,
+          currency: v.currency || defaultCurrency,
           name: v.name ?? '',
           customerId: v.customerId ?? '',
           opportunityId: v.opportunityId ?? '',
@@ -65,10 +67,15 @@ export function quoteRecord(data: AssignedQuoteResponse): Quote {
     })),
   };
 }
-export function quotePayload(content: QuoteContent, existingLineIds: string[] = []): CreateQuoteRequest {
+export function quotePayload(content: QuoteContent, existingLineIds: string[] = []): CreateQuoteRequest & { currency: string } {
   if (!content.customerId.trim() || !content.opportunityId.trim() || content.lines.some(line => !line.productId.trim()))
     throw new Error('請選擇有效的客戶、商機與產品。');
+  const currency = content.currency ?? defaultCurrency;
+  if (!/^[A-Z]{3}$/.test(currency)) throw new Error('請選擇有效的幣別');
+  if (content.lines.some(line => !Number.isFinite(line.unitPrice) || line.unitPrice < 0))
+    throw new Error('請填寫每筆明細的有效單價');
   return {
+    currency,
     name: content.name.trim(),
     customerId: content.customerId,
     opportunityId: content.opportunityId.trim(),

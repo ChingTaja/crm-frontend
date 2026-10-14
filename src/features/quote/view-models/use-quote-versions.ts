@@ -71,7 +71,7 @@ export function useQuoteVersions(
       latest: version.id === latest.id,
       status: statusLabels[version.status],
       approval: approvalLabels[version.approval],
-      total: money(version.totals?.totalCents ?? quoteTotals(version.lines).totalCents),
+      total: money(version.totals?.totalCents ?? quoteTotals(version.lines).totalCents, version.currency),
       createdAt: new Date(version.createdAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       createdBy: version.createdBy,
     })),

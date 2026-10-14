@@ -124,7 +124,7 @@ function ReviewList() {
                   <div className="sm:text-right">
                     <p className="text-xs text-muted-foreground">含稅總額 · {q.currency || 'TWD'}</p>
                     <p className="mt-1 text-lg font-semibold tabular-nums">
-                      {q.totalCents == null ? '—' : money(q.totalCents)}
+                      {q.totalCents == null ? '—' : money(q.totalCents, q.currency || 'TWD')}
                     </p>
                   </div>
                   <span className="flex items-center gap-2 text-sm font-medium text-primary">
@@ -247,7 +247,7 @@ function ReviewDetail({ id }: { id: string }) {
                 <caption className="sr-only">版本 {version.version} 的商品與價格明細</caption>
                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                   <tr>
-                    {['商品 / SKU', '數量', '單價', '折扣', '稅率'].map((label, index) => (
+                    {['商品 / SKU', '數量', '單價', '幣別', '折扣', '稅率'].map((label, index) => (
                       <th scope="col" className={`px-5 py-3 font-medium ${index ? 'text-right' : ''}`} key={label}>
                         {label}
                       </th>
@@ -262,7 +262,8 @@ function ReviewDetail({ id }: { id: string }) {
                         <p className="mt-1 text-xs text-muted-foreground">{line.sku || '—'}</p>
                       </td>
                       <td className="px-5 py-4 text-right tabular-nums">{line.quantity}</td>
-                      <td className="px-5 py-4 text-right tabular-nums">{money(line.unitPrice * 100)}</td>
+                      <td className="px-5 py-4 text-right tabular-nums">{money(line.unitPrice * 100, version.currency)}</td>
+                      <td className="px-5 py-4 text-right">{version.currency}</td>
                       <td className="px-5 py-4 text-right tabular-nums">
                         <span
                           className={
@@ -281,9 +282,9 @@ function ReviewDetail({ id }: { id: string }) {
               </table>
             </div>
             <div className="flex items-center justify-between border-t bg-muted/30 px-6 py-5">
-              <span className="text-sm text-muted-foreground">含稅總額 · TWD</span>
+              <span className="text-sm text-muted-foreground">含稅總額 · {version.currency}</span>
               <span className="text-xl font-semibold tabular-nums">
-                {version.totals?.totalCents == null ? '—' : money(version.totals.totalCents)}
+                {version.totals?.totalCents == null ? '—' : money(version.totals.totalCents, version.currency)}
               </span>
             </div>
           </section>

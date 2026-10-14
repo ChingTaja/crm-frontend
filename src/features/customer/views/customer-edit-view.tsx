@@ -32,48 +32,67 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
           >
             {editable ? '取消' : '返回列表'}
           </Button>
-          {editable && <><Button type="button" variant="outline" onClick={vm.reset}>
-            <RotateCcw /> 重置
-          </Button>
-          <Button type="submit" form="customer-edit-form" disabled={vm.isSaving || !can(vm.isNew ? 'customers.create' : 'customers.update')}>
-            <Save /> {vm.isNew ? '建立資料' : '儲存變更'}
-          </Button></>}
+          {editable && (
+            <>
+              <Button type="button" variant="outline" onClick={vm.reset}>
+                <RotateCcw /> 重置
+              </Button>
+              <Button
+                type="submit"
+                form="customer-edit-form"
+                disabled={vm.isSaving || !can(vm.isNew ? 'customers.create' : 'customers.update')}
+              >
+                <Save /> {vm.isNew ? '建立資料' : '儲存變更'}
+              </Button>
+            </>
+          )}
         </div>
       </EntityPageHeader>
-      <form id="customer-edit-form" onSubmit={event => { if (can(vm.isNew ? 'customers.create' : 'customers.update')) vm.save(event); else event.preventDefault(); }} className="mx-auto w-full max-w-5xl py-8">
-        <fieldset disabled={!editable || vm.isSaving}><Card>
-          <CardHeader>
-            <CardTitle>客戶基本資料</CardTitle>
-            {editable && <CardDescription>
-              {vm.isNew ? '填寫客戶資訊與負責人。' : '更新客戶資訊與負責人。'}儲存後將返回列表。
-            </CardDescription>}
-          </CardHeader>
-          <CardContent className="grid gap-6 sm:grid-cols-2">
-            {(
-              [
-                { field: 'name', label: '客戶名稱', required: true },
-                { field: 'company', label: '公司' },
-                { field: 'owner', label: '帳戶所有者' },
-                { field: 'email', label: '電子郵件', type: 'email' },
-                { field: 'phone', label: '電話', type: 'tel' },
-              ] as const
-            ).map((item) => (
-              <div key={item.field} className="space-y-2">
-                <Label htmlFor={`edit-${item.field}`}>
-                  {item.label}
-                  {'required' in item && ' *'}
-                </Label>
-                <Input
-                  id={`edit-${item.field}`}
-                  value={vm.draft[item.field] ?? ''}
-                  type={'type' in item ? item.type : 'text'}
-                  required={'required' in item}
-                  onChange={(event) => vm.updateField(item.field, event.target.value)}
-                />
-              </div>
-            ))}
-          </CardContent>
-        </Card></fieldset>
+      <form
+        id="customer-edit-form"
+        onSubmit={(event) => {
+          if (can(vm.isNew ? 'customers.create' : 'customers.update')) vm.save(event);
+          else event.preventDefault();
+        }}
+        className="mx-auto w-full max-w-5xl py-8"
+      >
+        <fieldset disabled={!editable || vm.isSaving}>
+          <Card>
+            <CardHeader>
+              <CardTitle>客戶基本資料</CardTitle>
+              {editable && (
+                <CardDescription>
+                  {vm.isNew ? '填寫客戶資訊與負責人。' : '更新客戶資訊與負責人。'}儲存後將返回列表。
+                </CardDescription>
+              )}
+            </CardHeader>
+            <CardContent className="grid gap-6 sm:grid-cols-2">
+              {(
+                [
+                  { field: 'name', label: '客戶名稱', required: true },
+                  { field: 'company', label: '公司' },
+                  { field: 'owner', label: '客戶所有者' },
+                  { field: 'email', label: '電子郵件', type: 'email' },
+                  { field: 'phone', label: '電話', type: 'tel' },
+                ] as const
+              ).map((item) => (
+                <div key={item.field} className="space-y-2">
+                  <Label htmlFor={`edit-${item.field}`}>
+                    {item.label}
+                    {'required' in item && ' *'}
+                  </Label>
+                  <Input
+                    id={`edit-${item.field}`}
+                    value={vm.draft[item.field] ?? ''}
+                    type={'type' in item ? item.type : 'text'}
+                    required={'required' in item}
+                    onChange={(event) => vm.updateField(item.field, event.target.value)}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </fieldset>
         <p role="status" className="mt-3 text-sm text-destructive">
           {vm.error}
         </p>

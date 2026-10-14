@@ -1,3 +1,4 @@
+import { formatMoney } from '../../currency/models/currency-model';
 import type { QuoteActor, QuoteContent, QuoteLine, QuoteTotals, QuoteVersion } from './quote-types';
 
 export const quotePolicy = {
@@ -28,11 +29,9 @@ export function quoteTotals(lines: QuoteLine[]): QuoteTotals {
   );
 }
 export const requiresQuoteApproval = (content: QuoteContent) =>
+  (!!content.currency && content.currency !== quotePolicy.currency) ||
   content.lines.some((line) => line.discountPercent > quotePolicy.discountThresholdPercent) ||
   quoteTotals(content.lines).totalCents > quotePolicy.totalThreshold * 100;
 export const canEditQuote = (version: QuoteVersion) =>
   version.status === 'Draft' && !['Pending', 'Approved'].includes(version.approval);
-export const money = (cents: number) =>
-  new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', minimumFractionDigits: 2 }).format(
-    Number.isFinite(cents) ? cents / 100 : 0
-  );
+export const money = formatMoney;

@@ -1,3 +1,4 @@
+import { formatMoney } from '@/features/currency/models/currency-model';
 import { useState } from 'react';
 import { AppLink } from '@/components/ui/app-link';
 import { Lookup } from '@/components/ui/lookup';
@@ -107,7 +108,7 @@ function OrderListView() {
                       const field = metadata.fields[index].apiFieldName;
                       const text =
                         field === 'totalCents' && value !== ''
-                          ? `NT$ ${(Number(value) / 100).toLocaleString('zh-TW', { minimumFractionDigits: 2 })}`
+                          ? formatMoney(Number(value), vm.query.records.find(record => record.id === row.id)?.currency || 'TWD')
                           : field === 'status'
                             ? (orderStatusLabels[value as keyof typeof orderStatusLabels] ?? value)
                             : value;

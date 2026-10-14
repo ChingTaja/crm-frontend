@@ -6,6 +6,7 @@ import { ForgotPasswordView } from './features/auth/views/forgot-password-view';
 import { ResetPasswordView } from './features/auth/views/reset-password-view';
 import { AccessView } from './features/access/views/access-view';
 import { OrderView } from './features/order/views/order-view';
+import { CurrencyView } from './features/currency/views/currency-view';
 import { ProductView } from './features/product/views/product-view';
 import { OpportunityView } from './features/opportunity/views/opportunity-view';
 import { LeadView } from './features/lead/views/lead-view';
@@ -45,6 +46,7 @@ const entityViews = {
   opportunities: OpportunityView,
   orders: OrderView,
   products: ProductView,
+  currencies: CurrencyView,
   quotes: QuoteView,
   'quote-reviews': QuoteReviewView,
 };
@@ -71,6 +73,7 @@ function App() {
       opportunities: '商機',
       orders: '訂單',
       products: '產品',
+      currencies: '幣別',
       quotes: '報價單',
       'quote-reviews': '待我審核',
     };

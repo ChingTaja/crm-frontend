@@ -2,7 +2,7 @@ import { useAccess } from '@/features/access/view-models/use-access';
 import type { ComponentProps, MouseEvent } from 'react';
 import { navigate } from '@/lib/router';
 
-export function AppLink({ onClick, ...props }: ComponentProps<'a'>) {
+export function AppLink({ onClick, hideWithoutReadPermission = true, ...props }: ComponentProps<'a'> & { hideWithoutReadPermission?: boolean }) {
   const { can } = useAccess();
   const target = props.href ? new URL(props.href, window.location.href) : undefined;
   const entity = target?.pathname.split('/')[1];
@@ -12,12 +12,13 @@ export function AppLink({ onClick, ...props }: ComponentProps<'a'>) {
     'leads',
     'opportunities',
     'products',
+    'currencies',
     'quotes',
     'orders',
     'users',
     'roles',
   ];
-  if (entity && protectedEntities.includes(entity) && !can(`${entity}.read`)) return null;
+  if (hideWithoutReadPermission && entity && protectedEntities.includes(entity) && !can(`${entity}.read`)) return null;
   function follow(event: MouseEvent<HTMLAnchorElement>) {
     onClick?.(event);
     if (

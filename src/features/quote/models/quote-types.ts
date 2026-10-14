@@ -13,7 +13,7 @@ export type QuoteActor = {
   permissionCodes?: string[];
 };
 export type QuoteLine = Required<QuoteLineResponse>;
-export type QuoteContent = Required<Omit<CreateQuoteRequest, 'lines'>> & { lines: QuoteLine[] };
+export type QuoteContent = Required<Omit<CreateQuoteRequest, 'lines'>> & { lines: QuoteLine[]; currency: string };
 export interface QuoteVersion extends QuoteContent, ReviewAssignment {
   totals?: ApiQuoteTotals;
   id: string;

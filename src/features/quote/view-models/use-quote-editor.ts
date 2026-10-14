@@ -15,6 +15,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   const [initial] = useState<QuoteContent>(() =>
     version
       ? structuredClone({
+          currency: version.currency,
           name: version.name,
           customerId: version.customerId,
           opportunityId: version.opportunityId,
@@ -25,6 +26,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
           notes: version.notes,
         })
       : {
+          currency: 'TWD',
           name: '',
           customerId: initialOpportunity?.customerId ?? '',
           opportunityId: initialOpportunity?.id ?? '',
@@ -42,7 +44,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   const dirty = JSON.stringify(initial) !== JSON.stringify(draft);
   function update<K extends keyof QuoteContent>(field: K, value: QuoteContent[K]) {
     if (field === 'customerId' || field === 'opportunityId') return;
-    setDraft((current) => ({ ...current, [field]: value, ...(field === 'customerId' ? { opportunityId: '' } : {}) }));
+    setDraft((current) => ({ ...current, [field]: value, ...(field === 'currency' ? { lines: current.lines.map(line => ({ ...line, unitPrice: Number.NaN })) } : {}) }));
     setError('');
   }
   function updateLine<K extends keyof QuoteLine>(id: string, field: K, value: QuoteLine[K]) {
@@ -63,7 +65,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
               productName: product.name,
               sku: product.sku,
               catalogPrice: product.price,
-              unitPrice: product.price,
+              unitPrice: current.currency === 'TWD' ? product.price : Number.NaN,
             }
           : line
       ),
@@ -80,6 +82,8 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
       if (!quote && !canCreateOpportunityQuote(await parentCheck.execute(draft.opportunityId))) throw new Error('商機已結案或狀態已變更，無法新增報價單。');
       const payload = quotePayload(draft, version?.lines.map(line => line.id));
       const result = quote && version ? await mutation.execute(quote.id, version.id, { ...payload, expectedRevision: version.revision }) : await create.execute(payload);
+      if (result.versions[result.versions.length - 1]?.currency !== draft.currency)
+        throw new Error('後端回傳幣別與選擇不一致，請重新載入確認，勿重複新增');
       cacheQuote(result);
       if (!quote && onCreated) onCreated(result);
       else if (!quote) navigate(`/quotes/${encodeURIComponent(result.id)}/edit${initialOpportunity?.id ? `?opportunityId=${encodeURIComponent(initialOpportunity.id)}` : ''}`);
