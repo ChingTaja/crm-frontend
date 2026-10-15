@@ -1,3 +1,4 @@
+import { earliestExpectedCloseDate } from '../models/opportunity-date';
 import { ValidatedForm } from '@/components/entity/validated-form';
 import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { useRef, useState } from 'react';
@@ -169,9 +170,11 @@ export function OpportunityEditView({
               <Input
                 id="opportunity-expectedCloseDate"
                 type="date"
+                min={earliestExpectedCloseDate()}
                 value={draft.expectedCloseDate ?? ''}
                 onChange={(e) => update('expectedCloseDate', e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">請選擇明天或更晚的日期。</p>
             </EntityField>
             <EntityField id="opportunity-customer" label="所屬客戶 *">
               <Lookup

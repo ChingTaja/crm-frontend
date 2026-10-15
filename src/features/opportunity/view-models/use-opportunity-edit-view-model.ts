@@ -6,6 +6,7 @@ import { useEntityForm } from '@/hooks/use-entity-form';
 import { useApi } from '@/hooks/use-api';
 import { opportunityApi } from '../models/opportunity-service';
 import { cacheOpportunity } from '../models/opportunity-model';
+import { validateExpectedCloseDate } from '../models/opportunity-date';
 
 export function useOpportunityEditViewModel(record?: OpportunityResponse) {
   const customerQuery = useCustomersQuery();
@@ -20,6 +21,7 @@ export function useOpportunityEditViewModel(record?: OpportunityResponse) {
     owner: record?.owner ?? '',
   };
   const form = useEntityForm('opportunities', initial, async (draft) => {
+    validateExpectedCloseDate(draft.expectedCloseDate);
     if (
       customerQuery.isLoading ||
       customerQuery.error ||
