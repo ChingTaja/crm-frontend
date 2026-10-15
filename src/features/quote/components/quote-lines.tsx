@@ -1,3 +1,4 @@
+import { ValidatedGroup } from '@/components/entity/validated-group';
 import { Fragment, useEffect } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { currencyApi } from '@/features/currency/models/currency-service';
@@ -34,7 +35,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
     .map(item => ({ value: item.code, label: `${item.code} · ${item.name}` }));
   if (!options.some(item => item.value === currency)) options.push({ value: currency, label: currency });
   return (
-    <Card>
+    <ValidatedGroup name="lines" validate={() => editor.editable && !editor.draft.lines.length ? '請至少新增一筆商品明細。' : ''}><Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>報價明細</CardTitle>
         {editor.editable && (
@@ -62,6 +63,8 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                   <td className="min-w-56 border-b px-2 py-3">
                     {editor.editable ? (
                       <Lookup
+                        name={`lines[${index}].productId`}
+                        required
                         label={`第 ${index + 1} 筆商品`}
                         value={line.productId}
                         options={products
@@ -87,6 +90,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                     <Fragment key={field}><td className="w-28 border-b px-2 py-3">
                       {editor.editable ? (
                         <Input
+                          name={`lines[${index}].${field}`}
                           aria-label={`第 ${index + 1} 筆${{ quantity: '數量', unitPrice: '單價', discountPercent: '折扣', taxPercent: '稅率' }[field]}`}
                           type="number"
                           required
@@ -102,6 +106,8 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                     </td>
                       {field === 'unitPrice' && <td className="min-w-40 border-b px-2 py-3">
                         {editor.editable ? <Lookup
+                          name="currency"
+                          required
                           label={`第 ${index + 1} 筆幣別`}
                           value={currency}
                           options={options}
@@ -138,6 +144,6 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
         <QuoteTotals lines={editor.draft.lines} snapshot={editor.totals} currency={currency} />
         <p className="text-xs text-muted-foreground">稅金按折後金額計算，金額四捨五入至小數點後兩位。</p>
       </CardContent>
-    </Card>
+    </Card></ValidatedGroup>
   );
 }

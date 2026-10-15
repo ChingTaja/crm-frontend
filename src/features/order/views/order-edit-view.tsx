@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { formatMoney } from '@/features/currency/models/currency-model';
 import { useState } from 'react';
 import {
@@ -434,7 +436,8 @@ export function OrderEditView({ id }: { id: string }) {
               ? '請填寫取消原因並確認取消此訂單。'
               : '請確認此訂單已處理完成。'}
           </DialogDescription>
-          <form
+          <ValidatedForm
+            requestError={vm.error}
             className="mt-4 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
@@ -447,7 +450,8 @@ export function OrderEditView({ id }: { id: string }) {
             {pendingStatus === 'Cancelled' && (
               <label className="block text-sm">
                 取消原因 *
-                <textarea
+                <ValidatedTextarea
+                  name="reason"
                   className="mt-2 min-h-24 w-full rounded border p-3"
                   required
                   maxLength={10000}
@@ -469,12 +473,12 @@ export function OrderEditView({ id }: { id: string }) {
               <Button
                 type="submit"
                 variant={pendingStatus === 'Cancelled' ? 'destructive' : 'default'}
-                disabled={vm.isSaving || vm.isLoading || (pendingStatus === 'Cancelled' && !vm.reason.trim())}
+                disabled={vm.isSaving || vm.isLoading}
               >
                 {vm.isSaving ? '更新中…' : '確認'}
               </Button>
             </div>
-          </form>
+          </ValidatedForm>
         </DialogContent>
       </Dialog>
     </div>

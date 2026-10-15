@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { useRef, useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { useAccess } from '@/features/access/view-models/use-access';
@@ -173,7 +175,7 @@ export function OpportunityEditView({
             </EntityField>
             <EntityField id="opportunity-customer" label="所屬客戶 *">
               <Lookup
-                id="opportunity-customer"
+                id="opportunity-customer" name="customerId"
                 label="所屬客戶"
                 required
                 value={draft.customerId}
@@ -192,7 +194,7 @@ export function OpportunityEditView({
             </EntityField>
             <EntityField id="opportunity-lead" label="來源 Lead">
               <Lookup
-                id="opportunity-lead"
+                id="opportunity-lead" name="leadId"
                 label="來源 Lead"
                 value={draft.leadId ?? ''}
                 options={[
@@ -243,7 +245,8 @@ export function OpportunityEditView({
             確認將「{record?.name}」標記為{outcome === 'won' ? '需求成交' : '失單'}
             ？結案不會自動變更報價、建立訂單或標记付款。
           </DialogDescription>
-          <form
+          <ValidatedForm
+            requestError={closure.error}
             className="mt-5 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
@@ -252,7 +255,8 @@ export function OpportunityEditView({
           >
             <label className="grid gap-2 text-sm">
               {outcome === 'lost' ? '失單理由（選填）' : '描述（選填）'}
-              <textarea
+              <ValidatedTextarea
+                name="description"
                 className="min-h-28 w-full rounded-lg border p-3"
                 placeholder="補充成交資訊或失單原因…"
                 maxLength={2000}
@@ -274,7 +278,7 @@ export function OpportunityEditView({
                 {closure.isLoading ? '結案中…' : '確認結案'}
               </Button>
             </div>
-          </form>
+          </ValidatedForm>
         </DialogContent>
       </Dialog>
     </>

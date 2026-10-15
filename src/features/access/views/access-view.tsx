@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedSelect, ValidatedTextarea } from '@/components/entity/validated-controls';
 import { ShieldCheck, LockKeyhole, X, Search, Check, Trash2, LoaderCircle } from 'lucide-react';
 import { permissionOptions, togglePermission, canGrantPermission } from '../models/permission-options';
 import { Input } from '@/components/ui/input';
@@ -51,7 +53,7 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
             <Button onClick={() => setEditing('')}>新增角色</Button>
           )}
         </div>
-        <form
+        <ValidatedForm
           className="flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
@@ -67,7 +69,7 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
             onChange={(e) => setKeyword(e.target.value)}
           />
           <Button type="submit">搜尋</Button>
-        </form>
+        </ValidatedForm>
         {(query.error || metadata.error || deletion.error) && (
           <div role="alert">
             {query.error?.message || metadata.error?.message || deletion.error?.message}
@@ -128,7 +130,7 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
         </table>
         <label>
           每頁筆數
-          <select
+          <ValidatedSelect
             className="ml-2 rounded border p-2"
             value={query.pagination.pageSize}
             onChange={(e) => {
@@ -139,7 +141,7 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
             {[5, 10, 20, 50, 100].map((size) => (
               <option key={size}>{size}</option>
             ))}
-          </select>{' '}
+          </ValidatedSelect>{' '}
           · 共 {query.pagination.total} 筆
         </label>
         <Pagination
@@ -362,7 +364,7 @@ function RoleForm({
         ? '此角色僅供檢視'
         : '';
   return (
-    <form onSubmit={save} className="flex min-h-0 flex-1 flex-col">
+    <ValidatedForm requestError={create.error ?? update.error} onSubmit={save} className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-6">
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -377,12 +379,14 @@ function RoleForm({
             <fieldset disabled={saving} className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-2 text-sm">
                 <span>角色名稱 *</span>
-                <Input required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} />
+                <Input name="name" required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} />
               </label>
               <label className="space-y-2 text-sm">
                 <span>角色代碼 *</span>
                 <Input
                   required
+                  name="code"
+                  title="角色代碼須以英文字母開頭，長度為 2–50 字元，僅可使用英文字母、數字或底線。"
                   pattern="[A-Za-z][A-Za-z0-9_]{1,49}"
                   maxLength={50}
                   readOnly={!!record}
@@ -393,8 +397,9 @@ function RoleForm({
               </label>
               <label className="space-y-2 text-sm sm:col-span-2">
                 <span>說明</span>
-                <textarea
+                <ValidatedTextarea
                   className="min-h-20 w-full resize-y rounded-lg border bg-background p-3"
+                  name="description"
                   maxLength={2000}
                   value={description}
                   placeholder="說明這個角色的工作範圍"
@@ -542,6 +547,6 @@ function RoleForm({
           )}
         </div>
       </footer>
-    </form>
+    </ValidatedForm>
   );
 }

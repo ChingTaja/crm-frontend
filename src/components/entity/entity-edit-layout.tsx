@@ -1,3 +1,4 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
 import { useAccess } from '@/features/access/view-models/use-access';
 import type { ReactNode, FormEventHandler } from 'react';
 import { ArrowLeft, RotateCcw, Save } from 'lucide-react';
@@ -14,6 +15,7 @@ interface EntityEditLayoutProps {
     reset: () => void;
     save: FormEventHandler<HTMLFormElement>;
     error: string;
+    fieldErrors?: import('@/lib/form-validation').FieldErrors;
     isSaving?: boolean;
   };
   headingAction?: ReactNode;
@@ -63,7 +65,7 @@ export function EntityEditLayout({
           </Button>
           {editable && (
             <>
-              <Button variant="outline" disabled={form.isSaving} onClick={form.reset}>
+              <Button variant="outline" disabled={form.isSaving} onClick={() => { form.reset(); (document.getElementById(formId) as HTMLFormElement | null)?.reset(); }}>
                 <RotateCcw />
                 重置
               </Button>
@@ -76,8 +78,9 @@ export function EntityEditLayout({
         </div>
       </EntityPageHeader>
       {notice}
-      <form
+      <ValidatedForm
         id={formId}
+        fieldErrors={form.fieldErrors}
         onSubmit={(event) => {
           if (editable) form.save(event);
           else event.preventDefault();
@@ -92,7 +95,7 @@ export function EntityEditLayout({
           {form.error}
         </p>
         {dataNotice && <p className="text-xs text-muted-foreground">{dataNotice}</p>}
-      </form>
+      </ValidatedForm>
     </>
   );
 }

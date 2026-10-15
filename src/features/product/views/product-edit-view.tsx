@@ -1,3 +1,4 @@
+import { ValidatedSelect } from '@/components/entity/validated-controls';
 import type { ProductResponse } from '../../../api/Api';
 import { EntityEditLayout } from '@/components/entity/entity-edit-layout';
 import { EntityField } from '@/components/entity/entity-field';
@@ -20,7 +21,7 @@ export function ProductEditView({ record }: { record?: ProductResponse }) {
             <Input id="product-name" maxLength={255} required value={draft.name} onChange={(e) => update('name', e.target.value)} />
           </EntityField>
           <EntityField id="product-status" label="狀態">
-            <select
+            <ValidatedSelect
               id="product-status"
               className="h-9 w-full rounded-lg border px-3 text-sm"
               value={draft.status}
@@ -29,7 +30,7 @@ export function ProductEditView({ record }: { record?: ProductResponse }) {
               {productStatuses.map((value) => (
                 <option key={value}>{value}</option>
               ))}
-            </select>
+            </ValidatedSelect>
           </EntityField>
           <EntityField id="product-sku" label="產品編號 *">
             <Input

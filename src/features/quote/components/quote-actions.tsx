@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { Lookup } from '@/components/ui/lookup';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -77,7 +79,7 @@ export function QuoteActions({
           <DialogDescription className="mt-2 text-sm text-muted-foreground">
             選擇一位審核人。提交後，報價內容將鎖定至審核結束。
           </DialogDescription>
-          <form
+          <ValidatedForm
             className="mt-4 flex gap-2"
             onSubmit={(e) => {
               e.preventDefault();
@@ -94,9 +96,12 @@ export function QuoteActions({
             <Button type="submit" variant="outline" disabled={vm.working || vm.reviewerOptions.isLoading}>
               搜尋
             </Button>
-          </form>
+          </ValidatedForm>
+          <ValidatedForm requestError={vm.reviewRequestError} onSubmit={event => { event.preventDefault(); void vm.submitReview(); }}>
           <div className="my-4">
             <Lookup
+              name="reviewerId"
+              required
               label="審核人"
               value={vm.reviewerId}
               disabled={vm.working || vm.reviewerOptions.isLoading}
@@ -120,18 +125,19 @@ export function QuoteActions({
             </p>
           )}
           <div className="mt-5 flex justify-end gap-2">
-            <Button variant="outline" disabled={vm.working} onClick={vm.closeRequest}>
+            <Button type="button" variant="outline" disabled={vm.working} onClick={vm.closeRequest}>
               取消
             </Button>
             <Button
               disabled={
-                dirty || vm.working || vm.reviewerOptions.isLoading || !!vm.reviewerOptions.error || !vm.reviewerId
+                dirty || vm.working || vm.reviewerOptions.isLoading || !!vm.reviewerOptions.error
               }
-              onClick={() => void vm.submitReview()}
+              type="submit"
             >
               {vm.working ? '提交中…' : '確認提交'}
             </Button>
           </div>
+          </ValidatedForm>
         </DialogContent>
       </Dialog>
       {dirty && <p className="text-xs text-muted-foreground">請先儲存或重置修改。</p>}
@@ -149,7 +155,8 @@ export function QuoteActions({
           <DialogDescription className="mt-2 text-sm text-muted-foreground">
             {quote.number} v{version.version}。{vm.needsReason ? '請填寫拒絕原因。' : '請確認此操作。'}
           </DialogDescription>
-          <form
+          <ValidatedForm
+            requestError={vm.requestError}
             className="mt-4 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
@@ -157,8 +164,8 @@ export function QuoteActions({
             }}
           >
             <Label htmlFor="quote-decision-reason">{vm.needsReason ? '原因 *' : '備註（選填）'}</Label>
-            <textarea
-              id="quote-decision-reason"
+            <ValidatedTextarea
+              id="quote-decision-reason" name="reason"
               className="min-h-24 w-full rounded-lg border p-3 text-sm"
               value={vm.reason}
               required={vm.needsReason}
@@ -175,7 +182,7 @@ export function QuoteActions({
                 {vm.working ? '處理中…' : '確認'}
               </Button>
             </div>
-          </form>
+          </ValidatedForm>
         </DialogContent>
       </Dialog>
     </div>

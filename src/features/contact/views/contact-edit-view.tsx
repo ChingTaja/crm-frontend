@@ -19,7 +19,7 @@ export function ContactEditView({ contact }: { contact?: ContactResponse }) {
         <CardContent className="grid gap-6 sm:grid-cols-2">
           <EntityField id="contact-customer" label="所屬客戶 *">
             <Lookup
-              id="contact-customer"
+              id="contact-customer" name="customerId"
               label="所屬客戶"
               required
               value={draft.customerId ?? ''}

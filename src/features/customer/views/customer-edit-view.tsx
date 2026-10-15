@@ -1,3 +1,4 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
 import { useAccess } from '@/features/access/view-models/use-access';
 import { EntityPageHeader, EntityPageTitle } from '@/components/layout/entity-page-header';
 import { ArrowLeft, Building2, RotateCcw, Save } from 'lucide-react';
@@ -34,7 +35,7 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
           </Button>
           {editable && (
             <>
-              <Button type="button" variant="outline" onClick={vm.reset}>
+              <Button type="button" variant="outline" onClick={() => { vm.reset(); (document.getElementById('customer-edit-form') as HTMLFormElement | null)?.reset(); }}>
                 <RotateCcw /> 重置
               </Button>
               <Button
@@ -48,8 +49,9 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
           )}
         </div>
       </EntityPageHeader>
-      <form
+      <ValidatedForm
         id="customer-edit-form"
+        fieldErrors={vm.fieldErrors}
         onSubmit={(event) => {
           if (can(vm.isNew ? 'customers.create' : 'customers.update')) vm.save(event);
           else event.preventDefault();
@@ -96,7 +98,7 @@ export function CustomerEditView({ customer }: { customer?: CustomerResponse }) 
         <p role="status" className="mt-3 text-sm text-destructive">
           {vm.error}
         </p>
-      </form>
+      </ValidatedForm>
     </>
   );
 }

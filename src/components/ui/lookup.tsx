@@ -1,3 +1,5 @@
+import { useValidatedField } from '@/components/entity/form-validation-context';
+import { FieldError } from '@/components/entity/field-error';
 import { useId, useRef, useState } from 'react';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,7 @@ export interface LookupOption {
 
 interface LookupProps {
   id?: string;
+  name?: string;
   label: string;
   value: string;
   options: LookupOption[];
@@ -26,6 +29,7 @@ const PAGE_SIZE = 10;
 /** Search all supplied options; reveal matches in batches of ten. */
 export function Lookup({
   id,
+  name,
   label,
   value,
   options,
@@ -34,6 +38,11 @@ export function Lookup({
   disabled,
   required,
 }: LookupProps) {
+  const trigger = useRef<HTMLButtonElement | null>(null);
+  const field = useValidatedField(name, id, {
+    validate: () => disabled || trigger.current?.matches(':disabled') ? '' : required && (!value || !options.some(option => option.value === value)) ? `請選擇有效的${label}。` : '',
+    focus: () => trigger.current?.focus(),
+  });
   const searchId = useId();
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -55,9 +64,14 @@ export function Lookup({
   }
 
   return (
-    <Popover open={open} onOpenChange={changeOpen}>
+    <><Popover open={open} onOpenChange={changeOpen}>
       <PopoverTrigger
-        id={id}
+        id={field.id}
+        ref={trigger}
+        aria-invalid={field.error ? true : undefined}
+        aria-describedby={field.error ? field.errorId : undefined}
+        className={field.error ? 'border-destructive ring-1 ring-destructive' : undefined}
+        onBlur={() => { if (!open) field.validate(); }}
         disabled={disabled}
         render={<Button type="button" variant="outline" className="h-9 w-full justify-between font-normal" />}
         aria-label={`${label}${required ? '（必填）' : ''}：${selected?.label ?? placeholder}`}
@@ -103,6 +117,7 @@ export function Lookup({
               aria-pressed={option.value === value}
               onClick={() => {
                 onValueChange(option.value);
+                field.change('');
                 changeOpen(false);
               }}
             >
@@ -118,6 +133,6 @@ export function Lookup({
           </p>
         </div>
       </PopoverContent>
-    </Popover>
+    </Popover><FieldError id={field.errorId} error={field.error} /></>
   );
 }

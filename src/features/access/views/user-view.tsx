@@ -1,7 +1,10 @@
+import type { FieldErrors } from '@/lib/form-validation';
+import { userFormErrors } from '../models/user-form-errors';
+import { ValidatedForm } from '@/components/entity/validated-form';
 import { deletionSummary } from '@/lib/api-operations';
 import { useAccess } from '../view-models/use-access';
 import { roleApi } from '../models/role-service';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import type { RegisterRequest, UserResponse } from '../../../api/Api';
 import { userApi } from '../models/user-service';
 import { useApi } from '@/hooks/use-api';
@@ -224,6 +227,11 @@ function UserForm({
   const isSelf = !!user && user.id === access.me?.id;
   const canChangeStatus = access.can('users.update') && !isSelf && statusSupported;
   const [validationError, setValidationError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const displayedFieldErrors = useMemo(() => ({
+    ...userFormErrors(create.error ?? update.error),
+    ...fieldErrors,
+  }), [create.error, update.error, fieldErrors]);
   const busy = useRef(false);
   const isSaving = create.isLoading || update.isLoading || statusMutation.isLoading;
   const options = [
@@ -239,17 +247,21 @@ function UserForm({
     if (busy.current || !editable || confirmStatus) return;
     if (!draft.username.trim()) {
       setValidationError('請輸入帳號。');
+      setFieldErrors({ username: '請輸入帳號。' });
       return;
     }
     if (!draft.roleId) {
       setValidationError('請選擇角色。');
+      setFieldErrors({ roleId: '請選擇角色。' });
       return;
     }
     if ((!user || draft.roleId !== user.role?.id) && !roleOptions.some((role) => role.value === draft.roleId)) {
       setValidationError('請選擇可指派的角色。');
+      setFieldErrors({ roleId: '請選擇可指派的角色。' });
       return;
     }
     setValidationError('');
+    setFieldErrors({});
     busy.current = true;
     onSaving(true);
     try {
@@ -289,7 +301,7 @@ function UserForm({
     }
   }
   return (
-    <form onSubmit={submit} className="space-y-5" aria-busy={isSaving}>
+    <ValidatedForm fieldErrors={displayedFieldErrors} onSubmit={submit} className="space-y-5" aria-busy={isSaving}>
       <DialogTitle>{user ? (editable ? '修改帳號' : '查看帳號') : '新增帳號'}</DialogTitle>
       <DialogDescription>
         {!editable ? '帳號資料僅供查看。' : user ? '更新帳號、電子郵件及角色。' : '設定帳號、電子郵件、密碼及角色。'}
@@ -356,6 +368,8 @@ function UserForm({
             required
             type="text"
             maxLength={100}
+            name="username"
+            id="user-username"
             autoComplete="username"
             value={draft.username}
             onChange={(event) => setDraft({ ...draft, username: event.target.value })}
@@ -367,6 +381,8 @@ function UserForm({
             required
             type="email"
             maxLength={254}
+            name="email"
+            id="user-email"
             autoComplete="email"
             value={draft.email}
             onChange={(event) => setDraft({ ...draft, email: event.target.value })}
@@ -380,6 +396,8 @@ function UserForm({
               type="password"
               minLength={8}
               maxLength={72}
+              name="password"
+              id="user-password"
               autoComplete="new-password"
               value={draft.password}
               onChange={(event) => setDraft({ ...draft, password: event.target.value })}
@@ -391,6 +409,8 @@ function UserForm({
           <p>角色 *</p>
           <Lookup
             label="角色"
+            name="roleId"
+            id="user-role"
             required
             disabled={isSaving || !editable || (!!user && !canAssign)}
             value={draft.roleId ?? ''}
@@ -415,6 +435,6 @@ function UserForm({
           </Button>
         )}
       </div>
-    </form>
+    </ValidatedForm>
   );
 }

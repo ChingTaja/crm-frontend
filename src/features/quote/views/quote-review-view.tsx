@@ -1,3 +1,4 @@
+import { ValidatedSelect } from '@/components/entity/validated-controls';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCheck, ClipboardCheck, FileText, LoaderCircle, RefreshCw } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
@@ -216,7 +217,7 @@ function ReviewDetail({ id }: { id: string }) {
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             版本
-            <select
+            <ValidatedSelect
               aria-label="查看審核版本"
               value={version.id}
               onChange={(event) => setVersionId(event.target.value)}
@@ -227,7 +228,7 @@ function ReviewDetail({ id }: { id: string }) {
                   版本 {v.version}
                 </option>
               ))}
-            </select>
+            </ValidatedSelect>
           </label>
           <Button variant="outline" onClick={reload}>
             <RefreshCw aria-hidden="true" />

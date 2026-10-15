@@ -1,11 +1,13 @@
 import { useRef } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { authApi } from '@/features/auth/models/auth-service';
+import { useAccess } from '@/features/access/view-models/use-access';
 import { AppLink } from '@/components/ui/app-link';
 import { Layers, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => void }) {
+  const { me } = useAccess();
   const request = useApi(authApi.logout);
   const busy = useRef(false);
   async function logout() {
@@ -33,7 +35,8 @@ export function WorkspaceHeader({ onReturnToLogin }: { onReturnToLogin: () => vo
           </span>
           Connect <span className="text-xs font-normal tracking-widest text-muted-foreground">CRM</span>
         </AppLink>
-        <AppLink href="/quote-reviews" className="ml-auto mr-4 text-sm hover:underline">
+        <span className="ml-auto break-all text-sm">Hi , {me?.username}</span>
+        <AppLink href="/quote-reviews" className="mr-4 text-sm hover:underline">
           待我審核
         </AppLink>
         <Button variant="outline" disabled={request.isLoading} onClick={logout}>

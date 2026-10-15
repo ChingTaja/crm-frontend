@@ -1,3 +1,4 @@
+import { ValidatedSelect } from '@/components/entity/validated-controls';
 import { useCallback, useEffect, useState } from 'react';
 import { useAccess } from '@/features/access/view-models/use-access';
 import { quoteApi, quoteCache } from '@/features/quote/models/quote-service';
@@ -55,7 +56,7 @@ export function OpportunityQuotesView({ opportunityId, opportunityName, allowCre
   return <div>
     {error && <p role="alert">無法重新載入商機報價：{error.message}</p>}
     <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-muted/20 p-4">
-      <div className="space-y-2"><p className="text-xs text-muted-foreground">「{opportunityName || '此商機'}」的報價單</p>{records.length > 0 && <label className="flex items-center gap-2 text-sm">報價單<select aria-label="切換此商機的報價單" className="max-w-full rounded-lg border bg-background px-3 py-2" value={currentId} disabled={saving || deletion.isLoading} onChange={event => switchQuote(event.target.value)}>{records.map(record => <option key={record.id} value={record.id}>{record.number || record.id} · {record.name || '未命名報價'}</option>)}{currentId === 'new' && <option value="new">新增報價單</option>}</select></label>}</div>
+      <div className="space-y-2"><p className="text-xs text-muted-foreground">「{opportunityName || '此商機'}」的報價單</p>{records.length > 0 && <label className="flex items-center gap-2 text-sm">報價單<ValidatedSelect aria-label="切換此商機的報價單" className="max-w-full rounded-lg border bg-background px-3 py-2" value={currentId} disabled={saving || deletion.isLoading} onChange={event => switchQuote(event.target.value)}>{records.map(record => <option key={record.id} value={record.id}>{record.number || record.id} · {record.name || '未命名報價'}</option>)}{currentId === 'new' && <option value="new">新增報價單</option>}</ValidatedSelect></label>}</div>
       <div className="flex gap-2">{allowDelete && current && can('quotes.delete') && <DeleteRecordsButton title="報價單" includesVersions records={[{ id: current.id!, name: current.name || current.number || '報價單' }]} onDelete={remove} disabled={dirty || deletion.isLoading} />}{allowCreate && can('quotes.create') && currentId !== 'new' && <Button disabled={saving || deletion.isLoading} onClick={() => switchQuote('new')}>新增報價單</Button>}</div>
     </div>
     {!allowCreate && <p className="mt-3 text-xs text-muted-foreground">商機已結案，無法新增報價單。{!allowDelete && '需求成交的商機也不可刪除報價單。'}</p>}

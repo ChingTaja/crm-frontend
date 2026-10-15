@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedSelect, ValidatedTextarea } from '@/components/entity/validated-controls';
 import { isLeadReviewed } from '../models/lead-model';
 import { useState } from 'react';
 import { ClipboardCheck } from 'lucide-react';
@@ -20,7 +22,7 @@ function QualificationForm({
   const vm = useLeadQualification(lead, onClose, onBusy);
   const converted = !!lead.qualification?.customerId;
   return (
-    <form className="mt-5 space-y-5" onSubmit={vm.submit} aria-busy={vm.isSubmitting}>
+    <ValidatedForm requestError={vm.requestError} className="mt-5 space-y-5" onSubmit={vm.submit} aria-busy={vm.isSubmitting}>
       <fieldset disabled={vm.isSubmitting} className="space-y-5">
         <fieldset className="space-y-3">
           <legend className="mb-2 text-sm font-medium">審核結果</legend>
@@ -80,7 +82,8 @@ function QualificationForm({
         ) : (
           <div className="space-y-3">
             <Label htmlFor="rejection-reason">不符合資格原因（選填）</Label>
-            <select
+            <ValidatedSelect
+              name="reason"
               id="rejection-reason"
               className="h-9 w-full rounded-lg border bg-background px-3 text-sm"
               value={vm.reason}
@@ -90,12 +93,13 @@ function QualificationForm({
               {disqualificationReasons.map((reason) => (
                 <option key={reason}>{reason}</option>
               ))}
-            </select>
+            </ValidatedSelect>
           </div>
         )}
         <div className="space-y-3">
           <Label htmlFor="qualification-note">補充說明（選填）</Label>
-          <textarea
+          <ValidatedTextarea
+            name="note"
             id="qualification-note"
             className="min-h-24 w-full rounded-lg border bg-background p-3 text-sm"
             value={vm.note}
@@ -116,7 +120,7 @@ function QualificationForm({
           {vm.isSubmitting ? '審核中…' : '確認審核'}
         </Button>
       </div>
-    </form>
+    </ValidatedForm>
   );
 }
 

@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { useEffect } from 'react';
 import type { OpportunityResponse } from '../../../api/Api';
 import { navigate } from '@/lib/router';
@@ -72,7 +74,7 @@ export function QuoteEditorView({
           </Button>}
           {editor.editable && (
             <>
-              <Button variant="outline" onClick={editor.reset}>
+              <Button variant="outline" onClick={() => { editor.reset(); (document.getElementById('quote-form') as HTMLFormElement | null)?.reset(); }}>
                 <RotateCcw />
                 重置
               </Button>
@@ -133,8 +135,9 @@ export function QuoteEditorView({
             <p className="mt-2 font-semibold">此版本需要指定審核人審核。</p>
           )}
         </aside>
-        <form
+        <ValidatedForm
           id="quote-form"
+          requestError={editor.requestError}
           className="space-y-5"
           onSubmit={(event) => {
             event.preventDefault();
@@ -159,7 +162,7 @@ export function QuoteEditorView({
                 <div className="space-y-2">
                   <Label htmlFor="quote-customer">客戶 *</Label>
                   <Lookup
-                    id="quote-customer"
+                    id="quote-customer" name="customerId"
                     label="客戶"
                     disabled={true}
                     value={d.customerId}
@@ -170,7 +173,7 @@ export function QuoteEditorView({
                 <div className="space-y-2">
                   <Label htmlFor="quote-opportunity">所屬商機</Label>
                   <Lookup
-                    id="quote-opportunity"
+                    id="quote-opportunity" name="opportunityId"
                     label="所屬商機"
                     disabled={true}
                     value={d.opportunityId}
@@ -226,7 +229,7 @@ export function QuoteEditorView({
                 ).map((field) => (
                   <div key={field.key} className="space-y-2">
                     <Label htmlFor={`quote-${field.key}`}>{field.label}</Label>
-                    <textarea
+                    <ValidatedTextarea
                       id={`quote-${field.key}`}
                       className="min-h-24 w-full rounded-lg border bg-transparent p-3 text-sm disabled:opacity-70"
                       value={d[field.key]}
@@ -240,7 +243,7 @@ export function QuoteEditorView({
           <p role="alert" className="text-sm text-destructive">
             {editor.error}
           </p>
-        </form>
+        </ValidatedForm>
         {quote && <QuoteAudit quote={quote} />}
       </div>
     </>

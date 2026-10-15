@@ -95,6 +95,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
     isSaving: create.isLoading || mutation.isLoading || parentCheck.isLoading,
     totals: !dirty ? version?.totals : undefined,
     error,
+    requestError: create.error ?? mutation.error,
     editable: editable && !create.isLoading && !mutation.isLoading && !parentCheck.isLoading,
     latest,
     dirty,

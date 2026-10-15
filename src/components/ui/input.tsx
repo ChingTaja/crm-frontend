@@ -1,10 +1,15 @@
 import * as React from 'react';
-import { Input as InputPrimitive } from '@base-ui/react/input';
+import { useValidatedField } from '@/components/entity/form-validation-context';
+import { FieldError } from '@/components/entity/field-error';
+import { validityMessage } from '@/lib/form-validation';
 import { cn } from '@/lib/utils';
 
-function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
+function Input({ className, type, ref: forwardedRef, ...props }: React.ComponentProps<'input'>) {
+  const control = React.useRef<HTMLInputElement | null>(null);
+  React.useImperativeHandle(forwardedRef, () => control.current!, []);
+  const field = useValidatedField(props.name, props.id, { validate: () => control.current ? validityMessage(control.current) : '', focus: () => control.current?.focus() });
   return (
-    <InputPrimitive
+    <><input
       type={type}
       data-slot="input"
       className={cn(
@@ -12,7 +17,13 @@ function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
         className
       )}
       {...props}
-    />
+      id={field.id}
+      ref={control}
+      aria-invalid={field.error ? true : props['aria-invalid']}
+      aria-describedby={[props['aria-describedby'], field.error ? field.errorId : undefined].filter(Boolean).join(' ') || undefined}
+      onBlur={event => { props.onBlur?.(event); field.validate(); }}
+      onChange={event => { props.onChange?.(event); field.change(); }}
+    /><FieldError id={field.errorId} error={field.error} /></>
   );
 }
 

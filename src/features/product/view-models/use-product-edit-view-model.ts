@@ -1,3 +1,4 @@
+import { FieldValidationError } from '@/lib/form-validation';
 import type { CreateProductRequest, ProductResponse } from '../../../api/Api';
 import { useEntityForm } from '@/hooks/use-entity-form';
 import { useApi } from '@/hooks/use-api';
@@ -10,8 +11,8 @@ export function useProductEditViewModel(record?: ProductResponse) {
     name: record?.name ?? '', sku: record?.sku ?? '', price: record?.price ?? 0, status: record?.status ?? '啟用',
   };
   return useEntityForm('products', initial, async draft => {
-    if (!draft.sku.trim()) throw new Error('請輸入產品編號。');
-    if (!Number.isFinite(draft.price) || draft.price < 0) throw new Error('單價必須為非負數。');
+    if (!draft.sku.trim()) throw new FieldValidationError({ sku: '請輸入產品編號。' });
+    if (!Number.isFinite(draft.price) || draft.price < 0) throw new FieldValidationError({ price: '單價必須為非負數。' });
     cacheProduct(await request.execute({ ...draft, sku: draft.sku.trim() }, record?.id));
   });
 }

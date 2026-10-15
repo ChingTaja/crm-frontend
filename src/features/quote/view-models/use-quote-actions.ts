@@ -119,6 +119,8 @@ export function useQuoteActions(
     decision,
     reason,
     error: error || conversion.error?.message,
+    requestError: workflow.error,
+    reviewRequestError: submitReview.error,
     isConverting: conversion.isLoading || working,
     working,
     setReason,

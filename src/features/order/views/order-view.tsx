@@ -1,3 +1,5 @@
+import { ValidatedForm } from '@/components/entity/validated-form';
+import { ValidatedSelect } from '@/components/entity/validated-controls';
 import { formatMoney } from '@/features/currency/models/currency-model';
 import { useState } from 'react';
 import { AppLink } from '@/components/ui/app-link';
@@ -39,7 +41,7 @@ function OrderListView() {
           前往商機查看報價
         </AppLink>
       </p>
-      <form
+      <ValidatedForm
         className="flex flex-wrap items-end gap-3"
         onSubmit={(e) => {
           e.preventDefault();
@@ -72,7 +74,7 @@ function OrderListView() {
         <Button type="button" variant="outline" onClick={clearFilters}>
           清除
         </Button>
-      </form>
+      </ValidatedForm>
       {vm.customers.error && (
         <p role="alert">
           無法載入客戶選項：{vm.customers.error.message}{' '}
@@ -151,7 +153,7 @@ function OrderListView() {
         </p>
         <label>
           每頁筆數
-          <select
+          <ValidatedSelect
             className="ml-2 rounded border p-2"
             value={page.pageSize}
             onChange={(e) => {
@@ -162,7 +164,7 @@ function OrderListView() {
             {[5, 10, 20, 50, 100].map((size) => (
               <option key={size}>{size}</option>
             ))}
-          </select>
+          </ValidatedSelect>
         </label>
         <Pagination page={page.page} pageCount={page.pageCount} onPageChange={page.setPage} />
       </div>

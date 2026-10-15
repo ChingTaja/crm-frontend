@@ -50,6 +50,7 @@ export function useLeadQualification(lead: Lead, onComplete: () => void, onBusy:
     setNote,
     submit,
     isSubmitting: request.isLoading,
+    requestError: request.error,
     error: validationError || request.error?.message,
   };
 }
