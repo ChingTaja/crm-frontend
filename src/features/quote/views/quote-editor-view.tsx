@@ -44,37 +44,51 @@ export function QuoteEditorView({
 }) {
   const editor = useQuoteEditor(vm.actor, quote, version, initialOpportunity, onCreated);
   const d = editor.draft;
-  useEffect(() => { onSavingChange?.(editor.isSaving); }, [onSavingChange, editor.isSaving]);
-  useEffect(() => { onDirtyChange?.(editor.dirty || editor.isSaving); }, [onDirtyChange, editor.dirty, editor.isSaving]);
+  useEffect(() => {
+    onSavingChange?.(editor.isSaving);
+  }, [onSavingChange, editor.isSaving]);
+  useEffect(() => {
+    onDirtyChange?.(editor.dirty || editor.isSaving);
+  }, [onDirtyChange, editor.dirty, editor.isSaving]);
   return (
     <>
       <EntityPageHeader>
         <div className="flex items-center gap-2">
-          {!embedded && <Button
-            variant="ghost"
-            size="icon"
-            aria-label="返回報價單"
-            onClick={() => {
-              navigate(backHref);
-            }}
-          >
-            <ArrowLeft />
-          </Button>}
+          {!embedded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="返回報價單"
+              onClick={() => {
+                navigate(backHref);
+              }}
+            >
+              <ArrowLeft />
+            </Button>
+          )}
           <EntityPageTitle>{quote ? quote.number : '新增報價單'}</EntityPageTitle>
         </div>
         <div className="ml-auto flex gap-2">
-          {!embedded && <Button
-            variant="outline"
-            className="border-red-200 bg-red-50 text-red-700"
-            onClick={() => {
-              navigate(backHref);
-            }}
-          >
-            返回列表
-          </Button>}
+          {!embedded && (
+            <Button
+              variant="outline"
+              className="border-red-200 bg-red-50 text-red-700"
+              onClick={() => {
+                navigate(backHref);
+              }}
+            >
+              返回列表
+            </Button>
+          )}
           {editor.editable && (
             <>
-              <Button variant="outline" onClick={() => { editor.reset(); (document.getElementById('quote-form') as HTMLFormElement | null)?.reset(); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  editor.reset();
+                  (document.getElementById('quote-form') as HTMLFormElement | null)?.reset();
+                }}
+              >
                 <RotateCcw />
                 重置
               </Button>
@@ -93,7 +107,6 @@ export function QuoteEditorView({
             selectedId={version.id}
             actor={vm.actor}
             dirty={editor.dirty || editor.isSaving}
-            readOnly={!version.opportunityId}
             onSelect={onVersion}
           />
         )}
@@ -111,7 +124,7 @@ export function QuoteEditorView({
             )}
           </div>
         )}
-        {quote && version && !!version.opportunityId && (
+        {quote && version && (
           <QuoteActions quote={quote} version={version} actor={vm.actor} dirty={editor.dirty || editor.isSaving} />
         )}
         {version?.approvalReason && <p className="rounded-lg border p-3 text-sm">審批意見：{version.approvalReason}</p>}
@@ -127,14 +140,24 @@ export function QuoteEditorView({
           className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
         >
           <p className="font-semibold">審核注意事項</p>
-          {d.currency !== 'TWD' ? <p className="mt-1 leading-relaxed">非台幣報價須指定審核人審核，批准後才能送出報價單</p> : <p className="mt-1 leading-relaxed">
-            任一明細折扣<strong>超過 {quotePolicy.discountThresholdPercent}%</strong>，或含稅總金額
-            <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>，需要指定審核人審核，批准後才能送出報價單。
-          </p>}
+          {d.currency !== 'TWD' ? (
+            <p className="mt-1 leading-relaxed">非台幣報價須指定審核人審核，批准後才能送出報價單</p>
+          ) : (
+            <p className="mt-1 leading-relaxed">
+              任一明細折扣<strong>超過 {quotePolicy.discountThresholdPercent}%</strong>，或含稅總金額
+              <strong>超過 {money(quotePolicy.totalThreshold * 100)}</strong>
+              ，需要指定審核人審核，批准後才能送出報價單。
+            </p>
+          )}
           {(requiresQuoteApproval(d) || version?.requiresReapproval) && (
             <p className="mt-2 font-semibold">此版本需要指定審核人審核。</p>
           )}
         </aside>
+        {!quote && editor.creationBlockedReason && (
+          <p role="alert" className="text-sm text-destructive">
+            {editor.creationBlockedReason}
+          </p>
+        )}
         <ValidatedForm
           id="quote-form"
           requestError={editor.requestError}
@@ -162,7 +185,8 @@ export function QuoteEditorView({
                 <div className="space-y-2">
                   <Label htmlFor="quote-customer">客戶 *</Label>
                   <Lookup
-                    id="quote-customer" name="customerId"
+                    id="quote-customer"
+                    name="customerId"
                     label="客戶"
                     disabled={true}
                     value={d.customerId}
@@ -173,7 +197,8 @@ export function QuoteEditorView({
                 <div className="space-y-2">
                   <Label htmlFor="quote-opportunity">所屬商機</Label>
                   <Lookup
-                    id="quote-opportunity" name="opportunityId"
+                    id="quote-opportunity"
+                    name="opportunityId"
                     label="所屬商機"
                     disabled={true}
                     value={d.opportunityId}

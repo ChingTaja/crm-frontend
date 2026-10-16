@@ -38,7 +38,9 @@ export function validityMessage(control: HTMLInputElement | HTMLSelectElement | 
   if (control.required && !control.value.trim()) return '此欄位為必填。';
   if (validity.valueMissing) return '此欄位為必填。';
   if (validity.typeMismatch) return control.type === 'email' ? '請輸入有效的電子郵件地址。' : '請輸入有效的格式。';
-  if (validity.rangeUnderflow) return `數值不得小於 ${control.getAttribute('min')}。`;
+  if (validity.rangeUnderflow) return control.type === 'date'
+    ? `日期須為 ${control.getAttribute('min')} 或之後。`
+    : `數值不得小於 ${control.getAttribute('min')}。`;
   if (validity.rangeOverflow) return `數值不得大於 ${control.getAttribute('max')}。`;
   if (validity.stepMismatch) return `請輸入符合間隔 ${control.getAttribute('step') || '1'} 的數值。`;
   if (validity.patternMismatch) return control.title || '格式不正確，請確認輸入內容。';

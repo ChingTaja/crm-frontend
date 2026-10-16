@@ -11,7 +11,7 @@ import { EntityList } from '@/components/entity/entity-list';
 import { EntityRequestError } from '@/components/entity/entity-request-error';
 import { useApi } from '@/hooks/use-api';
 import { opportunityApi } from '../models/opportunity-service';
-import { canCreateOpportunityQuote, opportunityOutcome, cacheOpportunity } from '../models/opportunity-model';
+import { cacheOpportunity } from '../models/opportunity-model';
 
 function OpportunityListView() {
   const vm = useOpportunityViewModel();
@@ -25,7 +25,16 @@ function OpportunityListView() {
         載入商機…
       </p>
     );
-  return <>{vm.request.error && <p role="alert" className="py-3 text-destructive">{vm.request.error.message}</p>}<EntityList vm={vm} dataNotice={null} /></>;
+  return (
+    <>
+      {vm.request.error && (
+        <p role="alert" className="py-3 text-destructive">
+          {vm.request.error.message}
+        </p>
+      )}
+      <EntityList vm={vm} dataNotice={null} />
+    </>
+  );
 }
 
 function OpportunityDetailView({ id }: { id: string }) {
@@ -58,7 +67,26 @@ function OpportunityDetailView({ id }: { id: string }) {
         載入商機資料…
       </p>
     );
-  return <><OpportunityTabs recordId={id} quotes={quotes} />{quotes ? can('quotes.read') ? <OpportunityQuotesView key={id} opportunityId={id} opportunityName={(closed ?? data).name} allowCreate={canCreateOpportunityQuote(closed ?? data)} allowDelete={opportunityOutcome((closed ?? data).stage) !== 'won'} /> : <p role="alert" className="py-8">沒有報價單的存取權限。</p> : <OpportunityEditView key={`${id}-${closed?.stage ?? data.stage}`} record={closed ?? data} onClosed={setClosed} />}</>;
+  return (
+    <>
+      <OpportunityTabs recordId={id} quotes={quotes} />
+      {quotes ? (
+        can('quotes.read') ? (
+          <OpportunityQuotesView key={id} opportunityId={id} opportunityName={(closed ?? data).name} />
+        ) : (
+          <p role="alert" className="py-8">
+            沒有報價單的存取權限。
+          </p>
+        )
+      ) : (
+        <OpportunityEditView
+          key={`${id}-${closed?.stage ?? data.stage}`}
+          record={closed ?? data}
+          onClosed={setClosed}
+        />
+      )}
+    </>
+  );
 }
 
 export function OpportunityView({ recordId }: { recordId?: string }) {

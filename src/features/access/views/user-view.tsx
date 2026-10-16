@@ -1,3 +1,5 @@
+import { PasswordInput } from '@/components/ui/password-input';
+import { Label } from '@/components/ui/label';
 import type { FieldErrors } from '@/lib/form-validation';
 import { userFormErrors } from '../models/user-form-errors';
 import { ValidatedForm } from '@/components/entity/validated-form';
@@ -219,6 +221,13 @@ function UserForm({
     password: '',
     roleId: user ? (user.role?.id ?? '') : defaultRoleId,
   });
+  const [confirmation, setConfirmation] = useState('');
+  const confirmationInput = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    confirmationInput.current?.setCustomValidity(
+      confirmation && confirmation !== draft.password ? '兩次輸入的密碼不一致。' : ''
+    );
+  }, [draft.password, confirmation]);
   const create = useApi(userApi.create);
   const update = useApi(userApi.update);
   const statusMutation = useApi(userApi.updateStatus);
@@ -228,10 +237,13 @@ function UserForm({
   const canChangeStatus = access.can('users.update') && !isSelf && statusSupported;
   const [validationError, setValidationError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const displayedFieldErrors = useMemo(() => ({
-    ...userFormErrors(create.error ?? update.error),
-    ...fieldErrors,
-  }), [create.error, update.error, fieldErrors]);
+  const displayedFieldErrors = useMemo(
+    () => ({
+      ...userFormErrors(create.error ?? update.error),
+      ...fieldErrors,
+    }),
+    [create.error, update.error, fieldErrors]
+  );
   const busy = useRef(false);
   const isSaving = create.isLoading || update.isLoading || statusMutation.isLoading;
   const options = [
@@ -248,6 +260,12 @@ function UserForm({
     if (!draft.username.trim()) {
       setValidationError('請輸入帳號。');
       setFieldErrors({ username: '請輸入帳號。' });
+      return;
+    }
+    if (!user && draft.password !== confirmation) {
+      setValidationError('兩次輸入的密碼不一致。');
+      setFieldErrors({ confirmation: '兩次輸入的密碼不一致。' });
+      confirmationInput.current?.focus();
       return;
     }
     if (!draft.roleId) {
@@ -278,6 +296,7 @@ function UserForm({
           roleId: draft.roleId,
         });
       setDraft({ username: '', email: '', password: '' });
+      setConfirmation('');
       onSaved();
     } catch {
       /* Keep the form open and show the API error. */
@@ -389,21 +408,47 @@ function UserForm({
           />
         </label>
         {!user && (
-          <label className="grid gap-2">
-            密碼
-            <Input
-              required
-              type="password"
-              minLength={8}
-              maxLength={72}
-              name="password"
-              id="user-password"
-              autoComplete="new-password"
-              value={draft.password}
-              onChange={(event) => setDraft({ ...draft, password: event.target.value })}
-            />
-            <span className="text-xs text-muted-foreground">8–72 個字元</span>
-          </label>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="user-password">密碼 *</Label>
+              <PasswordInput
+                required
+                minLength={8}
+                maxLength={72}
+                name="password"
+                id="user-password"
+                autoComplete="new-password"
+                value={draft.password}
+                onChange={(event) => setDraft({ ...draft, password: event.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">8–72 個字元</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="user-confirmation">確認密碼 *</Label>
+              <PasswordInput
+                ref={confirmationInput}
+                required
+                minLength={8}
+                maxLength={72}
+                name="confirmation"
+                id="user-confirmation"
+                autoComplete="new-password"
+                value={confirmation}
+                onChange={(event) => {
+                  event.target.setCustomValidity(
+                    event.target.value && event.target.value !== draft.password ? '兩次輸入的密碼不一致。' : ''
+                  );
+                  setConfirmation(event.target.value);
+                  setValidationError('');
+                  setFieldErrors((current) => {
+                    const next = { ...current };
+                    delete next.confirmation;
+                    return next;
+                  });
+                }}
+              />
+            </div>
+          </>
         )}
         <div className="space-y-2">
           <p>角色 *</p>

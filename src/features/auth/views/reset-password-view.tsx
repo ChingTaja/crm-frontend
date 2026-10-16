@@ -2,7 +2,7 @@ import { passwordResetApi } from '../models/password-reset-service';
 import { navigate } from '@/lib/router';
 import { AppLink } from '@/components/ui/app-link';
 import { useRef, useState, type FormEvent } from 'react';
-import { LockKeyhole } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ export function ResetPasswordView({ search }: { search: string }) {
   const token = resetToken(search);
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState('');
   const busy = useRef(false);
   const request = useApi(passwordResetApi.resetPassword);
@@ -51,7 +53,7 @@ export function ResetPasswordView({ search }: { search: string }) {
           <LoginInput
             id="new-password"
             icon={LockKeyhole}
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
             required
             minLength={8}
@@ -59,12 +61,26 @@ export function ResetPasswordView({ search }: { search: string }) {
             value={password}
             disabled={request.isLoading}
             onChange={(event) => setPassword(event.target.value)}
-          />
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-7 shrink-0 text-[#8a988e]"
+              aria-label={showPassword ? '隱藏新密碼' : '顯示新密碼'}
+              aria-pressed={showPassword}
+              aria-controls="new-password"
+              disabled={request.isLoading}
+              onClick={() => setShowPassword((current) => !current)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </Button>
+          </LoginInput>
           <Label htmlFor="confirm-password">確認新密碼</Label>
           <LoginInput
             id="confirm-password"
             icon={LockKeyhole}
-            type="password"
+            type={showConfirmation ? 'text' : 'password'}
             autoComplete="new-password"
             required
             minLength={8}
@@ -72,7 +88,21 @@ export function ResetPasswordView({ search }: { search: string }) {
             value={confirmation}
             disabled={request.isLoading}
             onChange={(event) => setConfirmation(event.target.value)}
-          />
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-7 shrink-0 text-[#8a988e]"
+              aria-label={showConfirmation ? '隱藏確認新密碼' : '顯示確認新密碼'}
+              aria-pressed={showConfirmation}
+              aria-controls="confirm-password"
+              disabled={request.isLoading}
+              onClick={() => setShowConfirmation((current) => !current)}
+            >
+              {showConfirmation ? <EyeOff size={18} /> : <Eye size={18} />}
+            </Button>
+          </LoginInput>
           <Button type="submit" className="h-12 w-full bg-[#254e3c] text-white" disabled={request.isLoading}>
             {request.isLoading ? '修改中…' : '修改密碼'}
           </Button>

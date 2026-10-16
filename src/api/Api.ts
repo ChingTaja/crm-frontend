@@ -252,7 +252,6 @@ export interface ProductResponse {
   name: string;
   sku: string;
   price: number;
-  currency: string;
   status: string;
 }
 
@@ -297,6 +296,8 @@ export interface OpportunityResponse {
   /** @format date-time */
   closedAt?: string;
   closedByName?: string;
+  /** 建立者帳號 ID；null 表示舊資料尚待確認，不可由 owner 推測 */
+  createdById: string | null;
 }
 
 export interface Lead {
@@ -582,8 +583,6 @@ export interface CreateProductRequest {
    * @pattern 啟用|停用
    */
   status: string;
-  /** @example "TWD" */
-  currency: string;
 }
 
 export interface CreateOpportunityRequest {
@@ -2163,7 +2162,6 @@ export class Api<
          * @default 20
          */
         size?: number;
-        currency?: string;
         status?: string;
       },
       params: RequestParams = {},

@@ -1,17 +1,16 @@
-import { canCreateOpportunityQuote } from '@/features/opportunity/models/opportunity-model';
+import { selectQuoteProduct, changeQuoteCurrency } from '../models/quote-pricing';
+import { quoteCreationBlockedReason, hasQuoteAction } from '../models/quote-permissions';
+import { refreshAfterForbidden } from '../models/quote-permission-recovery';
 import { opportunityApi } from '@/features/opportunity/models/opportunity-service';
-import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
 import { useRef, useState } from 'react';
-import { quoteApi, cacheQuote } from '../models/quote-service';
+import { quoteApi, cacheQuote, refreshQuoteAfterForbidden } from '../models/quote-service';
 import { quotePayload } from '../models/quote-api';
 import { useApi } from '@/hooks/use-api';
-import { canEditQuote, canManageQuote } from '../models/quote-policy';
 import type { ProductResponse, OpportunityResponse } from '../../../api/Api';
 import type { Quote, QuoteActor, QuoteContent, QuoteLine, QuoteVersion } from '../models/quote-types';
 
 export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?: QuoteVersion, initialOpportunity?: OpportunityResponse, onCreated?: (quote: Quote) => void) {
-  const { can } = useAccess();
   const [initial] = useState<QuoteContent>(() =>
     version
       ? structuredClone({
@@ -40,11 +39,14 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState('');
   const latest = !quote || quote.versions[quote.versions.length - 1]?.id === version?.id;
-  const editable = (quote ? !!version?.opportunityId : canCreateOpportunityQuote(initialOpportunity)) && can(quote ? 'quotes.update' : 'quotes.create') && canManageQuote(actor) && latest && (!version || canEditQuote(version));
+  const parentCheck = useApi(opportunityApi.get);
+  const [creationDenied, setCreationDenied] = useState(false);
+  const creationBlockedReason = creationDenied ? '無法確認新增報價權限，請重新載入商機。' : quoteCreationBlockedReason(parentCheck.data ?? initialOpportunity, actor);
+  const editable = quote ? hasQuoteAction(version, 'update') : !creationBlockedReason;
   const dirty = JSON.stringify(initial) !== JSON.stringify(draft);
   function update<K extends keyof QuoteContent>(field: K, value: QuoteContent[K]) {
     if (field === 'customerId' || field === 'opportunityId') return;
-    setDraft((current) => ({ ...current, [field]: value, ...(field === 'currency' ? { lines: current.lines.map(line => ({ ...line, unitPrice: Number.NaN })) } : {}) }));
+    setDraft(current => field === 'currency' ? changeQuoteCurrency(current, value as string) : { ...current, [field]: value });
     setError('');
   }
   function updateLine<K extends keyof QuoteLine>(id: string, field: K, value: QuoteLine[K]) {
@@ -57,29 +59,20 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
   function selectProduct(id: string, product: Required<ProductResponse>) {
     setDraft((current) => ({
       ...current,
-      lines: current.lines.map((line) =>
-        line.id === id && line.productId !== product.id
-          ? {
-              ...line,
-              productId: product.id,
-              productName: product.name,
-              sku: product.sku,
-              catalogPrice: product.price,
-              unitPrice: current.currency === 'TWD' ? product.price : Number.NaN,
-            }
-          : line
-      ),
+      lines: current.lines.map(line => line.id === id ? selectQuoteProduct(line, product) : line),
     }));
   }
   const create = useApi(quoteApi.create), mutation = useApi(quoteApi.update);
-  const parentCheck = useApi(opportunityApi.get);
   const busy = useRef(false);
   async function save() {
     if (busy.current || !editable) return;
     busy.current = true; setError('');
     try {
       if (!draft.opportunityId || !draft.customerId) throw new Error('報價必須隸屬商機及其客戶。');
-      if (!quote && !canCreateOpportunityQuote(await parentCheck.execute(draft.opportunityId))) throw new Error('商機已結案或狀態已變更，無法新增報價單。');
+      if (!quote) {
+        const reason = quoteCreationBlockedReason(await parentCheck.execute(draft.opportunityId), actor);
+        if (reason) throw new Error(reason);
+      }
       const payload = quotePayload(draft, version?.lines.map(line => line.id));
       const result = quote && version ? await mutation.execute(quote.id, version.id, { ...payload, expectedRevision: version.revision }) : await create.execute(payload);
       if (result.versions[result.versions.length - 1]?.currency !== draft.currency)
@@ -87,11 +80,19 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
       cacheQuote(result);
       if (!quote && onCreated) onCreated(result);
       else if (!quote) navigate(`/quotes/${encodeURIComponent(result.id)}/edit${initialOpportunity?.id ? `?opportunityId=${encodeURIComponent(initialOpportunity.id)}` : ''}`);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : '無法儲存報價。'); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '無法儲存報價。');
+      if (quote) await refreshQuoteAfterForbidden(cause, quote.id);
+      else await refreshAfterForbidden(cause, async () => {
+        await parentCheck.execute(draft.opportunityId);
+        setCreationDenied(false);
+      }, () => setCreationDenied(true));
+    }
     finally { busy.current = false; }
   }
   return {
     draft,
+    creationBlockedReason,
     isSaving: create.isLoading || mutation.isLoading || parentCheck.isLoading,
     totals: !dirty ? version?.totals : undefined,
     error,
@@ -117,7 +118,7 @@ export function useQuoteEditor(actor: QuoteActor | null, quote?: Quote, version?
           sku: '',
           catalogPrice: 0,
           quantity: 1,
-          unitPrice: 0,
+          unitPrice: Number.NaN,
           discountPercent: 0,
           taxPercent: 5,
         },

@@ -1,7 +1,6 @@
 import { ValidatedForm } from '@/components/entity/validated-form';
 import { ValidatedTextarea } from '@/components/entity/validated-controls';
 import { Lookup } from '@/components/ui/lookup';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -80,63 +79,52 @@ export function QuoteActions({
             選擇一位審核人。提交後，報價內容將鎖定至審核結束。
           </DialogDescription>
           <ValidatedForm
-            className="mt-4 flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              vm.searchReviewers();
+            className="mt-6 space-y-4"
+            requestError={vm.reviewRequestError}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void vm.submitReview();
             }}
           >
-            <Input
-              aria-label="搜尋審核人"
-              placeholder="搜尋帳號或姓名"
-              value={vm.reviewerSearch}
-              disabled={vm.working}
-              onChange={(e) => vm.setReviewerSearch(e.target.value)}
-            />
-            <Button type="submit" variant="outline" disabled={vm.working || vm.reviewerOptions.isLoading}>
-              搜尋
-            </Button>
-          </ValidatedForm>
-          <ValidatedForm requestError={vm.reviewRequestError} onSubmit={event => { event.preventDefault(); void vm.submitReview(); }}>
-          <div className="my-4">
-            <Lookup
-              name="reviewerId"
-              required
-              label="審核人"
-              value={vm.reviewerId}
-              disabled={vm.working || vm.reviewerOptions.isLoading}
-              options={(vm.reviewerOptions.data ?? [])
-                .filter((option) => option.id !== actor?.id && option.id !== version.createdBy)
-                .map((option) => ({
-                  value: option.id,
-                  label: option.username,
-                }))}
-              onValueChange={vm.setReviewerId}
-            />
-          </div>
-          {vm.reviewerOptions.isLoading && <p role="status">載入審核人…</p>}
-          {!vm.reviewerOptions.isLoading &&
-            !vm.reviewerOptions.error &&
-            !vm.reviewerOptions.data?.filter((option) => option.id !== actor?.id && option.id !== version.createdBy)
-              .length && <p className="text-sm text-muted-foreground">沒有可選的審核人。</p>}
-          {(vm.error || vm.reviewerOptions.error) && (
-            <p role="alert" className="text-sm text-destructive">
-              {vm.error || vm.reviewerOptions.error?.message}
-            </p>
-          )}
-          <div className="mt-5 flex justify-end gap-2">
-            <Button type="button" variant="outline" disabled={vm.working} onClick={vm.closeRequest}>
-              取消
-            </Button>
-            <Button
-              disabled={
-                dirty || vm.working || vm.reviewerOptions.isLoading || !!vm.reviewerOptions.error
-              }
-              type="submit"
-            >
-              {vm.working ? '提交中…' : '確認提交'}
-            </Button>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="quote-reviewer">審核人 *</Label>
+              <Lookup
+                id="quote-reviewer"
+                name="reviewerId"
+                required
+                label="審核人"
+                value={vm.reviewerId}
+                disabled={vm.working || vm.reviewerOptions.isLoading}
+                options={(vm.reviewerOptions.data ?? [])
+                  .filter((option) => option.id !== actor?.id && option.id !== version.createdBy)
+                  .map((option) => ({
+                    value: option.id,
+                    label: option.username,
+                  }))}
+                onValueChange={vm.setReviewerId}
+              />
+            </div>
+            {vm.reviewerOptions.isLoading && <p role="status">載入審核人…</p>}
+            {!vm.reviewerOptions.isLoading &&
+              !vm.reviewerOptions.error &&
+              !vm.reviewerOptions.data?.filter((option) => option.id !== actor?.id && option.id !== version.createdBy)
+                .length && <p className="text-sm text-muted-foreground">沒有可選的審核人。</p>}
+            {(vm.error || vm.reviewerOptions.error) && (
+              <p role="alert" className="text-sm text-destructive">
+                {vm.error || vm.reviewerOptions.error?.message}
+              </p>
+            )}
+            <div className="mt-5 flex justify-end gap-2">
+              <Button type="button" variant="outline" disabled={vm.working} onClick={vm.closeRequest}>
+                取消
+              </Button>
+              <Button
+                disabled={dirty || vm.working || vm.reviewerOptions.isLoading || !!vm.reviewerOptions.error}
+                type="submit"
+              >
+                {vm.working ? '提交中…' : '確認提交'}
+              </Button>
+            </div>
           </ValidatedForm>
         </DialogContent>
       </Dialog>
@@ -165,7 +153,8 @@ export function QuoteActions({
           >
             <Label htmlFor="quote-decision-reason">{vm.needsReason ? '原因 *' : '備註（選填）'}</Label>
             <ValidatedTextarea
-              id="quote-decision-reason" name="reason"
+              id="quote-decision-reason"
+              name="reason"
               className="min-h-24 w-full rounded-lg border p-3 text-sm"
               value={vm.reason}
               required={vm.needsReason}

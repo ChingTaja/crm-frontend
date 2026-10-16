@@ -1,12 +1,11 @@
 import { quoteReviewApi } from '../models/quote-review-service';
 import { canReviewAssignment } from '../models/quote-review-contract';
-import { useAccess } from '@/features/access/view-models/use-access';
 import { navigate } from '@/lib/router';
 import { useRef, useState } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { orderApi } from '@/features/order/models/order-service';
-import { quoteApi, cacheQuote } from '../models/quote-service';
-import { canManageQuote } from '../models/quote-policy';
+import { quoteApi, cacheQuote, quoteCache, refreshQuoteAfterForbidden } from '../models/quote-service';
+import { quoteOperationPermissions, hasQuoteAction } from '../models/quote-permissions';
 import type { Quote, QuoteActor, QuoteVersion } from '../models/quote-types';
 
 type Decision = 'approve' | 'deny' | 'accept' | 'reject';
@@ -16,7 +15,6 @@ export function useQuoteActions(
   actor: QuoteActor | null,
   onReviewed?: (quote: Quote) => void
 ) {
-  const { can } = useAccess();
   const pending = useRef(false);
   const [working, setWorking] = useState(false);
   const workflow = useApi(
@@ -41,14 +39,11 @@ export function useQuoteActions(
   const submitReview = useApi(quoteReviewApi.request);
   const [requestOpen, setRequestOpen] = useState(false);
   const [reviewerId, setReviewerId] = useState('');
-  const [reviewerSearch, setReviewerSearch] = useState('');
   const conversion = useApi(orderApi.convert);
   const [decision, setDecision] = useState<Decision | null>(null);
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
-  const latest = quote.versions[quote.versions.length - 1]?.id === version.id;
-  const canManage = latest && canManageQuote(actor);
-  const draft = version.status === 'Draft';
+  const permissions = quoteOperationPermissions(version);
   const labels = { approve: '批准報價', deny: '拒絕審核', accept: '接受報價', reject: '拒絕報價' };
 
   async function act(action: () => Promise<void>) {
@@ -60,6 +55,11 @@ export function useQuoteActions(
       await action();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '操作失敗。');
+      const refreshedPermissions = await refreshQuoteAfterForbidden(cause, quote.id, onReviewed ? quoteReviewApi.get : quoteApi.get, quote);
+      if (onReviewed && refreshedPermissions) {
+        const refreshed = quoteCache.getSnapshot().find(record => record.id === quote.id);
+        if (refreshed) onReviewed(refreshed);
+      }
     } finally {
       pending.current = false;
       setWorking(false);
@@ -68,6 +68,8 @@ export function useQuoteActions(
   function confirm() {
     void act(async () => {
       if (!decision) return;
+      const action = { approve: 'approve', deny: 'reject-approval', accept: 'record-decision', reject: 'record-decision' }[decision];
+      if (!hasQuoteAction(version, action)) throw new Error('沒有此操作的權限，請重新載入。');
       if ((decision === 'deny' || decision === 'reject') && !reason.trim()) throw new Error('請填寫拒絕原因。');
       if (
         (decision === 'approve' || decision === 'deny') &&
@@ -90,22 +92,16 @@ export function useQuoteActions(
     requestOpen,
     reviewerId,
     setReviewerId,
-    reviewerSearch,
-    setReviewerSearch,
     reviewerOptions,
     closeRequest: () => {
       if (!pending.current) setRequestOpen(false);
     },
-    searchReviewers: () => {
-      setReviewerId('');
-      void reviewerOptions.execute(quote.id, reviewerSearch).catch(() => {});
-    },
     submitReview: () =>
       act(async () => {
+        if (!permissions.canRequest) return;
         if (
           !reviewerId ||
           reviewerId === actor?.id ||
-          reviewerId === version.createdBy ||
           !reviewerOptions.data?.some((option) => option.id === reviewerId)
         )
           throw new Error('請選擇有效的審核人。');
@@ -128,6 +124,8 @@ export function useQuoteActions(
     decisionLabel: decision ? labels[decision] : '',
     needsReason: decision === 'deny' || decision === 'reject',
     open: (value: Decision) => {
+      const action = { approve: 'approve', deny: 'reject-approval', accept: 'record-decision', reject: 'record-decision' }[value];
+      if (!hasQuoteAction(version, action)) return;
       setDecision(value);
       setReason('');
       setError('');
@@ -135,25 +133,23 @@ export function useQuoteActions(
     close: () => {
       if (!pending.current) setDecision(null);
     },
-    canRequest: can('quotes.update') && canManage && draft && ['Required', 'Rejected'].includes(version.approval),
-    canSend: can('quotes.update') && canManage && draft && ['Approved', 'NotRequired'].includes(version.approval),
-    canConvert: can('quotes.update') && canManage && version.status === 'Accepted',
-    canReview: latest && canReviewAssignment(version, actor?.id, 'approve'),
-    canRejectReview: latest && canReviewAssignment(version, actor?.id, 'reject-approval'),
-    canDecide: latest && can('quotes.update') && version.status === 'Sent',
+    ...permissions,
     requestApproval: () => {
+      if (!permissions.canRequest) return;
       setError('');
       setReviewerId('');
-      setReviewerSearch('');
       setRequestOpen(true);
-      void reviewerOptions.execute(quote.id, '').catch(() => {});
+      void reviewerOptions.execute(quote.id, '').catch(async cause => {
+        setError(cause instanceof Error ? cause.message : '無法載入審核人。');
+        await refreshQuoteAfterForbidden(cause, quote.id);
+      });
     },
     send: () =>
       act(async () => {
-        cacheQuote(await workflow.execute('send'));
+        if (permissions.canSend) cacheQuote(await workflow.execute('send'));
       }),
     convertToOrder: async () => {
-      if (conversion.isLoading) return;
+      if (conversion.isLoading || pending.current || !permissions.canConvert) return;
       if (quote.orderId) {
         navigate(`/orders/${quote.orderId}/edit`);
         return;
@@ -161,8 +157,9 @@ export function useQuoteActions(
       try {
         const result = await conversion.execute(quote.id, version.id, { expectedRevision: version.revision });
         navigate(`/orders/${result.orderId}/edit`);
-      } catch {
-        /* useApi exposes ProblemDetail messages. */
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : '轉訂單失敗。');
+        await refreshQuoteAfterForbidden(cause, quote.id);
       }
     },
   };

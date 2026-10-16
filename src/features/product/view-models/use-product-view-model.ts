@@ -22,7 +22,7 @@ export function useProductViewModel() {
     }
     return summary;
   }
-  const fields = metadata.fields;
+  const fields = metadata.fields.filter((field) => field.apiFieldName !== 'currency');
   const rows = metadataRows(products, fields);
   const list = useEntityList('products', '產品', fields, rows, removeMany, true, query.pagination);
   return {

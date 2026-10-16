@@ -3,9 +3,16 @@ import { collectPages } from '../../../lib/api-pagination';
 import type { Api, ProductResponse, CreateProductRequest } from '../../../api/Api';
 
 function product(record: ProductResponse): Required<ProductResponse> {
-  if (!record?.id || typeof record.name !== 'string' || typeof record.sku !== 'string' ||
-    typeof record.price !== 'number' || !Number.isFinite(record.price) || record.price < 0 ||
-    !['啟用', '停用'].includes(record.status ?? '')) throw new Error('產品資料格式不正確，請重新載入。');
+  if (
+    !record?.id ||
+    typeof record.name !== 'string' ||
+    typeof record.sku !== 'string' ||
+    typeof record.price !== 'number' ||
+    !Number.isFinite(record.price) ||
+    record.price < 0 ||
+    !['啟用', '停用'].includes(record.status ?? '')
+  )
+    throw new Error('產品資料格式不正確，請重新載入。');
   return { id: record.id, name: record.name, sku: record.sku, price: record.price, status: record.status! };
 }
 export function createProductApi(client: Api<unknown>['api']) {
@@ -16,7 +23,12 @@ export function createProductApi(client: Api<unknown>['api']) {
     signal: AbortSignal,
     query: Parameters<Api<unknown>['api']['findAllProducts']>[0] = { page: 0, size: 20 }
   ) => {
-    const data = await unwrapResponse(client.findAllProducts(query, { signal, format: 'json' }));
+    const data = await unwrapResponse(
+      client.findAllProducts(
+        { page: query?.page, size: query?.size, status: query?.status },
+        { signal, format: 'json' }
+      )
+    );
     if (
       !data ||
       !Array.isArray(data.content) ||
@@ -31,17 +43,19 @@ export function createProductApi(client: Api<unknown>['api']) {
     list,
     listAll: (signal: AbortSignal) => collectPages(signal, list),
     async get(signal: AbortSignal, id: string) {
-      return product(
-        await unwrapResponse(client.findByIdProduct(encodeURIComponent(id), { signal, format: 'json' }))
-      );
+      return product(await unwrapResponse(client.findByIdProduct(encodeURIComponent(id), { signal, format: 'json' })));
     },
     async save(signal: AbortSignal, fields: CreateProductRequest, id?: string) {
       const params = { signal, format: 'json' as const };
+      const payload: CreateProductRequest = {
+        name: fields.name,
+        sku: fields.sku,
+        price: fields.price,
+        status: fields.status,
+      };
       return product(
         await unwrapResponse(
-          id
-            ? client.updateProducts(encodeURIComponent(id), fields, params)
-            : client.createProducts(fields, params)
+          id ? client.updateProducts(encodeURIComponent(id), payload, params) : client.createProducts(payload, params)
         )
       );
     },

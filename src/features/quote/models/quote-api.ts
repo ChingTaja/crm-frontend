@@ -67,12 +67,19 @@ export function quoteRecord(data: AssignedQuoteResponse): Quote {
     })),
   };
 }
-export function quotePayload(content: QuoteContent, existingLineIds: string[] = []): CreateQuoteRequest & { currency: string } {
-  if (!content.customerId.trim() || !content.opportunityId.trim() || content.lines.some(line => !line.productId.trim()))
+export function quotePayload(
+  content: QuoteContent,
+  existingLineIds: string[] = []
+): CreateQuoteRequest & { currency: string } {
+  if (
+    !content.customerId.trim() ||
+    !content.opportunityId.trim() ||
+    content.lines.some((line) => !line.productId.trim())
+  )
     throw new Error('請選擇有效的客戶、商機與產品。');
-  const currency = content.currency ?? defaultCurrency;
+  const currency = content.currency;
   if (!/^[A-Z]{3}$/.test(currency)) throw new Error('請選擇有效的幣別');
-  if (content.lines.some(line => !Number.isFinite(line.unitPrice) || line.unitPrice < 0))
+  if (content.lines.some((line) => !Number.isFinite(line.unitPrice) || line.unitPrice < 0))
     throw new Error('請填寫每筆明細的有效單價');
   return {
     currency,
@@ -114,12 +121,7 @@ export function createQuoteApi(client: Api<unknown>['api']) {
       quoteRecord(await unwrapResponse(client.findByIdQuote(encodeURIComponent(id), params(signal)))),
     create: async (signal: AbortSignal, body: CreateQuoteRequest) =>
       quoteRecord(await unwrapResponse(client.createQuotes(body, params(signal)))),
-    update: async (
-      signal: AbortSignal,
-      id: string,
-      versionId: string,
-      body: UpdateQuoteRequest
-    ) =>
+    update: async (signal: AbortSignal, id: string, versionId: string, body: UpdateQuoteRequest) =>
       quoteRecord(
         await unwrapResponse(
           client.updateQuotes(encodeURIComponent(id), encodeURIComponent(versionId), body, params(signal))

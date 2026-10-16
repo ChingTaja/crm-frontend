@@ -1,8 +1,8 @@
-import { useAccess } from '@/features/access/view-models/use-access';
 import { useRef, useState } from 'react';
-import { quoteApi, cacheQuote } from '../models/quote-service';
+import { quoteApi, cacheQuote, refreshQuoteAfterForbidden } from '../models/quote-service';
 import { useApi } from '@/hooks/use-api';
-import { canManageQuote, money, quoteTotals } from '../models/quote-policy';
+import { money } from '../models/quote-policy';
+import { hasQuoteAction } from '../models/quote-permissions';
 import type { ApprovalStatus, Quote, QuoteActor, QuoteStatus } from '../models/quote-types';
 
 const statusLabels: Record<QuoteStatus, string> = {
@@ -22,42 +22,41 @@ const approvalLabels: Record<ApprovalStatus, string> = {
 export function useQuoteVersions(
   quote: Quote,
   selectedId: string,
-  actor: QuoteActor | null,
+  _actor: QuoteActor | null,
   dirty: boolean,
   onSelect: (id: string) => void
 ) {
-  const { can } = useAccess();
   const request = useApi(quoteApi.newVersion);
   const busy = useRef(false);
   const [error, setError] = useState('');
   const latest = quote.versions[quote.versions.length - 1];
+  const selected = quote.versions.find((version) => version.id === selectedId) ?? latest;
   const blockedReason = dirty
     ? '請先儲存或重置修改，再切換或建立版本。'
-    : (!can('quotes.update') || !canManageQuote(actor))
-      ? '目前身分無法建立新版本。'
-      : quote.orderId || latest.status === 'Accepted'
-        ? '報價已接受或已轉成訂單，無法建立新版本。'
-        : latest.status === 'Draft' && latest.approval === 'Pending'
-          ? '最新版本正在審批，完成審批後才能建立新版本。'
-          : '';
+    : !hasQuoteAction(selected, 'new-version')
+      ? '此版本目前無法建立新版本。'
+      : '';
 
   async function createVersion() {
     if (blockedReason || busy.current) return;
     busy.current = true;
     setError('');
     try {
-      const updated = await request.execute(quote.id, latest.id, { expectedRevision: latest.revision });
+      const updated = await request.execute(quote.id, selected.id, { expectedRevision: selected.revision });
       cacheQuote(updated);
       onSelect(updated.versions[updated.versions.length - 1].id);
     } catch (error) {
       setError(error instanceof Error ? error.message : '建立版本失敗。');
-    } finally { busy.current = false; }
+      await refreshQuoteAfterForbidden(error, quote.id);
+    } finally {
+      busy.current = false;
+    }
   }
 
   return {
     error,
     blockedReason: request.isLoading ? '建立版本中…' : blockedReason,
-    canCreateVersion: can('quotes.update'),
+    canCreateVersion: hasQuoteAction(selected, 'new-version'),
     createVersion,
     latestNumber: latest.version,
     nextNumber: latest.version + 1,
@@ -71,7 +70,7 @@ export function useQuoteVersions(
       latest: version.id === latest.id,
       status: statusLabels[version.status],
       approval: approvalLabels[version.approval],
-      total: money(version.totals?.totalCents ?? quoteTotals(version.lines).totalCents, version.currency),
+      total: version.totals?.totalCents == null ? '—' : money(version.totals.totalCents, version.currency),
       createdAt: new Date(version.createdAt).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
       createdBy: version.createdBy,
     })),

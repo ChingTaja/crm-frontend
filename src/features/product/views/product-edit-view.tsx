@@ -18,7 +18,13 @@ export function ProductEditView({ record }: { record?: ProductResponse }) {
         </CardHeader>
         <CardContent className="grid gap-6 sm:grid-cols-2">
           <EntityField id="product-name" label="名稱 *">
-            <Input id="product-name" maxLength={255} required value={draft.name} onChange={(e) => update('name', e.target.value)} />
+            <Input
+              id="product-name"
+              maxLength={255}
+              required
+              value={draft.name}
+              onChange={(e) => update('name', e.target.value)}
+            />
           </EntityField>
           <EntityField id="product-status" label="狀態">
             <ValidatedSelect
@@ -42,7 +48,7 @@ export function ProductEditView({ record }: { record?: ProductResponse }) {
               onChange={(e) => update('sku', e.target.value)}
             />
           </EntityField>
-          <EntityField id="product-price" label="單價（TWD）">
+          <EntityField id="product-price" label="參考價">
             <Input
               id="product-price"
               type="number"
@@ -52,6 +58,7 @@ export function ProductEditView({ record }: { record?: ProductResponse }) {
               value={draft.price}
               onChange={(e) => update('price', e.target.valueAsNumber)}
             />
+            <p className="text-xs text-muted-foreground">產品參考價不指定幣別，報價時請另行確認交易單價。</p>
           </EntityField>
         </CardContent>
       </Card>
