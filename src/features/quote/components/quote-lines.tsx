@@ -26,7 +26,7 @@ export function QuoteTotals({
 }) {
   const totals: ApiQuoteTotals = snapshot ?? (preview ? quoteTotals(lines) : {});
   return (
-    <dl className="ml-auto grid w-full max-w-sm grid-cols-2 gap-3 text-sm">
+    <dl className="ml-auto grid w-full min-w-0 max-w-sm grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-3 text-sm [&_dd]:min-w-0 [&_dd]:[overflow-wrap:anywhere]">
       <dt>未稅原價</dt>
       <dd className="text-right">{totals.subtotalCents == null ? '—' : money(totals.subtotalCents, currency)}</dd>
       <dt>折扣</dt>
@@ -56,8 +56,8 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
       name="lines"
       validate={() => (editor.editable && !editor.draft.lines.length ? '請至少新增一筆商品明細。' : '')}
     >
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
+      <Card className="min-w-0 max-w-full">
+        <CardHeader className="grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <CardTitle>報價明細</CardTitle>
           {editor.editable && (
             <Button type="button" variant="outline" onClick={editor.addLine}>
@@ -66,7 +66,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
             </Button>
           )}
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="min-w-0 space-y-6">
           <div className="max-w-sm space-y-2">
             <p id="quote-currency-label" className="text-sm font-medium">
               報價幣別 *
@@ -95,12 +95,26 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
               所有明細共用報價幣別；產品參考價不代表已換算的交易單價，請逐筆填寫確認。
             </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[920px] text-left text-sm">
+          <div
+            className="w-full min-w-0 overflow-x-auto overscroll-x-contain"
+            role="region"
+            aria-label="報價明細，可左右捲動"
+            tabIndex={0}
+          >
+            <table className="w-full min-w-[976px] table-fixed text-left text-sm">
+              <colgroup>
+                <col className="w-[280px]" />
+                <col className="w-[96px]" />
+                <col className="w-[144px]" />
+                <col className="w-[112px]" />
+                <col className="w-[112px]" />
+                <col className="w-[176px]" />
+                <col className="w-[56px]" />
+              </colgroup>
               <thead>
                 <tr>
                   {['商品', '數量', `單價（${currency}）`, '折扣 %', '稅率 %', '含稅小計', ''].map((label) => (
-                    <th key={label} className="border-b px-2 py-3 font-medium text-muted-foreground">
+                    <th key={label} className="border-b px-2 py-3 align-top font-medium text-muted-foreground">
                       {label}
                     </th>
                   ))}
@@ -108,8 +122,8 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
               </thead>
               <tbody>
                 {editor.draft.lines.map((line, index) => (
-                  <tr key={line.id}>
-                    <td className="min-w-56 border-b px-2 py-3">
+                  <tr key={line.id} className="[&>td]:align-top">
+                    <td className="min-w-0 border-b px-2 py-3 [&_button]:min-w-0">
                       {editor.editable ? (
                         <Lookup
                           name={`lines[${index}].productId`}
@@ -127,15 +141,15 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                           }}
                         />
                       ) : (
-                        <p>{line.productName}</p>
+                        <p className="break-words [overflow-wrap:anywhere]">{line.productName}</p>
                       )}
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="mt-1 break-words text-xs text-muted-foreground [overflow-wrap:anywhere]">
                         {line.sku || '尚未選擇'} · 參考價{' '}
                         {new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 }).format(line.catalogPrice)}
                       </p>
                     </td>
                     {(['quantity', 'unitPrice', 'discountPercent', 'taxPercent'] as const).map((field) => (
-                      <td key={field} className="w-28 border-b px-2 py-3">
+                      <td key={field} className="border-b px-2 py-3">
                         {editor.editable ? (
                           <Input
                             name={`lines[${index}].${field}`}
@@ -153,7 +167,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                         )}
                       </td>
                     ))}
-                    <td className="whitespace-nowrap border-b px-2 py-3">
+                    <td className="border-b px-2 py-3 text-right tabular-nums [overflow-wrap:anywhere]">
                       {money(quoteLineTotals(line).totalCents, currency)}
                     </td>
                     <td className="border-b px-2 py-3">
@@ -175,7 +189,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
             </table>
           </div>
           {error && (
-            <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div role="status" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               無法載入幣別，目前保留 {currency}
               <Button
                 type="button"

@@ -1,11 +1,13 @@
 import { navigate } from '@/lib/router';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { authService, type AuthService, type LoginCredentials } from '../models/auth-model';
+import { loginErrorMessage } from '../models/login-error';
 
 export function useLoginViewModel(service: AuthService = authService, onSignedIn?: () => void) {
   const [credentials, setCredentials] = useState<LoginCredentials>({ code: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState('');
+  const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitting = useRef(false);
   const active = useRef<AbortController | null>(null);
@@ -14,6 +16,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
   function updateField(field: keyof LoginCredentials, value: string) {
     setCredentials((current) => ({ ...current, [field]: value }));
     setNotice('');
+    setIsError(false);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -24,6 +27,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
     active.current = controller;
     setIsSubmitting(true);
     setNotice('');
+    setIsError(false);
     try {
       if (!credentials.code.trim()) throw new Error('請輸入帳號。');
       await service.signIn({ ...credentials, code: credentials.code.trim() }, controller.signal);
@@ -33,7 +37,8 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
       onSignedIn?.();
     } catch (error) {
       if (controller.signal.aborted) return;
-      setNotice(error instanceof Error ? error.message : '暫時無法登入，請稍後再試。');
+      setNotice(loginErrorMessage(error));
+      setIsError(true);
     } finally {
       submitting.current = false;
       setIsSubmitting(false);
@@ -44,6 +49,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
     credentials,
     showPassword,
     notice,
+    isError,
     isSubmitting,
     updateField,
     submit,

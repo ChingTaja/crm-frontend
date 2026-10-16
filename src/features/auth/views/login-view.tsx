@@ -7,7 +7,7 @@ import type { LoginViewModel } from '../view-models/use-login-view-model';
 import { BrandContent } from '../components/brand-content';
 
 function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
-  const { credentials, showPassword, notice, isSubmitting, updateField, submit, togglePassword, requestPasswordReset } =
+  const { credentials, showPassword, notice, isError, isSubmitting, updateField, submit, togglePassword, requestPasswordReset } =
     viewModel;
   return (
     <main className="grid min-h-svh grid-cols-1 bg-white text-[#263d37] min-[761px]:grid-cols-[47%_53%]">
@@ -91,10 +91,10 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
             >
               {isSubmitting ? '登入中…' : '登入工作空間'} <ArrowRight size={18} />
             </Button>
-            <div className="mt-3 min-h-10 text-xs leading-relaxed text-[#6b7056]" role="status" aria-live="polite">
+            <div className="mt-3 min-h-10 text-xs leading-relaxed" role={isError ? 'alert' : 'status'} aria-live={isError ? 'assertive' : 'polite'}>
               {notice && (
-                <Alert className="border-[#e1e7d7] bg-[#f5f7ef]" role="presentation">
-                  <AlertDescription className="text-xs text-[#6b7056]">{notice}</AlertDescription>
+                <Alert variant={isError ? 'destructive' : 'default'} className={isError ? 'border-red-200 bg-red-50' : 'border-[#e1e7d7] bg-[#f5f7ef]'} role="presentation">
+                  <AlertDescription className={isError ? 'text-xs text-red-700' : 'text-xs text-[#6b7056]'}>{notice}</AlertDescription>
                 </Alert>
               )}
             </div>

@@ -40,7 +40,12 @@ export function Lookup({
 }: LookupProps) {
   const trigger = useRef<HTMLButtonElement | null>(null);
   const field = useValidatedField(name, id, {
-    validate: () => disabled || trigger.current?.matches(':disabled') ? '' : required && (!value || !options.some(option => option.value === value)) ? `請選擇有效的${label}。` : '',
+    validate: () =>
+      disabled || trigger.current?.matches(':disabled')
+        ? ''
+        : required && (!value || !options.some((option) => option.value === value))
+          ? `請選擇有效的${label}。`
+          : '',
     focus: () => trigger.current?.focus(),
   });
   const searchId = useId();
@@ -64,75 +69,84 @@ export function Lookup({
   }
 
   return (
-    <><Popover open={open} onOpenChange={changeOpen}>
-      <PopoverTrigger
-        id={field.id}
-        ref={trigger}
-        aria-invalid={field.error ? true : undefined}
-        aria-describedby={field.error ? field.errorId : undefined}
-        className={field.error ? 'border-destructive ring-1 ring-destructive' : undefined}
-        onBlur={() => { if (!open) field.validate(); }}
-        disabled={disabled}
-        render={<Button type="button" variant="outline" className="h-9 w-full justify-between font-normal" />}
-        aria-label={`${label}${required ? '（必填）' : ''}：${selected?.label ?? placeholder}`}
-      >
-        <span className={selected ? 'truncate' : 'truncate text-muted-foreground'}>
-          {selected?.label ?? placeholder}
-        </span>
-        <ChevronsUpDown className="shrink-0 text-muted-foreground" />
-      </PopoverTrigger>
-      <PopoverContent className="w-[var(--anchor-width)] min-w-64">
-        <PopoverTitle className="sr-only">選擇{label}</PopoverTitle>
-        <div className="relative border-b p-3">
-          <Search className="pointer-events-none absolute top-5 left-5 text-muted-foreground" size={16} />
-          <Input
-            id={searchId}
-            aria-label={`搜尋${label}`}
-            placeholder={`搜尋${label}…`}
-            className="pl-8"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setLimit(PAGE_SIZE);
-              if (listRef.current) listRef.current.scrollTop = 0;
-            }}
-          />
-        </div>
-        <div
-          ref={listRef}
-          className="max-h-72 overflow-y-auto p-1.5"
-          onScroll={(event) => {
-            const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
-            if (visible.length < matches.length && scrollHeight - scrollTop - clientHeight <= 40) {
-              setLimit(Math.min(limit + PAGE_SIZE, matches.length));
-            }
+    <>
+      <Popover open={open} onOpenChange={changeOpen}>
+        <PopoverTrigger
+          id={field.id}
+          ref={trigger}
+          aria-invalid={field.error ? true : undefined}
+          aria-describedby={field.error ? field.errorId : undefined}
+          className={field.error ? 'border-destructive ring-1 ring-destructive' : undefined}
+          onBlur={() => {
+            if (!open) field.validate();
           }}
+          disabled={disabled}
+          render={<Button type="button" variant="outline" className="h-9 w-full min-w-0 justify-between font-normal" />}
+          aria-label={`${label}${required ? '（必填）' : ''}：${selected?.label ?? placeholder}`}
         >
-          {visible.map((option) => (
-            <Button
-              key={option.value}
-              type="button"
-              variant="ghost"
-              className="h-auto min-h-9 w-full justify-between py-2 text-left font-normal whitespace-normal"
-              aria-pressed={option.value === value}
-              onClick={() => {
-                onValueChange(option.value);
-                field.change('');
-                changeOpen(false);
+          <span
+            className={
+              selected ? 'min-w-0 flex-1 truncate text-left' : 'min-w-0 flex-1 truncate text-left text-muted-foreground'
+            }
+          >
+            {selected?.label ?? placeholder}
+          </span>
+          <ChevronsUpDown className="shrink-0 text-muted-foreground" />
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--anchor-width)] min-w-64">
+          <PopoverTitle className="sr-only">選擇{label}</PopoverTitle>
+          <div className="relative border-b p-3">
+            <Search className="pointer-events-none absolute top-5 left-5 text-muted-foreground" size={16} />
+            <Input
+              id={searchId}
+              aria-label={`搜尋${label}`}
+              placeholder={`搜尋${label}…`}
+              className="pl-8"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setLimit(PAGE_SIZE);
+                if (listRef.current) listRef.current.scrollTop = 0;
               }}
-            >
-              {option.label}
-              {option.value === value && <Check className="shrink-0" aria-hidden="true" />}
-            </Button>
-          ))}
-          {matches.length === 0 && <p className="p-5 text-center text-sm text-muted-foreground">找不到符合的資料</p>}
-        </div>
-        <div className="space-y-2 border-t p-3">
-          <p role="status" className="text-xs text-muted-foreground">
-            顯示 {visible.length} / {matches.length} 筆
-          </p>
-        </div>
-      </PopoverContent>
-    </Popover><FieldError id={field.errorId} error={field.error} /></>
+            />
+          </div>
+          <div
+            ref={listRef}
+            className="max-h-72 overflow-y-auto p-1.5"
+            onScroll={(event) => {
+              const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
+              if (visible.length < matches.length && scrollHeight - scrollTop - clientHeight <= 40) {
+                setLimit(Math.min(limit + PAGE_SIZE, matches.length));
+              }
+            }}
+          >
+            {visible.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                variant="ghost"
+                className="h-auto min-h-9 w-full justify-between py-2 text-left font-normal whitespace-normal"
+                aria-pressed={option.value === value}
+                onClick={() => {
+                  onValueChange(option.value);
+                  field.change('');
+                  changeOpen(false);
+                }}
+              >
+                {option.label}
+                {option.value === value && <Check className="shrink-0" aria-hidden="true" />}
+              </Button>
+            ))}
+            {matches.length === 0 && <p className="p-5 text-center text-sm text-muted-foreground">找不到符合的資料</p>}
+          </div>
+          <div className="space-y-2 border-t p-3">
+            <p role="status" className="text-xs text-muted-foreground">
+              顯示 {visible.length} / {matches.length} 筆
+            </p>
+          </div>
+        </PopoverContent>
+      </Popover>
+      <FieldError id={field.errorId} error={field.error} />
+    </>
   );
 }
