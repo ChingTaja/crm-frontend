@@ -1,3 +1,4 @@
+import { availableQuoteProducts } from '../models/quote-pricing';
 import { ValidatedGroup } from '@/components/entity/validated-group';
 import { useEffect } from 'react';
 import { useApi } from '@/hooks/use-api';
@@ -115,13 +116,11 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                           required
                           label={`第 ${index + 1} 筆商品`}
                           value={line.productId}
-                          options={products
-                            .filter((p) => p.status === '啟用' || p.id === line.productId)
-                            .map((p) => ({
-                              value: p.id,
-                              label: p.id === line.productId ? line.productName : p.name,
-                              keywords: p.sku,
-                            }))}
+                          options={availableQuoteProducts(products, editor.draft.lines, line.id).map((p) => ({
+                            value: p.id,
+                            label: p.id === line.productId ? line.productName : p.name,
+                            keywords: p.sku,
+                          }))}
                           onValueChange={(id) => {
                             const product = products.find((p) => p.id === id);
                             if (product) editor.selectProduct(line.id, product);
