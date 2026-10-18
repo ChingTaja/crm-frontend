@@ -1,13 +1,14 @@
 import { availableQuoteProducts } from '../models/quote-pricing';
 import { ValidatedGroup } from '@/components/entity/validated-group';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { currencyApi } from '@/features/currency/models/currency-service';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lookup } from '@/components/ui/lookup';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { ProductResponse, QuoteTotals as ApiQuoteTotals } from '../../../api/Api';
 import type { QuoteEditor } from '../view-models/use-quote-editor';
 import { money, quoteLineTotals, quoteTotals } from '../models/quote-policy';
@@ -41,6 +42,7 @@ export function QuoteTotals({
   );
 }
 export function QuoteLines({ editor, products }: { editor: QuoteEditor; products: Required<ProductResponse>[] }) {
+  const [pendingCurrency, setPendingCurrency] = useState<{ from: string; to: string } | null>(null);
   const { data: currencies, error, isLoading, execute, cancel } = useApi(currencyApi.list);
   useEffect(() => {
     void execute().catch(() => {});
@@ -81,11 +83,7 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
                 options={options}
                 disabled={isLoading || !!error || !currencies}
                 onValueChange={(value) => {
-                  if (
-                    value !== currency &&
-                    window.confirm('變更整張報價的幣別不會自動換匯，所有明細單價將清空，請重新確認並填寫。是否繼續？')
-                  )
-                    editor.update('currency', value);
+                  if (value !== currency) setPendingCurrency({ from: currency, to: value });
                 }}
               />
             ) : (
@@ -213,6 +211,37 @@ export function QuoteLines({ editor, products }: { editor: QuoteEditor; products
           <p className="text-xs text-muted-foreground">稅金按折後金額計算，金額四捨五入至小數點後兩位。</p>
         </CardContent>
       </Card>
+      <Dialog
+        open={!!pendingCurrency && editor.editable && pendingCurrency.from === currency}
+        onOpenChange={open => { if (!open) setPendingCurrency(null); }}
+      >
+        <DialogContent>
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <TriangleAlert className="size-5 text-amber-600" aria-hidden="true" />
+            確認變更報價幣別
+          </DialogTitle>
+          <DialogDescription className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            變更整張報價的幣別不會自動換匯，所有明細單價將清空，請重新確認並填寫。是否繼續？
+          </DialogDescription>
+          <p className="mt-4 rounded-lg border bg-muted/40 p-3 text-sm">
+            報價幣別：<strong>{pendingCurrency?.from}</strong> → <strong>{pendingCurrency?.to}</strong>
+          </p>
+          <div className="mt-6 flex flex-wrap justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setPendingCurrency(null)}>
+              取消
+            </Button>
+            <Button type="button" disabled={!editor.editable} onClick={() => {
+              if (pendingCurrency && editor.editable && pendingCurrency.from === currency &&
+                currencies?.some(item => item.code === pendingCurrency.to && item.active && item.fractionDigits === 2)) {
+                editor.update('currency', pendingCurrency.to);
+              }
+              setPendingCurrency(null);
+            }}>
+              確認變更並清空單價
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ValidatedGroup>
   );
 }
