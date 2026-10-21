@@ -7,8 +7,18 @@ import type { LoginViewModel } from '../view-models/use-login-view-model';
 import { BrandContent } from '../components/brand-content';
 
 function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
-  const { credentials, showPassword, notice, isError, isSubmitting, updateField, submit, togglePassword, requestPasswordReset } =
-    viewModel;
+  const {
+    rateLimit,
+    credentials,
+    showPassword,
+    notice,
+    isError,
+    isSubmitting,
+    updateField,
+    submit,
+    togglePassword,
+    requestPasswordReset,
+  } = viewModel;
   return (
     <main className="grid min-h-svh grid-cols-1 bg-white text-[#263d37] min-[761px]:grid-cols-[47%_53%]">
       <BrandContent />
@@ -36,7 +46,7 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
               name="code"
               value={credentials.code}
               onChange={(event) => updateField('code', event.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || rateLimit.remainingSeconds > 0}
               type="text"
               autoComplete="username"
               maxLength={100}
@@ -62,7 +72,7 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
               name="password"
               value={credentials.password}
               onChange={(event) => updateField('password', event.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || rateLimit.remainingSeconds > 0}
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               maxLength={72}
@@ -87,14 +97,24 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
             <Button
               className="h-12 w-full cursor-pointer gap-4 rounded-lg bg-[#254e3c] text-[13px] text-white shadow-sm hover:bg-[#193d2d] active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || rateLimit.remainingSeconds > 0}
             >
-              {isSubmitting ? '登入中…' : '登入工作空間'} <ArrowRight size={18} />
+              {rateLimit.message || (isSubmitting ? '登入中…' : '登入工作空間')} <ArrowRight size={18} />
             </Button>
-            <div className="mt-3 min-h-10 text-xs leading-relaxed" role={isError ? 'alert' : 'status'} aria-live={isError ? 'assertive' : 'polite'}>
+            <div
+              className="mt-3 min-h-10 text-xs leading-relaxed"
+              role={isError ? 'alert' : 'status'}
+              aria-live={isError ? 'assertive' : 'polite'}
+            >
               {notice && (
-                <Alert variant={isError ? 'destructive' : 'default'} className={isError ? 'border-red-200 bg-red-50' : 'border-[#e1e7d7] bg-[#f5f7ef]'} role="presentation">
-                  <AlertDescription className={isError ? 'text-xs text-red-700' : 'text-xs text-[#6b7056]'}>{notice}</AlertDescription>
+                <Alert
+                  variant={isError ? 'destructive' : 'default'}
+                  className={isError ? 'border-red-200 bg-red-50' : 'border-[#e1e7d7] bg-[#f5f7ef]'}
+                  role="presentation"
+                >
+                  <AlertDescription className={isError ? 'text-xs text-red-700' : 'text-xs text-[#6b7056]'}>
+                    {notice}
+                  </AlertDescription>
                 </Alert>
               )}
             </div>

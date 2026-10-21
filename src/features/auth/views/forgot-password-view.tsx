@@ -1,3 +1,4 @@
+import { useRateLimit } from '@/hooks/use-rate-limit';
 import { useRef, useState, type FormEvent } from 'react';
 import { Mail } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
@@ -8,19 +9,20 @@ import { PasswordResetLayout } from '../components/password-reset-layout';
 import { passwordResetApi } from '../models/password-reset-service';
 
 export function ForgotPasswordView() {
+  const rateLimit = useRateLimit();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const busy = useRef(false);
   const request = useApi(passwordResetApi.requestReset);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy.current) return;
+    if (busy.current || rateLimit.isBlocked()) return;
     busy.current = true;
     try {
       await request.execute({ email: email.trim() });
       setSent(true);
-    } catch {
-      /* useApi exposes the failure. */
+    } catch (error) {
+      rateLimit.capture(error);
     } finally {
       busy.current = false;
     }
@@ -52,11 +54,15 @@ export function ForgotPasswordView() {
             maxLength={254}
             placeholder="name@gmail.com"
             value={email}
-            disabled={request.isLoading}
+            disabled={request.isLoading || rateLimit.remainingSeconds > 0}
             onChange={(event) => setEmail(event.target.value)}
           />
-          <Button type="submit" className="h-12 w-full bg-[#254e3c] text-white" disabled={request.isLoading}>
-            {request.isLoading ? '寄送中…' : '寄送重設密碼信件'}
+          <Button
+            type="submit"
+            className="h-12 w-full bg-[#254e3c] text-white"
+            disabled={request.isLoading || rateLimit.remainingSeconds > 0}
+          >
+            {rateLimit.message || (request.isLoading ? '寄送中…' : '寄送重設密碼信件')}
           </Button>
           {request.error && (
             <p role="alert" className="text-sm text-destructive">

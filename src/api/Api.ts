@@ -1434,7 +1434,20 @@ export class Api<
      * @secure
      */
     findByIdUser: (id: string, params: RequestParams = {}) =>
-      this.request<UserResponse, any>({
+      this.request<
+        UserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users/${id}`,
         method: "GET",
         secure: true,
@@ -1454,7 +1467,20 @@ export class Api<
       data: UpdateUserRequest,
       params: RequestParams = {},
     ) =>
-      this.request<UserResponse, any>({
+      this.request<
+        UserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users/${id}`,
         method: "PUT",
         body: data,
@@ -1472,7 +1498,20 @@ export class Api<
      * @secure
      */
     deleteUsers: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users/${id}`,
         method: "DELETE",
         secure: true,
@@ -1488,7 +1527,20 @@ export class Api<
      * @secure
      */
     findByIdRole: (id: string, params: RequestParams = {}) =>
-      this.request<RoleDetailResponse, any>({
+      this.request<
+        RoleDetailResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles/${id}`,
         method: "GET",
         secure: true,
@@ -1508,7 +1560,20 @@ export class Api<
       data: UpdateRoleRequest,
       params: RequestParams = {},
     ) =>
-      this.request<RoleDetailResponse, any>({
+      this.request<
+        RoleDetailResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles/${id}`,
         method: "PUT",
         body: data,
@@ -1526,7 +1591,20 @@ export class Api<
      * @secure
      */
     deleteRoles: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles/${id}`,
         method: "DELETE",
         secure: true,
@@ -1547,7 +1625,20 @@ export class Api<
       data: UpdateQuoteRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}`,
         method: "PUT",
         body: data,
@@ -1565,7 +1656,20 @@ export class Api<
      * @secure
      */
     findByIdProduct: (id: string, params: RequestParams = {}) =>
-      this.request<ProductResponse, any>({
+      this.request<
+        ProductResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/products/${id}`,
         method: "GET",
         secure: true,
@@ -1585,7 +1689,20 @@ export class Api<
       data: UpdateProductRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ProductResponse, any>({
+      this.request<
+        ProductResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/products/${id}`,
         method: "PUT",
         body: data,
@@ -1603,7 +1720,20 @@ export class Api<
      * @secure
      */
     deleteProducts: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/products/${id}`,
         method: "DELETE",
         secure: true,
@@ -1619,7 +1749,20 @@ export class Api<
      * @secure
      */
     findByIdOpportunity: (id: string, params: RequestParams = {}) =>
-      this.request<OpportunityResponse, any>({
+      this.request<
+        OpportunityResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities/${id}`,
         method: "GET",
         secure: true,
@@ -1639,7 +1782,20 @@ export class Api<
       data: UpdateOpportunityRequest,
       params: RequestParams = {},
     ) =>
-      this.request<OpportunityResponse, any>({
+      this.request<
+        OpportunityResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities/${id}`,
         method: "PUT",
         body: data,
@@ -1657,7 +1813,20 @@ export class Api<
      * @secure
      */
     deleteOpportunities: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities/${id}`,
         method: "DELETE",
         secure: true,
@@ -1673,7 +1842,20 @@ export class Api<
      * @secure
      */
     findByIdLead: (id: string, params: RequestParams = {}) =>
-      this.request<Lead, any>({
+      this.request<
+        Lead,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads/${id}`,
         method: "GET",
         secure: true,
@@ -1689,7 +1871,20 @@ export class Api<
      * @secure
      */
     updateLeads: (id: string, data: Lead, params: RequestParams = {}) =>
-      this.request<Lead, any>({
+      this.request<
+        Lead,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads/${id}`,
         method: "PUT",
         body: data,
@@ -1707,7 +1902,20 @@ export class Api<
      * @secure
      */
     deleteLeads: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads/${id}`,
         method: "DELETE",
         secure: true,
@@ -1723,7 +1931,20 @@ export class Api<
      * @secure
      */
     findByIdCustomer: (id: string, params: RequestParams = {}) =>
-      this.request<CustomerResponse, any>({
+      this.request<
+        CustomerResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers/${id}`,
         method: "GET",
         secure: true,
@@ -1743,7 +1964,20 @@ export class Api<
       data: UpdateCustomerRequest,
       params: RequestParams = {},
     ) =>
-      this.request<CustomerResponse, any>({
+      this.request<
+        CustomerResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers/${id}`,
         method: "PUT",
         body: data,
@@ -1761,7 +1995,20 @@ export class Api<
      * @secure
      */
     deleteCustomers: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers/${id}`,
         method: "DELETE",
         secure: true,
@@ -1777,7 +2024,20 @@ export class Api<
      * @secure
      */
     findByCode: (code: string, params: RequestParams = {}) =>
-      this.request<CurrencyResponse, any>({
+      this.request<
+        CurrencyResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/currencies/${code}`,
         method: "GET",
         secure: true,
@@ -1797,7 +2057,20 @@ export class Api<
       data: UpdateCurrencyRequest,
       params: RequestParams = {},
     ) =>
-      this.request<CurrencyResponse, any>({
+      this.request<
+        CurrencyResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/currencies/${code}`,
         method: "PUT",
         body: data,
@@ -1815,7 +2088,20 @@ export class Api<
      * @secure
      */
     delete: (code: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/currencies/${code}`,
         method: "DELETE",
         secure: true,
@@ -1831,7 +2117,20 @@ export class Api<
      * @secure
      */
     findByIdContact: (id: string, params: RequestParams = {}) =>
-      this.request<ContactResponse, any>({
+      this.request<
+        ContactResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/contacts/${id}`,
         method: "GET",
         secure: true,
@@ -1851,7 +2150,20 @@ export class Api<
       data: UpdateContactRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ContactResponse, any>({
+      this.request<
+        ContactResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/contacts/${id}`,
         method: "PUT",
         body: data,
@@ -1869,7 +2181,20 @@ export class Api<
      * @secure
      */
     deleteContacts: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/contacts/${id}`,
         method: "DELETE",
         secure: true,
@@ -1889,7 +2214,20 @@ export class Api<
       data: EntitySearchRequest,
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseObject, any>({
+      this.request<
+        PageResponseObject,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/${entity}/search`,
         method: "POST",
         body: data,
@@ -1921,7 +2259,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseUserResponse, any>({
+      this.request<
+        PageResponseUserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users`,
         method: "GET",
         query: query,
@@ -1938,7 +2289,20 @@ export class Api<
      * @secure
      */
     createUsers: (data: RegisterRequest, params: RequestParams = {}) =>
-      this.request<UserResponse, any>({
+      this.request<
+        UserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users`,
         method: "POST",
         body: data,
@@ -1971,7 +2335,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseRoleSummaryResponse, any>({
+      this.request<
+        PageResponseRoleSummaryResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles`,
         method: "GET",
         query: query,
@@ -1988,7 +2365,20 @@ export class Api<
      * @secure
      */
     createRoles: (data: CreateRoleRequest, params: RequestParams = {}) =>
-      this.request<RoleDetailResponse, any>({
+      this.request<
+        RoleDetailResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles`,
         method: "POST",
         body: data,
@@ -2021,7 +2411,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseQuoteSummaryResponse, any>({
+      this.request<
+        PageResponseQuoteSummaryResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes`,
         method: "GET",
         query: query,
@@ -2038,7 +2441,20 @@ export class Api<
      * @secure
      */
     createQuotes: (data: CreateQuoteRequest, params: RequestParams = {}) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes`,
         method: "POST",
         body: data,
@@ -2059,7 +2475,20 @@ export class Api<
       data: DeleteQuotesRequest,
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes`,
         method: "DELETE",
         body: data,
@@ -2082,7 +2511,20 @@ export class Api<
       data: QuoteActionRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/send`,
         method: "POST",
         body: data,
@@ -2105,7 +2547,20 @@ export class Api<
       data: ReviewQuoteRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/review`,
         method: "POST",
         body: data,
@@ -2128,7 +2583,20 @@ export class Api<
       data: RequestQuoteApprovalRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/request-approval`,
         method: "POST",
         body: data,
@@ -2151,7 +2619,20 @@ export class Api<
       data: QuoteActionRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/new-version`,
         method: "POST",
         body: data,
@@ -2174,7 +2655,20 @@ export class Api<
       data: DecideQuoteRequest,
       params: RequestParams = {},
     ) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/decision`,
         method: "POST",
         body: data,
@@ -2197,7 +2691,20 @@ export class Api<
       data: QuoteActionRequest,
       params: RequestParams = {},
     ) =>
-      this.request<ConvertQuoteToOrderResponse, any>({
+      this.request<
+        ConvertQuoteToOrderResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/versions/${versionId}/convert-to-order`,
         method: "POST",
         body: data,
@@ -2230,7 +2737,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseProductResponse, any>({
+      this.request<
+        PageResponseProductResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/products`,
         method: "GET",
         query: query,
@@ -2247,7 +2767,20 @@ export class Api<
      * @secure
      */
     createProducts: (data: CreateProductRequest, params: RequestParams = {}) =>
-      this.request<ProductResponse, any>({
+      this.request<
+        ProductResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/products`,
         method: "POST",
         body: data,
@@ -2279,7 +2812,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseOpportunityResponse, any>({
+      this.request<
+        PageResponseOpportunityResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities`,
         method: "GET",
         query: query,
@@ -2299,7 +2845,20 @@ export class Api<
       data: CreateOpportunityRequest,
       params: RequestParams = {},
     ) =>
-      this.request<OpportunityResponse, any>({
+      this.request<
+        OpportunityResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities`,
         method: "POST",
         body: data,
@@ -2322,7 +2881,20 @@ export class Api<
       data: CloseOpportunityRequest,
       params: RequestParams = {},
     ) =>
-      this.request<OpportunityResponse, any>({
+      this.request<
+        OpportunityResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/opportunities/${id}/close`,
         method: "POST",
         body: data,
@@ -2354,7 +2926,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseLead, any>({
+      this.request<
+        PageResponseLead,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads`,
         method: "GET",
         query: query,
@@ -2371,7 +2956,20 @@ export class Api<
      * @secure
      */
     createLeads: (data: CreateLeadRequest, params: RequestParams = {}) =>
-      this.request<CreateLeadResponse, any>({
+      this.request<
+        CreateLeadResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads`,
         method: "POST",
         body: data,
@@ -2393,7 +2991,20 @@ export class Api<
       data: QualifyLeadRequest,
       params: RequestParams = {},
     ) =>
-      this.request<Lead, any>({
+      this.request<
+        Lead,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/leads/${id}/qualification`,
         method: "POST",
         body: data,
@@ -2425,7 +3036,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseCustomerResponse, any>({
+      this.request<
+        PageResponseCustomerResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers`,
         method: "GET",
         query: query,
@@ -2445,7 +3069,20 @@ export class Api<
       data: CreateCustomerRequest,
       params: RequestParams = {},
     ) =>
-      this.request<CustomerResponse, any>({
+      this.request<
+        CustomerResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers`,
         method: "POST",
         body: data,
@@ -2467,7 +3104,20 @@ export class Api<
       data: CustomerImportRequest,
       params: RequestParams = {},
     ) =>
-      this.request<CustomerImportResponse, any>({
+      this.request<
+        CustomerImportResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/customers/import`,
         method: "POST",
         body: data,
@@ -2485,7 +3135,20 @@ export class Api<
      * @secure
      */
     findAllCurrencies: (params: RequestParams = {}) =>
-      this.request<CurrencyResponse[], any>({
+      this.request<
+        CurrencyResponse[],
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/currencies`,
         method: "GET",
         secure: true,
@@ -2501,7 +3164,20 @@ export class Api<
      * @secure
      */
     create: (data: CreateCurrencyRequest, params: RequestParams = {}) =>
-      this.request<CurrencyResponse, any>({
+      this.request<
+        CurrencyResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/currencies`,
         method: "POST",
         body: data,
@@ -2533,7 +3209,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseContactResponse, any>({
+      this.request<
+        PageResponseContactResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/contacts`,
         method: "GET",
         query: query,
@@ -2550,7 +3239,20 @@ export class Api<
      * @secure
      */
     createContacts: (data: CreateContactRequest, params: RequestParams = {}) =>
-      this.request<ContactResponse, any>({
+      this.request<
+        ContactResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/contacts`,
         method: "POST",
         body: data,
@@ -2567,7 +3269,20 @@ export class Api<
      * @request POST:/api/auth/reset-password
      */
     resetPassword: (data: ResetPasswordRequest, params: RequestParams = {}) =>
-      this.request<Record<string, string>, any>({
+      this.request<
+        Record<string, string>,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/reset-password`,
         method: "POST",
         body: data,
@@ -2583,7 +3298,20 @@ export class Api<
      * @request POST:/api/auth/register
      */
     register: (data: RegisterRequest, params: RequestParams = {}) =>
-      this.request<UserResponse, any>({
+      this.request<
+        UserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/register`,
         method: "POST",
         body: data,
@@ -2600,7 +3328,20 @@ export class Api<
      * @secure
      */
     refresh: (params: RequestParams = {}) =>
-      this.request<RefreshResponse, any>({
+      this.request<
+        RefreshResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/refresh`,
         method: "POST",
         secure: true,
@@ -2616,7 +3357,20 @@ export class Api<
      * @secure
      */
     logout: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/logout`,
         method: "POST",
         secure: true,
@@ -2632,7 +3386,20 @@ export class Api<
      * @secure
      */
     login: (data: LoginRequest, params: RequestParams = {}) =>
-      this.request<LoginResponse, any>({
+      this.request<
+        LoginResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/login`,
         method: "POST",
         body: data,
@@ -2649,7 +3416,20 @@ export class Api<
      * @request POST:/api/auth/forgot-password
      */
     forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
-      this.request<Record<string, string>, any>({
+      this.request<
+        Record<string, string>,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/forgot-password`,
         method: "POST",
         body: data,
@@ -2671,7 +3451,20 @@ export class Api<
       data: UpdateUserStatusRequest,
       params: RequestParams = {},
     ) =>
-      this.request<UserResponse, any>({
+      this.request<
+        UserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/users/${id}/status`,
         method: "PATCH",
         body: data,
@@ -2693,7 +3486,20 @@ export class Api<
       data: UpdateOrderStatusRequest,
       params: RequestParams = {},
     ) =>
-      this.request<OrderResponse, any>({
+      this.request<
+        OrderResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/orders/${id}/status`,
         method: "PATCH",
         body: data,
@@ -2716,7 +3522,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<RoleOptionResponse[], any>({
+      this.request<
+        RoleOptionResponse[],
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/roles/options`,
         method: "GET",
         query: query,
@@ -2733,7 +3552,20 @@ export class Api<
      * @secure
      */
     findByIdQuote: (id: string, params: RequestParams = {}) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}`,
         method: "GET",
         secure: true,
@@ -2749,7 +3581,20 @@ export class Api<
      * @secure
      */
     deleteQuotes: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<
+        void,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}`,
         method: "DELETE",
         secure: true,
@@ -2771,7 +3616,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<ReviewerOption[], any>({
+      this.request<
+        ReviewerOption[],
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quotes/${id}/reviewer-options`,
         method: "GET",
         query: query,
@@ -2802,7 +3660,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseQuoteSummaryResponse, any>({
+      this.request<
+        PageResponseQuoteSummaryResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quote-reviews`,
         method: "GET",
         query: query,
@@ -2819,7 +3690,20 @@ export class Api<
      * @secure
      */
     findMyQuoteReview: (quoteId: string, params: RequestParams = {}) =>
-      this.request<QuoteResponse, any>({
+      this.request<
+        QuoteResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/quote-reviews/${quoteId}`,
         method: "GET",
         secure: true,
@@ -2835,7 +3719,20 @@ export class Api<
      * @secure
      */
     findAllPermissions: (params: RequestParams = {}) =>
-      this.request<PermissionResponse[], any>({
+      this.request<
+        PermissionResponse[],
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/permissions`,
         method: "GET",
         secure: true,
@@ -2876,7 +3773,20 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<PageResponseOrderSummaryResponse, any>({
+      this.request<
+        PageResponseOrderSummaryResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/orders`,
         method: "GET",
         query: query,
@@ -2893,7 +3803,20 @@ export class Api<
      * @secure
      */
     findByIdOrder: (id: string, params: RequestParams = {}) =>
-      this.request<OrderResponse, any>({
+      this.request<
+        OrderResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/orders/${id}`,
         method: "GET",
         secure: true,
@@ -2909,7 +3832,20 @@ export class Api<
      * @secure
      */
     findFieldsByEntityName: (entityName: string, params: RequestParams = {}) =>
-      this.request<FieldMetadata[], any>({
+      this.request<
+        FieldMetadata[],
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/entities/${entityName}/fields`,
         method: "GET",
         secure: true,
@@ -2925,7 +3861,20 @@ export class Api<
      * @secure
      */
     currentUser: (params: RequestParams = {}) =>
-      this.request<CurrentUserResponse, any>({
+      this.request<
+        CurrentUserResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/me`,
         method: "GET",
         secure: true,
@@ -2940,7 +3889,20 @@ export class Api<
      * @request GET:/api/auth/csrf
      */
     csrf: (params: RequestParams = {}) =>
-      this.request<CsrfResponse, any>({
+      this.request<
+        CsrfResponse,
+        {
+          /**
+           * @format int32
+           * @example 429
+           */
+          status?: number;
+          /** @example "RATE_LIMIT_EXCEEDED" */
+          code?: string;
+          /** @example "操作過於頻繁，請稍後再試。" */
+          detail?: string;
+        }
+      >({
         path: `/api/auth/csrf`,
         method: "GET",
         ...params,

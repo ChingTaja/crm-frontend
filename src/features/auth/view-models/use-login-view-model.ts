@@ -1,3 +1,4 @@
+import { useRateLimit } from '@/hooks/use-rate-limit';
 import { navigate } from '@/lib/router';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { authService, type AuthService, type LoginCredentials } from '../models/auth-model';
@@ -9,6 +10,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
   const [notice, setNotice] = useState('');
   const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const rateLimit = useRateLimit();
   const submitting = useRef(false);
   const active = useRef<AbortController | null>(null);
   useEffect(() => () => active.current?.abort(), []);
@@ -21,7 +23,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting.current) return;
+    if (submitting.current || rateLimit.isBlocked()) return;
     submitting.current = true;
     const controller = new AbortController();
     active.current = controller;
@@ -37,6 +39,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
       onSignedIn?.();
     } catch (error) {
       if (controller.signal.aborted) return;
+      rateLimit.capture(error);
       setNotice(loginErrorMessage(error));
       setIsError(true);
     } finally {
@@ -46,6 +49,7 @@ export function useLoginViewModel(service: AuthService = authService, onSignedIn
   }
 
   return {
+    rateLimit,
     credentials,
     showPassword,
     notice,

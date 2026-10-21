@@ -1,5 +1,5 @@
 import type { CsrfResponse, RefreshResponse } from './Api';
-import { ApiError } from './api-error';
+import { ApiError, retryAfterSeconds } from './api-error';
 import { authSession } from './auth-session';
 import type { HttpTransport } from './http-transport';
 
@@ -14,7 +14,7 @@ export async function problemCode(response: Response): Promise<string | undefine
 }
 async function json<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => undefined);
-  if (!response.ok) throw new ApiError(data?.detail ?? `請求失敗（HTTP ${response.status}）。`, response.status, data);
+  if (!response.ok) throw new ApiError(data?.detail ?? `請求失敗（HTTP ${response.status}）。`, response.status, data, retryAfterSeconds(response));
   if (!data) throw new Error('無法完成登入驗證，請稍後再試。');
   return data;
 }
