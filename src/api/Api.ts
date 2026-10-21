@@ -688,6 +688,70 @@ export interface CreateCustomerRequest {
   owner?: string;
 }
 
+export interface CustomerImportRequest {
+  /**
+   * @maxItems 500
+   * @minItems 1
+   */
+  rows: CustomerImportRow[];
+}
+
+export interface CustomerImportRow {
+  /**
+   * @format int32
+   * @exclusiveMin 0
+   */
+  rowNumber: number;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  company?: string;
+  /**
+   * @format email
+   * @minLength 0
+   * @maxLength 255
+   */
+  email?: string;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  phone?: string;
+  /**
+   * @minLength 0
+   * @maxLength 255
+   */
+  owner?: string;
+}
+
+export interface CustomerImportResponse {
+  idempotencyKey: string;
+  /** @format int32 */
+  total: number;
+  /** @format int64 */
+  successCount: number;
+  /** @format int64 */
+  skippedCount: number;
+  /** @format int64 */
+  failedCount: number;
+  results: CustomerImportResult[];
+}
+
+export interface CustomerImportResult {
+  /** @format int32 */
+  rowNumber: number;
+  status: "success" | "skipped" | "failed";
+  code: string;
+  reason: string;
+  customerId?: string;
+}
+
 export interface CreateCurrencyRequest {
   /**
    * @minLength 1
@@ -2383,6 +2447,28 @@ export class Api<
     ) =>
       this.request<CustomerResponse, any>({
         path: `/api/customers`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 需要 customers.create。rows 為 1–500 筆且 rowNumber 為不重複正整數；欄位錯誤逐列回傳，部分成功回 200。Idempotency-Key 選填但建議於首次送出前產生並於重試時沿用；同一使用者同 Key 不同內容回 409。
+     *
+     * @tags customer-import-controller
+     * @name ImportCustomers
+     * @summary 批次匯入客戶
+     * @request POST:/api/customers/import
+     * @secure
+     */
+    importCustomers: (
+      data: CustomerImportRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<CustomerImportResponse, any>({
+        path: `/api/customers/import`,
         method: "POST",
         body: data,
         secure: true,

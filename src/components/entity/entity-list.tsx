@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useAccess } from '@/features/access/view-models/use-access';
 import { AppLink } from '@/components/ui/app-link';
 import { filterValueLabel } from '@/lib/filter-fields';
@@ -25,6 +26,7 @@ export function EntityList({
   allowCreate = true,
   allowDelete = true,
   headingTitle,
+  headerActions,
   emptyMessage = '沒有符合條件的資料',
   recordHref,
 }: {
@@ -33,6 +35,7 @@ export function EntityList({
   allowCreate?: boolean;
   allowDelete?: boolean;
   headingTitle?: string;
+  headerActions?: ReactNode;
   emptyMessage?: string;
   recordHref?: (id: string) => string;
 }) {
@@ -59,6 +62,7 @@ export function EntityList({
               }
             />
           )}
+          {headerActions}
           {allowCreate && can(`${entity}.create`) && (
             <Button onClick={vm.startCreate}>
               <Plus />

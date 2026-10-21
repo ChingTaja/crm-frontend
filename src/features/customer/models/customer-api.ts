@@ -1,6 +1,7 @@
 import { unwrapResponse, deleteRecords } from '../../../lib/api-operations';
 import { collectPages } from '../../../lib/api-pagination';
-import type { Api, CustomerResponse } from '../../../api/Api';
+import { validateCustomerImportResponse } from './customer-import-runner';
+import type { Api, CustomerResponse, CustomerImportRequest } from '../../../api/Api';
 
 function customer(record: CustomerResponse) {
   if (!record?.id) throw new Error('客戶資料格式不正確，請重新載入。');
@@ -27,6 +28,12 @@ export function createCustomerApi(client: Api<unknown>['api']) {
   };
   return {
     list,
+    async importBatch(signal: AbortSignal, body: CustomerImportRequest, idempotencyKey: string) {
+      const data = await unwrapResponse(client.importCustomers(body, {
+        signal, format: 'json', headers: { 'Idempotency-Key': idempotencyKey },
+      }));
+      return validateCustomerImportResponse(body, idempotencyKey, data);
+    },
     listAll: (signal: AbortSignal) => collectPages(signal, list),
     async get(signal: AbortSignal, id: string) {
       return customer(

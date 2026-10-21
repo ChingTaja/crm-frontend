@@ -1,3 +1,4 @@
+import { CustomerImportButton } from '../components/customer-import-button';
 import { useEffect } from 'react';
 import { useCustomerViewModel } from '../view-models/use-customer-view-model';
 import { CustomerEditView } from './customer-edit-view';
@@ -26,7 +27,7 @@ function CustomerListView() {
           {vm.request.error.message}
         </p>
       )}
-      <EntityList vm={vm} dataNotice={null} />
+      <EntityList vm={vm} dataNotice={null} headerActions={<CustomerImportButton onImported={vm.request.reload} />} />
     </>
   );
 }
