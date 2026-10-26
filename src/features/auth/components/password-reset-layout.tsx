@@ -7,10 +7,12 @@ export function PasswordResetLayout({
   title,
   description,
   children,
+  footer,
 }: {
   title: string;
   description: string;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   return (
     <main className="grid min-h-svh grid-cols-1 bg-white text-[#263d37] min-[761px]:grid-cols-[47%_53%]">
@@ -30,6 +32,7 @@ export function PasswordResetLayout({
           <AppLink href="/login" className="inline-block text-sm text-[#3b6550] underline">
             返回登入頁面
           </AppLink>
+          {footer}
         </div>
       </section>
     </main>
