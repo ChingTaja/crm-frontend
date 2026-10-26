@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoginInput } from '../components/login-input';
 import { Label } from '@/components/ui/label';
@@ -101,6 +101,20 @@ function LoginView({ viewModel }: { viewModel: LoginViewModel }) {
             >
               {rateLimit.message || (isSubmitting ? '登入中…' : '登入工作空間')} <ArrowRight size={18} />
             </Button>
+            <aside
+              className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900"
+              aria-labelledby="usage-notice-title"
+            >
+              <h3 id="usage-notice-title" className="mb-2 flex items-center gap-2 font-semibold">
+                <TriangleAlert size={16} className="shrink-0" aria-hidden="true" />
+                使用提醒
+              </h3>
+              <p>
+                本網站後端部署於 Render 免費方案，若一段時間沒有使用，服務可能進入休眠狀態。首次呼叫 API
+                時，系統需要重新啟動，可能需要等待約 1 分鐘。
+              </p>
+              <p className="mt-2">若首次載入較慢，請稍候片刻，或重新嘗試操作。感謝您的耐心等候</p>
+            </aside>
             <div
               className="mt-3 min-h-10 text-xs leading-relaxed"
               role={isError ? 'alert' : 'status'}

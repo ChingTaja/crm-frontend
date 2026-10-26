@@ -127,11 +127,6 @@ export function CustomerImportButton({ onImported }: { onImported: () => void })
               <li>空白範本與填寫範例分開下載。</li>
             </ul>
             {templateButtons}
-            {!vm.open && vm.error && (
-              <p role="alert" className="text-xs text-destructive">
-                {vm.error}
-              </p>
-            )}
           </PopoverContent>
         </Popover>
       </div>
