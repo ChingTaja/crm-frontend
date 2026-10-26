@@ -1,9 +1,27 @@
 import type { PermissionResponse } from '../../../api/Api';
-const quoteUpdateCodes = new Set(['quotes.update', 'quotes.new-version', 'quotes.request-approval', 'quotes.approve', 'quotes.send', 'quotes.convert', 'quotes.record-decision']);
+const quoteUpdateCodes = new Set([
+  'quotes.update',
+  'quotes.new-version',
+  'quotes.request-approval',
+  'quotes.approve',
+  'quotes.send',
+  'quotes.convert',
+  'quotes.record-decision',
+]);
 export function permissionOptions(catalog: PermissionResponse[]) {
-  const quoteUpdates = catalog.filter(p => quoteUpdateCodes.has(p.code));
-  const options = catalog.filter(p => !quoteUpdateCodes.has(p.code)).map(p => ({ ...p, codes: [p.code] }));
-  if (quoteUpdates.length) options.push({ code: 'quotes.update', name: '修改報價', entity: 'quotes', groupName: quoteUpdates[0].groupName, description: '包含送出、審批、客戶回覆及轉單。', codes: quoteUpdates.map(p => p.code) });
+  const quoteUpdates = catalog.filter((p) => quoteUpdateCodes.has(p.code));
+  const options = catalog
+    .filter((p) => p.code !== 'users.delete' && !quoteUpdateCodes.has(p.code))
+    .map((p) => ({ ...p, codes: [p.code] }));
+  if (quoteUpdates.length)
+    options.push({
+      code: 'quotes.update',
+      name: '修改報價',
+      entity: 'quotes',
+      groupName: quoteUpdates[0].groupName,
+      description: '包含送出、審批、客戶回覆及轉單。',
+      codes: quoteUpdates.map((p) => p.code),
+    });
   return options;
 }
 
@@ -13,8 +31,9 @@ export function hasPermission(codes: readonly string[], code: string) {
 }
 
 export function togglePermission(selected: string[], codes: string[], checked: boolean) {
-  const next = new Set(selected);
+  const next = new Set(selected.filter((code) => code !== 'users.delete'));
   for (const code of codes) {
+    if (code === 'users.delete') continue;
     const entity = code.split('.')[0];
     if (checked) {
       next.add(`${entity}.read`);
@@ -27,6 +46,12 @@ export function togglePermission(selected: string[], codes: string[], checked: b
 }
 
 export function canGrantPermission(codes: string[], catalogCodes: string[], actorCodes: readonly string[]) {
-  return codes.every(code => actorCodes.includes(code) && catalogCodes.includes(code) &&
-    actorCodes.includes(`${code.split('.')[0]}.read`) && catalogCodes.includes(`${code.split('.')[0]}.read`));
+  return codes.every(
+    (code) =>
+      code !== 'users.delete' &&
+      actorCodes.includes(code) &&
+      catalogCodes.includes(code) &&
+      actorCodes.includes(`${code.split('.')[0]}.read`) &&
+      catalogCodes.includes(`${code.split('.')[0]}.read`)
+  );
 }

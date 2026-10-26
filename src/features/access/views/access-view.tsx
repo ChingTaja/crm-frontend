@@ -32,7 +32,10 @@ export function AccessView({ section }: { section: 'users' | 'roles' }) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const fields = metadata.fields.filter((field) => !['revision', 'version'].includes(field.apiFieldName ?? ''));
   const deletingRole = query.records.find((role) => role.id === deleting);
-  const rows = metadataRows(query.records, fields);
+  const rows = metadataRows(
+    query.records.map((role) => ({ ...role, name: role.code === 'SUPER_ADMIN' ? '最高管理員' : role.name })),
+    fields
+  );
   async function remove() {
     if (!deleting || deletion.isLoading) return;
     try {
@@ -263,7 +266,7 @@ function RoleEditor({ id, done }: { id: string; done: () => void }) {
         </span>
         <div className="flex-1">
           <DialogTitle className="text-lg font-semibold">
-            {detail.data?.name || (id ? '角色資料' : '新增角色')}
+            {detail.data?.code === 'SUPER_ADMIN' ? '最高管理員' : detail.data?.name || (id ? '角色資料' : '新增角色')}
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             管理角色資料與功能存取權限
@@ -328,7 +331,7 @@ function RoleForm({
   const [name, setName] = useState(record?.name ?? '');
   const [description, setDescription] = useState(record?.description ?? '');
   const [permissionSearch, setPermissionSearch] = useState('');
-  const [selected, setSelected] = useState(record?.permissionCodes ?? []);
+  const [selected, setSelected] = useState((record?.permissionCodes ?? []).filter((code) => code !== 'users.delete'));
   const create = useApi(roleApi.create),
     update = useApi(roleApi.update);
   const busy = useRef(false);
@@ -344,7 +347,11 @@ function RoleForm({
     if (!editable || busy.current) return;
     busy.current = true;
     try {
-      const fields = { name: name.trim(), description: description.trim(), permissionCodes: selected };
+      const fields = {
+        name: name.trim(),
+        description: description.trim(),
+        permissionCodes: selected.filter((code) => code !== 'users.delete'),
+      };
       if (record) await update.execute(record.id, { ...fields, expectedRevision: record.revision });
       else await create.execute({ ...fields, code: code.trim().toUpperCase() });
       done();

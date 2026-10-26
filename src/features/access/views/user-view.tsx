@@ -22,6 +22,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
+const roleLabel = (role: { code?: string; name?: string; id?: string }) =>
+  role.code === 'SUPER_ADMIN' ? '最高管理員' : role.name || role.code || role.id || '';
+
 const defaultRoleId = '055a46a66-27a6-4e6f-8e06-de8f448f935f';
 
 export function UserView() {
@@ -40,9 +43,13 @@ export function UserView() {
     if (canLoadOptions) void loadOptions().catch(() => {});
     return cancelOptions;
   }, [loadOptions, cancelOptions, canLoadOptions]);
-  const roleOptions = (optionsRequest.data ?? []).map((role) => ({ value: role.id, label: role.name }));
+  const roleOptions = (optionsRequest.data ?? []).map((role) => ({ value: role.id, label: roleLabel(role) }));
+  const displayRoleOptions = [
+    ...roleOptions,
+    ...query.records.flatMap((user) => (user.role ? [{ value: user.role.id, label: roleLabel(user.role) }] : [])),
+  ];
   const baseFields = metadataFields.map((field) =>
-    ['role', 'roleId', 'role.id'].includes(field.apiFieldName ?? '') ? { ...field, options: roleOptions } : field
+    ['role', 'roleId', 'role.id'].includes(field.apiFieldName ?? '') ? { ...field, options: displayRoleOptions } : field
   );
   const fields = [
     ...baseFields.filter((field) => !['enabled', 'accountStatus'].includes(field.apiFieldName ?? '')),
@@ -61,12 +68,14 @@ export function UserView() {
     query.records.map((user) => ({
       ...user,
       name: user.username,
+      role: user.role ? { ...user.role, name: roleLabel(user.role) } : undefined,
       roleId: user.role?.id,
       accountStatus: user.enabled === true ? 'enabled' : user.enabled === false ? 'disabled' : 'unknown',
     })),
     fields
   );
   async function removeMany(ids: string[]) {
+    if (!access.can('users.delete')) throw new Error('沒有刪除帳號的權限。');
     const result = await deletion.execute(ids);
     const summary = deletionSummary(result, query.records);
     await query.reload().catch(() => {});
@@ -213,8 +222,10 @@ function UserForm({
   onSaving: (value: boolean) => void;
 }) {
   const access = useAccess();
-  const editable = access.can(user ? 'users.update' : 'users.create');
-  const canAssign = access.can('users.assign-role') && user?.id !== access.me?.id;
+  const protectedAccount = user?.username === 'taja' || user?.role?.code === 'SUPER_ADMIN';
+  const editable =
+    access.can(user ? 'users.update' : 'users.create') && (!protectedAccount || access.me?.role.code === 'SUPER_ADMIN');
+  const canAssign = !protectedAccount && access.can('users.assign-role') && user?.id !== access.me?.id;
   const [draft, setDraft] = useState<RegisterRequest>({
     username: user?.username ?? '',
     email: user?.email ?? '',
@@ -234,7 +245,7 @@ function UserForm({
   const [confirmStatus, setConfirmStatus] = useState(false);
   const statusSupported = typeof user?.enabled === 'boolean';
   const isSelf = !!user && user.id === access.me?.id;
-  const canChangeStatus = access.can('users.update') && !isSelf && statusSupported;
+  const canChangeStatus = access.can('users.update') && editable && !isSelf && statusSupported;
   const [validationError, setValidationError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const displayedFieldErrors = useMemo(
@@ -248,10 +259,9 @@ function UserForm({
   const isSaving = create.isLoading || update.isLoading || statusMutation.isLoading;
   const options = [
     ...new Map(
-      [
-        ...roleOptions,
-        ...(user?.role?.id ? [{ value: user.role.id, label: user.role.name || user.role.code || user.role.id }] : []),
-      ].map((role) => [role.value, role])
+      [...roleOptions, ...(user?.role?.id ? [{ value: user.role.id, label: roleLabel(user.role) }] : [])].map(
+        (role) => [role.value, role]
+      )
     ).values(),
   ];
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -283,7 +293,10 @@ function UserForm({
     busy.current = true;
     onSaving(true);
     try {
-      const fields = { username: draft.username.trim(), email: draft.email.trim() };
+      const fields = {
+        username: protectedAccount ? user!.username! : draft.username.trim(),
+        email: draft.email.trim(),
+      };
       if (user?.id)
         await update.execute(user.id, {
           ...fields,
@@ -390,6 +403,7 @@ function UserForm({
             name="username"
             id="user-username"
             autoComplete="username"
+            readOnly={protectedAccount}
             value={draft.username}
             onChange={(event) => setDraft({ ...draft, username: event.target.value })}
           />
